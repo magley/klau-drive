@@ -1,0 +1,11 @@
+# aws & localstack
+
+localstack
+awscli
+awscli-local
+boto3
+dynamodb_json
+
+# jwt
+
+pyjwt
