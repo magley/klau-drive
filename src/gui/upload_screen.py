@@ -1,5 +1,7 @@
 from typing import List
 from PyQt6.QtWidgets import *
+from PyQt6 import QtGui
+from PyQt6.QtCore import Qt
 from src.lambdas.upload_file import UploadFile, Init, ListFiles
 import json
 
@@ -123,12 +125,26 @@ class UploadScreen(QWidget):
             self.lst_tags.takeItem(row)
 
 
+    def clear_form(self):
+        self.tags.clear()
+        self.lst_tags.clear()
+        self.txt_tag.clear()
+        self.txt_desc.clear()
+        self.lbl_fname.setText("No File Selected")
+        self.fname = None
+
+
     def upload_file(self):
         fname: str = self.fname
         desc: str = self.txt_desc.toPlainText()
         tags: List[str] = self.tags
 
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+
         Init()
         UploadFile(fname, desc, tags)
         for file in ListFiles():
             print(json.dumps(file, indent=2, default=str))
+
+        self.clear_form()
+        QApplication.restoreOverrideCursor()
