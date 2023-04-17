@@ -9,3 +9,7 @@ dynamodb_json
 # jwt
 
 pyjwt
+
+# frontend
+
+PyQt6
