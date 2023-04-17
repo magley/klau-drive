@@ -138,7 +138,7 @@ def UploadFile(fname: str, desc: str, tags: List[str]):
     upload_file_dynamo(fname, desc, tags)
 
 
-Init()
-UploadFile("./upload_file.py", "First file", ['python', 'aws', 'localstack'])
-for file in ListFiles():
-    print(json.dumps(file, indent=2, default=str))
+# Init()
+# UploadFile("./upload_file.py", "First file", ['python', 'aws', 'localstack'])
+# for file in ListFiles():
+#     print(json.dumps(file, indent=2, default=str))

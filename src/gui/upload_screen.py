@@ -1,4 +1,7 @@
 from PyQt6.QtWidgets import *
+from src.lambdas.upload_file import UploadFile, Init, ListFiles
+import json
+
 
 class UploadScreen(QWidget):
     def __init__(self, win: QStackedWidget):
@@ -65,4 +68,7 @@ class UploadScreen(QWidget):
         fname: str = self.fname
         desc: str = self.txt_desc.text()
 
-        print(fname, desc)
+        Init()
+        UploadFile(fname, desc, [])
+        for file in ListFiles():
+            print(json.dumps(file, indent=2, default=str))

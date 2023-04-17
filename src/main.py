@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import *
 from PyQt6 import QtGui
-from upload_screen import UploadScreen
+from src.gui.upload_screen import UploadScreen
 
 
 app = QApplication([])
