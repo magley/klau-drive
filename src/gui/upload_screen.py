@@ -141,7 +141,7 @@ class UploadScreen(QWidget):
 
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
 
-        Init()
+        Init() # All buckets and tables will be deleted before this file is uploaded. Remove this later (maybe call it one time, after the program boots up)
         UploadFile(fname, desc, tags)
         for file in ListFiles():
             print(json.dumps(file, indent=2, default=str))
