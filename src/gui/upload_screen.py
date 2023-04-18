@@ -2,7 +2,7 @@ from typing import List
 from PyQt6.QtWidgets import *
 from PyQt6 import QtGui
 from PyQt6.QtCore import Qt
-from src.lambdas.upload_file import UploadFile, Init, ListFiles
+from src.lambdas.upload_file import upload_file, init, list_files
 import json
 
 
@@ -14,18 +14,17 @@ class UploadScreen(QWidget):
         self.tags: List[str] = []
 
         self.win = win
-        self.btn_pick: QPushButton
-        self.lbl_fname = QLabel
-        self.txt_desc: QTextEdit
-        self.txt_tag: QLineEdit
-        self.btn_tag_add: QPushButton
-        self.btn_tag_rem: QPushButton
-        self.lst_tags: QListWidget
-        self.btn_upload: QPushButton
+        self.btn_pick: QPushButton = None
+        self.lbl_fname: QLabel = None
+        self.txt_desc: QTextEdit = None
+        self.txt_tag: QLineEdit = None
+        self.btn_tag_add: QPushButton = None
+        self.btn_tag_rem: QPushButton = None
+        self.lst_tags: QListWidget = None
+        self.btn_upload: QPushButton = None
 
         self.init_gui()
         self.make_layout()
-
 
     def init_gui(self):
         self.btn_pick = QPushButton("Select File")
@@ -51,7 +50,6 @@ class UploadScreen(QWidget):
         self.set_btn_upload_enabled()
         self.set_btn_tag_add_enabled()
         self.set_btn_tag_rem_enabled()
-
 
     def make_layout(self):
         layout_main = QVBoxLayout()
@@ -80,7 +78,6 @@ class UploadScreen(QWidget):
 
         self.setLayout(layout_main)
 
-
     def pick_file(self):
         fname, _ = QFileDialog.getOpenFileName(self, 'Open File')
         if fname == "":
@@ -97,7 +94,6 @@ class UploadScreen(QWidget):
         else:
             self.btn_upload.setEnabled(True)
 
-
     def set_btn_tag_add_enabled(self):
         if self.txt_tag.text().strip() == "":
             self.btn_tag_add.setEnabled(False)
@@ -110,20 +106,17 @@ class UploadScreen(QWidget):
         else:
             self.btn_tag_rem.setEnabled(True)
 
-
     def add_tag(self):
         new_tag = self.txt_tag.text()
         self.tags.append(new_tag)
         self.lst_tags.addItem(QListWidgetItem(new_tag))
         self.txt_tag.setText("")
 
-
     def rem_tag(self):
         selected_rows = [t.row() for t in self.lst_tags.selectedIndexes()]
         for row in selected_rows:
             self.tags.remove(self.tags[row])
             self.lst_tags.takeItem(row)
-
 
     def clear_form(self):
         self.tags.clear()
@@ -133,7 +126,6 @@ class UploadScreen(QWidget):
         self.lbl_fname.setText("No File Selected")
         self.fname = None
 
-
     def upload_file(self):
         fname: str = self.fname
         desc: str = self.txt_desc.toPlainText()
@@ -141,9 +133,9 @@ class UploadScreen(QWidget):
 
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
 
-        Init() # All buckets and tables will be deleted before this file is uploaded. Remove this later (maybe call it one time, after the program boots up)
-        UploadFile(fname, desc, tags)
-        for file in ListFiles():
+        init() # All buckets and tables will be deleted before this file is uploaded. Remove this later (maybe call it one time, after the program boots up)
+        upload_file(fname, desc, tags)
+        for file in list_files():
             print(json.dumps(file, indent=2, default=str))
 
         self.clear_form()

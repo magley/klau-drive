@@ -15,7 +15,8 @@ TB_META_NAME = 'file_meta'
 TB_META_PK = 'name'
 TB_META_SK = None
 
-session = boto3.Session(aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
+session = boto3.Session(aws_access_key_id=ACCESS_KEY,
+                        aws_secret_access_key=SECRET_KEY)
 s3_cli = session.client('s3', endpoint_url=ENDPOINT)
 s3_res = session.resource("s3", endpoint_url=ENDPOINT)
 dynamo_cli = session.client('dynamodb', endpoint_url=ENDPOINT)
@@ -27,6 +28,7 @@ def upload_file_s3(fname: str, key: str):
         Bucket=BUCKET_NAME,
         Key=key
     )
+
 
 def upload_file_dynamo(fname: str, desc: str, tags: List[str]):
     stat: os.stat_result = os.stat(fname)
@@ -50,15 +52,16 @@ def upload_file_dynamo(fname: str, desc: str, tags: List[str]):
     item_data = d_json.dumps(metadata, as_dict=True)
 
     dynamo_cli.put_item(
-        TableName = TB_META_NAME,
-        Item = item_data
+        TableName=TB_META_NAME,
+        Item=item_data
     )
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 #
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
-def Init():
+
+def init():
     try:
         dynamo_cli.delete_table(TableName=TB_META_NAME)
     except Exception as e:
@@ -107,13 +110,14 @@ def Init():
     )
 
 
-def ListFiles():
+def list_files():
     response = s3_cli.list_objects(Bucket=BUCKET_NAME)
     result = []
     for s3_file in response.get('Contents'):
         dynamo_key = {TB_META_PK: s3_file['Key']}
         dynamo_key = d_json.dumps(dynamo_key, as_dict=True)
-        dynamo_res = dynamo_cli.get_item(TableName=TB_META_NAME, Key=dynamo_key)
+        dynamo_res = dynamo_cli.get_item(
+            TableName=TB_META_NAME, Key=dynamo_key)
         dynamo_item = d_json.loads(dynamo_res.get('Item'), as_dict=True)
 
         item = {}
@@ -127,12 +131,11 @@ def ListFiles():
         item['db_desc'] = dynamo_item['desc']
         item['db_tags'] = dynamo_item['tags']
 
-
         result.append(item)
     return result
 
 
-def UploadFile(fname: str, desc: str, tags: List[str]):
+def upload_file(fname: str, desc: str, tags: List[str]):
     key = Path(fname).stem
     upload_file_s3(fname, key)
     upload_file_dynamo(fname, desc, tags)
