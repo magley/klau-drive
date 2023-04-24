@@ -1,8 +1,7 @@
 from PyQt6.QtWidgets import *
 from PyQt6 import QtGui
-from src.gui.upload_screen import UploadScreen
 from src.gui.login_screen import LoginScreen
-
+from src.gui.dashboard_screen import DashboardScreen
 
 class MainWindow(QStackedWidget):
     SCREEN_LOGIN = 0
@@ -17,4 +16,4 @@ class MainWindow(QStackedWidget):
         self.setWindowIcon(QtGui.QIcon('res/ico.png'))
 
         MainWindow.SCREEN_LOGIN = self.addWidget(LoginScreen(self))
-        MainWindow.SCREEN_DASHBOARD = self.addWidget(UploadScreen(self))
+        MainWindow.SCREEN_DASHBOARD = self.addWidget(DashboardScreen(self))

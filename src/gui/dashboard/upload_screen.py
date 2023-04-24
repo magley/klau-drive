@@ -7,13 +7,13 @@ import json
 
 
 class UploadScreen(QWidget):
-    def __init__(self, win: QStackedWidget):
+    def __init__(self, parent: QTabWidget):
         QWidget.__init__(self)
         
         self.fname: str = None
         self.tags: List[str] = []
 
-        self.win = win
+        self.parent = parent
         self.btn_pick: QPushButton = None
         self.lbl_fname: QLabel = None
         self.txt_desc: QTextEdit = None
