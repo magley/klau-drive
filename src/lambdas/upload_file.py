@@ -163,6 +163,9 @@ def list_files() -> List[FileData]:
         )
 
         result.append(item)
+
+    # TODO: Research if there's a way to get S3 to return items sorted by creation date
+    result = sorted(result, key=lambda item: item.upload_date)
     return result
 
 

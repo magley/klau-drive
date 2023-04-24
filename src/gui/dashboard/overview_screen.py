@@ -1,6 +1,6 @@
 from typing import List
 from PyQt6.QtWidgets import *
-from PyQt6.QtGui import QStandardItemModel, QStandardItem
+from PyQt6.QtGui import QStandardItemModel, QStandardItem, QIcon
 from src.lambdas.upload_file import list_files, FileData
 
 class OverviewScreen(QWidget):
@@ -46,4 +46,11 @@ class OverviewScreen(QWidget):
 
     def add_to_list(self, file: FileData):
         self.files.append(str(file))
-        self.mdl_files.appendRow(QStandardItem(str(file)))
+
+        mdl_item = QStandardItem(str(file))
+        
+        pixmapi = QStyle.StandardPixmap.SP_FileIcon
+        icon = self.style().standardIcon(pixmapi)
+        mdl_item.setIcon(icon)
+
+        self.mdl_files.appendRow(mdl_item)
