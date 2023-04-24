@@ -1,6 +1,7 @@
 from typing import List
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QStandardItemModel, QStandardItem
+from src.lambdas.upload_file import list_files, FileData
 
 class OverviewScreen(QWidget):
     def __init__(self, parent: QTabWidget):
@@ -14,6 +15,8 @@ class OverviewScreen(QWidget):
         self.init_gui()
         self.make_layout()
 
+        self.refresh()
+
     def init_gui(self):
         self.lst_files = QListView()
         self.mdl_files = QStandardItemModel()
@@ -26,3 +29,21 @@ class OverviewScreen(QWidget):
         layout_main = QVBoxLayout()
         layout_main.addWidget(self.lst_files)
         self.setLayout(layout_main)
+
+    def refresh(self):
+        self.load_files_from_cloud()
+
+    def load_files_from_cloud(self):
+        self.clear_list()
+
+        for file in list_files():
+            file: FileData = file
+            self.add_to_list(file)
+
+    def clear_list(self):
+        self.files.clear()
+        self.mdl_files.clear()
+
+    def add_to_list(self, file: FileData):
+        self.files.append(str(file))
+        self.mdl_files.appendRow(QStandardItem(str(file)))

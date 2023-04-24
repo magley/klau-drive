@@ -12,3 +12,11 @@ class DashboardScreen(QTabWidget):
 
         DashboardScreen.TAB_OVERVIEW = self.addTab(OverviewScreen(self), 'Overview')
         DashboardScreen.TAB_UPLOAD = self.addTab(UploadScreen(self), 'Upload')
+
+        self.tabBarClicked.connect(self.handle_tabbar_clicked)
+
+    def handle_tabbar_clicked(self, index):
+        if index == DashboardScreen.TAB_OVERVIEW:
+            overview: OverviewScreen = self.widget(index)
+
+            overview.refresh()

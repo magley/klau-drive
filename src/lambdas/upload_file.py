@@ -130,7 +130,7 @@ def init():
     )
 
 
-def list_files():
+def list_files() -> List[FileData]:
     response = s3_cli.list_objects(Bucket=BUCKET_NAME)
     result = []
     for s3_file in response.get('Contents'):
