@@ -87,7 +87,6 @@ class UploadScreen(QWidget):
             self.lbl_fname.setText(fname)
             self.fname = fname
 
-
     def set_btn_upload_enabled(self):
         if self.fname is None:
             self.btn_upload.setEnabled(False)
@@ -125,6 +124,9 @@ class UploadScreen(QWidget):
         self.txt_desc.clear()
         self.lbl_fname.setText("No File Selected")
         self.fname = None
+        self.set_btn_upload_enabled()
+        self.set_btn_tag_add_enabled()
+        self.set_btn_tag_rem_enabled()
 
     def upload_file(self):
         fname: str = self.fname
