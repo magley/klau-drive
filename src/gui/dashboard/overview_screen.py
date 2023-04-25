@@ -1,14 +1,42 @@
 from typing import List
 from PyQt6.QtWidgets import *
-from PyQt6.QtGui import QStandardItemModel, QStandardItem, QIcon
+from PyQt6.QtGui import *
+from PyQt6.QtCore import *
+
 from src.lambdas.upload_file import list_files, FileData
+
+class FileEdit(QGroupBox):
+    def __init__(self, parent: "OverviewScreen"):
+        QGroupBox.__init__(self)
+        self.owner = parent
+
+        self.txt_name: QLineEdit
+        self.btn_update: QPushButton
+
+        self.init_gui()
+        self.init_layout()
+
+    def init_gui(self):
+        self.txt_name = QLineEdit()
+        self.btn_update = QPushButton("Save Changes")
+
+    def init_layout(self):
+        layout_main = QVBoxLayout()
+        layout_main.addWidget(self.txt_name)
+        layout_main.addWidget(self.btn_update)
+        layout_main.addItem(QSpacerItem(
+            1, 1, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+
+        self.setLayout(layout_main)
+
 
 class OverviewScreen(QWidget):
     def __init__(self, parent: QTabWidget):
         QWidget.__init__(self)
-        self.parent = parent
+        self.owner = parent
 
         self.table: QTableWidget
+        self.edit_region: FileEdit
         self.files: List[FileData] = []
         self.columns = ['Icon', 'Name', 'Type', 'Date Modified']
 
@@ -25,9 +53,17 @@ class OverviewScreen(QWidget):
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.setShowGrid(False)
 
+        self.edit_region = FileEdit(self)
+
     def make_layout(self):
-        layout_main = QVBoxLayout()
-        layout_main.addWidget(self.table)
+        layout_main = QHBoxLayout()
+        
+        hsplitter = QSplitter(Qt.Orientation.Horizontal)
+        hsplitter.addWidget(self.table)
+        hsplitter.addWidget(self.edit_region)
+        
+        layout_main.addWidget(hsplitter)
+
         self.setLayout(layout_main)
 
     def refresh(self):
