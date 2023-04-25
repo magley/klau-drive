@@ -8,9 +8,9 @@ class OverviewScreen(QWidget):
         QWidget.__init__(self)
         self.parent = parent
 
-        self.files: List = ['a', 'b', 'c']
-        self.mdl_files: QStandardItemModel = None
-        self.lst_files: QListView = None
+        self.table: QTableWidget
+        self.files: List[FileData] = []
+        self.columns = ['Icon', 'Name', 'Type', 'Date Modified']
 
         self.init_gui()
         self.make_layout()
@@ -18,17 +18,20 @@ class OverviewScreen(QWidget):
         self.refresh()
 
     def init_gui(self):
-        self.lst_files = QListView()
-        self.mdl_files = QStandardItemModel()
-        self.lst_files.setModel(self.mdl_files)
+        self.table = QTableWidget()
+        self.table.setColumnCount(len(self.columns))
+        self.table.setHorizontalHeaderLabels(self.columns)
+        self.table.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
+        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
 
-        for item in self.files:
-            self.mdl_files.appendRow(QStandardItem(item))
 
     def make_layout(self):
         layout_main = QVBoxLayout()
-        layout_main.addWidget(self.lst_files)
+        layout_main.addWidget(self.table)
         self.setLayout(layout_main)
+
+    def refresh(self):
+        self.files.clear()
 
     def refresh(self):
         self.load_files_from_cloud()
@@ -36,21 +39,24 @@ class OverviewScreen(QWidget):
     def load_files_from_cloud(self):
         self.clear_list()
 
-        for file in list_files():
+        self.files = list_files()
+        self.table.setRowCount(len(self.files))
+
+        for row, file in enumerate(list_files()):
             file: FileData = file
-            self.add_to_list(file)
+            self.put_file_in_table(file, row)
 
     def clear_list(self):
         self.files.clear()
-        self.mdl_files.clear()
-
-    def add_to_list(self, file: FileData):
-        self.files.append(str(file))
-
-        mdl_item = QStandardItem(str(file))
+        self.table.clearContents()
         
+    def put_file_in_table(self, file: FileData, row: int):
         pixmapi = QStyle.StandardPixmap.SP_FileIcon
         icon = self.style().standardIcon(pixmapi)
-        mdl_item.setIcon(icon)
+        icon_item = QTableWidgetItem()
+        icon_item.setIcon(icon)
 
-        self.mdl_files.appendRow(mdl_item)
+        self.table.setItem(row, 0, QTableWidgetItem(icon_item))
+        self.table.setItem(row, 1, QTableWidgetItem(file.name))
+        self.table.setItem(row, 2, QTableWidgetItem(file.type))
+        self.table.setItem(row, 3, QTableWidgetItem(file.last_modified.strftime('%a %d %b %Y, %I:%M%p')))

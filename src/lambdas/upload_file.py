@@ -133,7 +133,12 @@ def init():
 def list_files() -> List[FileData]:
     response = s3_cli.list_objects(Bucket=BUCKET_NAME)
     result = []
-    for s3_file in response.get('Contents'):
+
+    contents = response.get('Contents')
+    if contents is None:
+        return result
+
+    for s3_file in contents:
         dynamo_key = {TB_META_PK: s3_file['Key']}
         dynamo_key = d_json.dumps(dynamo_key, as_dict=True)
         dynamo_res = dynamo_cli.get_item(
