@@ -11,23 +11,43 @@ class FileEdit(QGroupBox):
         self.owner = parent
 
         self.txt_name: QLineEdit
+        self.txt_desc: QTextEdit
         self.btn_update: QPushButton
+        self.lbl_upload_date: QLabel
+        self.lbl_modify_date: QLabel
+        self.lbl_size: QLabel
 
         self.init_gui()
         self.init_layout()
 
     def init_gui(self):
         self.txt_name = QLineEdit()
+        self.txt_desc = QTextEdit()
+        self.lbl_upload_date = QLabel()
+        self.lbl_modify_date = QLabel()
+        self.lbl_size = QLabel()
         self.btn_update = QPushButton("Save Changes")
 
     def init_layout(self):
         layout_main = QVBoxLayout()
         layout_main.addWidget(self.txt_name)
+        layout_main.addWidget(self.txt_desc)
+        layout_main.addWidget(self.lbl_size)
+        layout_main.addWidget(self.lbl_upload_date)
+        layout_main.addWidget(self.lbl_modify_date)
+
         layout_main.addWidget(self.btn_update)
-        layout_main.addItem(QSpacerItem(
-            1, 1, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        layout_main.addItem(QSpacerItem(1, 1, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
         self.setLayout(layout_main)
+
+    def on_selected_file(self, file: FileData):
+        self.txt_name.setText(file.name)
+        self.txt_desc.setText(file.desc)
+        
+        self.lbl_size.setText(f"{file.size} B")
+        self.lbl_upload_date.setText(file.upload_date.strftime('%a %d %b %Y, %I:%M%p'))
+        self.lbl_modify_date.setText(file.last_modified.strftime('%a %d %b %Y, %I:%M%p'))
 
 
 class OverviewScreen(QWidget):
@@ -52,6 +72,7 @@ class OverviewScreen(QWidget):
         self.table.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.setShowGrid(False)
+        self.table.clicked.connect(self.on_click_item)
 
         self.edit_region = FileEdit(self)
 
@@ -61,7 +82,7 @@ class OverviewScreen(QWidget):
         hsplitter = QSplitter(Qt.Orientation.Horizontal)
         hsplitter.addWidget(self.table)
         hsplitter.addWidget(self.edit_region)
-        
+
         layout_main.addWidget(hsplitter)
 
         self.setLayout(layout_main)
@@ -97,3 +118,6 @@ class OverviewScreen(QWidget):
         self.table.setItem(row, 1, QTableWidgetItem(file.name + file.type))
         self.table.setItem(row, 2, QTableWidgetItem(file.type))
         self.table.setItem(row, 3, QTableWidgetItem(file.last_modified.strftime('%a %d %b %Y, %I:%M%p')))
+
+    def on_click_item(self, item: QModelIndex):
+        self.edit_region.on_selected_file(self.files[item.row()])

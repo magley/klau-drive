@@ -1,9 +1,7 @@
 from typing import List
 from PyQt6.QtWidgets import *
-from PyQt6 import QtGui
 from PyQt6.QtCore import Qt
-from src.lambdas.upload_file import upload_file, init, list_files
-import json
+from src.lambdas.upload_file import upload_file
 
 
 class UploadScreen(QWidget):
