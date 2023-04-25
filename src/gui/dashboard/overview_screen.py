@@ -15,6 +15,7 @@ class FileEdit(QGroupBox):
         self.btn_update: QPushButton
         self.lbl_upload_date: QLabel
         self.lbl_modify_date: QLabel
+        self.lst_tags: QListWidget = None
         self.lbl_size: QLabel
 
         self.init_gui()
@@ -23,21 +24,40 @@ class FileEdit(QGroupBox):
     def init_gui(self):
         self.txt_name = QLineEdit()
         self.txt_desc = QTextEdit()
+        self.lst_tags = QListWidget()
         self.lbl_upload_date = QLabel()
         self.lbl_modify_date = QLabel()
         self.lbl_size = QLabel()
         self.btn_update = QPushButton("Save Changes")
+        self.btn_update.setEnabled(False)
 
     def init_layout(self):
         layout_main = QVBoxLayout()
-        layout_main.addWidget(self.txt_name)
-        layout_main.addWidget(self.txt_desc)
-        layout_main.addWidget(self.lbl_size)
-        layout_main.addWidget(self.lbl_upload_date)
-        layout_main.addWidget(self.lbl_modify_date)
 
-        layout_main.addWidget(self.btn_update)
+        h1 = QHBoxLayout()
+        h1.addWidget(QLabel("Size: "))
+        h1.addWidget(self.lbl_size)
+
+        h2 = QHBoxLayout()
+        h2.addWidget(QLabel("Uploaded: "))
+        h2.addWidget(self.lbl_upload_date)
+
+        h3 = QHBoxLayout()
+        h3.addWidget(QLabel("Modified: "))
+        h3.addWidget(self.lbl_modify_date)
+
+        layout_main.addWidget(QLabel("Name:"))
+        layout_main.addWidget(self.txt_name)
+        layout_main.addWidget(QLabel("Description:"))
+        layout_main.addWidget(self.txt_desc)
+        layout_main.addWidget(QLabel("Tags:"))
+        layout_main.addWidget(self.lst_tags)
+        layout_main.addLayout(h1)
+        layout_main.addLayout(h2)
+        layout_main.addLayout(h3)
+
         layout_main.addItem(QSpacerItem(1, 1, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        layout_main.addWidget(self.btn_update)
 
         self.setLayout(layout_main)
 
@@ -48,6 +68,10 @@ class FileEdit(QGroupBox):
         self.lbl_size.setText(f"{file.size} B")
         self.lbl_upload_date.setText(file.upload_date.strftime('%a %d %b %Y, %I:%M%p'))
         self.lbl_modify_date.setText(file.last_modified.strftime('%a %d %b %Y, %I:%M%p'))
+
+        self.lst_tags.clear()
+        for tag in file.tags:
+            self.lst_tags.addItem(QListWidgetItem(tag))
 
 
 class OverviewScreen(QWidget):
@@ -75,6 +99,7 @@ class OverviewScreen(QWidget):
         self.table.clicked.connect(self.on_click_item)
 
         self.edit_region = FileEdit(self)
+        self.edit_region.setVisible(False)
 
     def make_layout(self):
         layout_main = QHBoxLayout()
@@ -121,3 +146,4 @@ class OverviewScreen(QWidget):
 
     def on_click_item(self, item: QModelIndex):
         self.edit_region.on_selected_file(self.files[item.row()])
+        self.edit_region.setVisible(True)
