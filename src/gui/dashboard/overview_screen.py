@@ -23,7 +23,7 @@ class OverviewScreen(QWidget):
         self.table.setHorizontalHeaderLabels(self.columns)
         self.table.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-
+        self.table.setShowGrid(False)
 
     def make_layout(self):
         layout_main = QVBoxLayout()
@@ -45,6 +45,7 @@ class OverviewScreen(QWidget):
         for row, file in enumerate(list_files()):
             file: FileData = file
             self.put_file_in_table(file, row)
+            self.table.setRowHeight(row, 8)
 
     def clear_list(self):
         self.files.clear()
@@ -57,6 +58,6 @@ class OverviewScreen(QWidget):
         icon_item.setIcon(icon)
 
         self.table.setItem(row, 0, QTableWidgetItem(icon_item))
-        self.table.setItem(row, 1, QTableWidgetItem(file.name))
+        self.table.setItem(row, 1, QTableWidgetItem(file.name + file.type))
         self.table.setItem(row, 2, QTableWidgetItem(file.type))
         self.table.setItem(row, 3, QTableWidgetItem(file.last_modified.strftime('%a %d %b %Y, %I:%M%p')))
