@@ -1,15 +1,18 @@
+from dataclasses import dataclass
 from PyQt6.QtWidgets import *
 import src.gui.gui_window as mainWindow
 
 
+@dataclass
 class LoginScreen(QWidget):
-    def __init__(self, win: QStackedWidget):
+    # TODO: Declare other fields.
+    btn_login: QPushButton
+    owner: QStackedWidget
+
+    def __init__(self, owner: QStackedWidget):
         QWidget.__init__(self)
-        self.win = win
-
-        # TODO: Declare other fields.
-        self.btn_login: QPushButton = None
-
+        self.owner = owner
+        
         self.init_gui()
         self.make_layout()
 
@@ -32,4 +35,4 @@ class LoginScreen(QWidget):
     def on_login_clicked(self):
         # TODO: Add logic.
 
-        self.win.setCurrentIndex(mainWindow.MainWindow.SCREEN_DASHBOARD)
+        self.owner.setCurrentIndex(mainWindow.MainWindow.SCREEN_DASHBOARD)
