@@ -2,9 +2,6 @@ from PyQt6.QtWidgets import *
 from PyQt6 import QtGui
 from src.gui.gui_window import MainWindow
 
-from src.lambdas.init import init
-init()
-
 app = QApplication([])
 app.setStyle('Fusion')  # 'Fusion'
 
