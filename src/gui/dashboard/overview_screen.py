@@ -1,22 +1,25 @@
 from typing import List
+from dataclasses import dataclass
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 
 from src.lambdas.upload_file import list_files, FileData
 
+@dataclass
 class FileEdit(QGroupBox):
-    def __init__(self, parent: "OverviewScreen"):
-        QGroupBox.__init__(self)
-        self.owner = parent
+    txt_name: QLineEdit
+    txt_desc: QTextEdit
+    btn_update: QPushButton
+    lbl_upload_date: QLabel
+    lbl_modify_date: QLabel
+    lst_tags: QListWidget
+    lbl_size: QLabel
+    owner: "OverviewScreen"
 
-        self.txt_name: QLineEdit
-        self.txt_desc: QTextEdit
-        self.btn_update: QPushButton
-        self.lbl_upload_date: QLabel
-        self.lbl_modify_date: QLabel
-        self.lst_tags: QListWidget = None
-        self.lbl_size: QLabel
+    def __init__(self, owner: "OverviewScreen"):
+        QGroupBox.__init__(self)
+        self.owner = owner
 
         self.init_gui()
         self.init_layout()
@@ -74,14 +77,19 @@ class FileEdit(QGroupBox):
             self.lst_tags.addItem(QListWidgetItem(tag))
 
 
+@dataclass
 class OverviewScreen(QWidget):
-    def __init__(self, parent: QTabWidget):
-        QWidget.__init__(self)
-        self.owner = parent
+    owner: QTabWidget
+    table: QTableWidget
+    edit_region: FileEdit
+    files: List[FileData]
+    columns: List[str]
 
-        self.table: QTableWidget
-        self.edit_region: FileEdit
-        self.files: List[FileData] = []
+    def __init__(self, owner: QTabWidget):
+        QWidget.__init__(self)
+        self.owner = owner
+
+        self.files = []
         self.columns = ['Icon', 'Name', 'Type', 'Date Modified']
 
         self.init_gui()

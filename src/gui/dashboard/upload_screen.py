@@ -1,26 +1,32 @@
 from typing import List
+from dataclasses import dataclass, field
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import Qt
 from src.lambdas.upload_file import upload_file
 
 
+@dataclass
 class UploadScreen(QWidget):
-    def __init__(self, parent: QTabWidget):
+    btn_pick: QPushButton
+    lbl_fname: QLabel
+    txt_desc: QTextEdit
+    txt_tag: QLineEdit
+    btn_tag_add: QPushButton
+    btn_tag_rem: QPushButton
+    lst_tags: QListWidget
+    btn_upload: QPushButton
+
+    tags: List[str]
+    fname: str
+    owner: QTabWidget
+
+    def __init__(self, owner: QTabWidget):
         QWidget.__init__(self)
         
-        self.fname: str = None
-        self.tags: List[str] = []
-
-        self.parent = parent
-        self.btn_pick: QPushButton = None
-        self.lbl_fname: QLabel = None
-        self.txt_desc: QTextEdit = None
-        self.txt_tag: QLineEdit = None
-        self.btn_tag_add: QPushButton = None
-        self.btn_tag_rem: QPushButton = None
-        self.lst_tags: QListWidget = None
-        self.btn_upload: QPushButton = None
-
+        self.owner = owner
+        self.tags = []
+        self.fname = ""
+        
         self.init_gui()
         self.make_layout()
 
