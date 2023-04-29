@@ -6,7 +6,7 @@ import src.lambdas.register_user as register_user
 def init():
     _init_bucket(upload_file.BUCKET_NAME)
     _init_table(upload_file.TB_META_NAME, upload_file.TB_META_PK, upload_file.TB_META_SK)
-    _init_table(register_user.TB_META_NAME, register_user.TB_META_PK, None)
+    _init_table(register_user.TB_USER_NAME, register_user.TB_USER_PK, None)
 
 
 def _init_bucket(bucket_name):
