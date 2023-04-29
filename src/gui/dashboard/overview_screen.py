@@ -121,9 +121,6 @@ class OverviewScreen(QWidget):
         self.setLayout(layout_main)
 
     def refresh(self):
-        self.files.clear()
-
-    def refresh(self):
         self.load_files_from_cloud()
 
     def load_files_from_cloud(self):
