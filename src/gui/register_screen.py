@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import *
-from src.lambdas.register_user import User, register_user
-from datetime import datetime, date
+from src.lambdas.register_user import User, register_user, list_users
+from datetime import datetime
 import src.gui.gui_window as mainWindow
 
 class RegisterScreen(QWidget):
@@ -33,36 +33,45 @@ class RegisterScreen(QWidget):
         self.setLayout(layout)
 
     def on_register_clicked(self):
-        dob, err = self.attempt_dob_parse()
+        dob, err = self.parse_dob()
         if err:
             self.show_error('Date of birth format invalid.\nProper format is dd-mm-YYYY')
             return
+
         username = self.txt_username.text()
         if username == '':
             self.show_error('Username cannot be empty.')
             return
+
+        password = self.txt_password.text()
+        if password == '':
+            self.show_error('Password cannot be empty.')
+            return
+
         user = User(
             name=self.txt_name.text(),
             surname=self.txt_surname.text(),
             date_of_birth=dob,
             username=username,
             email=self.txt_email.text(),
-            password=self.txt_password.text()
+            password=password
         )
         err = register_user(user)
         if err:
             self.show_error(err)
             return
-        self.show_success()
-        self.owner.setCurrentIndex(mainWindow.MainWindow.SCREEN_DASHBOARD)
 
-    def attempt_dob_parse(self) -> tuple[date | None, bool]:
+        list_users()
+        self.show_success()
+        # self.owner.setCurrentIndex(mainWindow.MainWindow.SCREEN_DASHBOARD)
+
+    def parse_dob(self) -> tuple[datetime | None, bool]:
         dob_text = self.txt_date_of_birth.text()
         if dob_text == '':
             return None, False
         try:    
-            dob = datetime.strptime(dob_text, '%d-%m-%Y').date()
-            return dob.strftime('%d-%m-%Y'), False
+            dob = datetime.strptime(dob_text, '%d-%m-%Y')
+            return dob, False
         except ValueError:
             return None, True
 
