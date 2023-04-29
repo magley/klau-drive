@@ -69,55 +69,6 @@ def upload_file_dynamo(fname: str, desc: str, tags: List[str]):
 # ------------------------------------------------------------------------------
 
 
-def init():
-    try:
-        dynamo_cli.delete_table(TableName=TB_META_NAME)
-    except Exception as e:
-        pass
-
-    bucket = s3_res.Bucket(BUCKET_NAME)
-    try:
-        bucket.objects.all().delete()
-        bucket.delete()
-    except Exception as e:
-        pass
-
-    s3_cli.create_bucket(Bucket=BUCKET_NAME)
-
-    attrdef = [
-        {
-            'AttributeName': TB_META_PK,
-            'AttributeType': 'S',
-        },
-    ]
-    keyschema = [
-        {
-            'AttributeName': TB_META_PK,
-            'KeyType': 'HASH',
-        }
-    ]
-
-    if TB_META_SK is not None:
-        attrdef.append({
-            'AttributeName': TB_META_SK,
-            'AttributeType': 'S',
-        })
-        keyschema.append({
-            'AttributeName': TB_META_SK,
-            'KeyType': 'RANGE',
-        })
-
-    dynamo_cli.create_table(
-        TableName=TB_META_NAME,
-        AttributeDefinitions=attrdef,
-        KeySchema=keyschema,
-        ProvisionedThroughput={
-            'ReadCapacityUnits': 5,
-            'WriteCapacityUnits': 5
-        },
-    )
-
-
 def list_files() -> List[FileData]:
     response = s3_cli.list_objects(Bucket=BUCKET_NAME)
     result = []
