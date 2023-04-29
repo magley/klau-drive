@@ -1,12 +1,11 @@
 from dataclasses import dataclass
 from datetime import datetime
-import json
 import os
 from pathlib import Path
 from typing import List
-import boto3
 from dynamodb_json import json_util as d_json
-from botocore.client import ClientError
+from src.lambdas.session import s3_cli, dynamo_cli
+from src.lambdas.util import create_bucket_if_not_exists, create_table_if_not_exists
 
 
 @dataclass
@@ -25,33 +24,14 @@ class FileData():
 #
 # ------------------------------------------------------------------------------
 
-ACCESS_KEY = 'test'
-SECRET_KEY = 'test'
-REGION = 'us-east-1'
-ENDPOINT = 'http://localhost.localstack.cloud:4566'
 BUCKET_NAME = "content"
 TB_META_NAME = 'file_meta'
 TB_META_PK = 'name'
 TB_META_SK = None
 
-session = boto3.Session(aws_access_key_id=ACCESS_KEY,
-                        aws_secret_access_key=SECRET_KEY,
-                        region_name=REGION)
-s3_cli = session.client('s3', endpoint_url=ENDPOINT)
-s3_res = session.resource("s3", endpoint_url=ENDPOINT)
-dynamo_cli = session.client('dynamodb', endpoint_url=ENDPOINT)
-
-
-def create_bucket_if_not_exists():
-    # s3_cli.create_bucket is idempotent.
-    try:
-        s3_cli.create_bucket(Bucket=BUCKET_NAME)
-    except Exception as e:
-        pass
-
 
 def upload_file_s3(fname: str, key: str):
-    create_bucket_if_not_exists()
+    create_bucket_if_not_exists(BUCKET_NAME)
 
     s3_cli.upload_file(
         Filename=fname,
@@ -60,46 +40,8 @@ def upload_file_s3(fname: str, key: str):
     )
 
 
-def create_table_if_not_exists():
-    attrdef = [
-        {
-            'AttributeName': TB_META_PK,
-            'AttributeType': 'S',
-        },
-    ]
-    keyschema = [
-        {
-            'AttributeName': TB_META_PK,
-            'KeyType': 'HASH',
-        }
-    ]
-
-    if TB_META_SK is not None:
-        attrdef.append({
-            'AttributeName': TB_META_SK,
-            'AttributeType': 'S',
-        })
-        keyschema.append({
-            'AttributeName': TB_META_SK,
-            'KeyType': 'RANGE',
-        })
-
-    try:
-        dynamo_cli.create_table(
-            TableName=TB_META_NAME,
-            AttributeDefinitions=attrdef,
-            KeySchema=keyschema,
-            ProvisionedThroughput={
-                'ReadCapacityUnits': 5,
-                'WriteCapacityUnits': 5
-            },
-        )
-    except dynamo_cli.exceptions.ResourceInUseException:
-        pass
-
-
 def upload_file_dynamo(fname: str, desc: str, tags: List[str]):
-    create_table_if_not_exists()
+    create_table_if_not_exists(TB_META_NAME, TB_META_PK, TB_META_SK)
 
     stat: os.stat_result = os.stat(fname)
 
@@ -129,20 +71,6 @@ def upload_file_dynamo(fname: str, desc: str, tags: List[str]):
 # ------------------------------------------------------------------------------
 #
 # ------------------------------------------------------------------------------
-
-
-def purge_all_data():
-    try:
-        dynamo_cli.delete_table(TableName=TB_META_NAME)
-    except Exception as e:
-        pass
-
-    bucket = s3_res.Bucket(BUCKET_NAME)
-    try:
-        bucket.objects.all().delete()
-        bucket.delete()
-    except Exception as e:
-        pass
 
 
 def list_files() -> List[FileData]:
