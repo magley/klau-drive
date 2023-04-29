@@ -1,10 +1,9 @@
 from datetime import datetime
-import json
 import os
 from pathlib import Path
 from typing import List
-import boto3
 from dynamodb_json import json_util as d_json
+from src.lambdas.session import s3_cli, s3_res, dynamo_cli
 
 class FileData():
     def __init__(self, name: str, type: str, desc: str, tags: List[str], size: int, upload_date: datetime, last_modified: datetime, creation_date: datetime):
@@ -25,21 +24,10 @@ class FileData():
 #
 # ------------------------------------------------------------------------------
 
-ACCESS_KEY = 'test'
-SECRET_KEY = 'test'
-REGION = 'us-east-1'
-ENDPOINT = 'http://localhost.localstack.cloud:4566'
 BUCKET_NAME = "content"
 TB_META_NAME = 'file_meta'
 TB_META_PK = 'name'
 TB_META_SK = None
-
-session = boto3.Session(aws_access_key_id=ACCESS_KEY,
-                        aws_secret_access_key=SECRET_KEY,
-                        region_name=REGION)
-s3_cli = session.client('s3', endpoint_url=ENDPOINT)
-s3_res = session.resource("s3", endpoint_url=ENDPOINT)
-dynamo_cli = session.client('dynamodb', endpoint_url=ENDPOINT)
 
 
 def upload_file_s3(fname: str, key: str):
