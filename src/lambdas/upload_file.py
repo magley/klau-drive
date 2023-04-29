@@ -4,7 +4,8 @@ import os
 from pathlib import Path
 from typing import List
 from dynamodb_json import json_util as d_json
-from src.lambdas.session import s3_cli, s3_res, dynamo_cli
+from src.lambdas.session import s3_cli, dynamo_cli
+from src.lambdas.util import create_bucket_if_not_exists, create_table_if_not_exists
 
 
 @dataclass
@@ -29,16 +30,8 @@ TB_META_PK = 'name'
 TB_META_SK = None
 
 
-def create_bucket_if_not_exists():
-    # s3_cli.create_bucket is idempotent.
-    try:
-        s3_cli.create_bucket(Bucket=BUCKET_NAME)
-    except Exception as e:
-        pass
-
-
 def upload_file_s3(fname: str, key: str):
-    create_bucket_if_not_exists()
+    create_bucket_if_not_exists(BUCKET_NAME)
 
     s3_cli.upload_file(
         Filename=fname,
@@ -47,46 +40,8 @@ def upload_file_s3(fname: str, key: str):
     )
 
 
-def create_table_if_not_exists():
-    attrdef = [
-        {
-            'AttributeName': TB_META_PK,
-            'AttributeType': 'S',
-        },
-    ]
-    keyschema = [
-        {
-            'AttributeName': TB_META_PK,
-            'KeyType': 'HASH',
-        }
-    ]
-
-    if TB_META_SK is not None:
-        attrdef.append({
-            'AttributeName': TB_META_SK,
-            'AttributeType': 'S',
-        })
-        keyschema.append({
-            'AttributeName': TB_META_SK,
-            'KeyType': 'RANGE',
-        })
-
-    try:
-        dynamo_cli.create_table(
-            TableName=TB_META_NAME,
-            AttributeDefinitions=attrdef,
-            KeySchema=keyschema,
-            ProvisionedThroughput={
-                'ReadCapacityUnits': 5,
-                'WriteCapacityUnits': 5
-            },
-        )
-    except dynamo_cli.exceptions.ResourceInUseException:
-        pass
-
-
 def upload_file_dynamo(fname: str, desc: str, tags: List[str]):
-    create_table_if_not_exists()
+    create_table_if_not_exists(TB_META_NAME, TB_META_PK, TB_META_SK)
 
     stat: os.stat_result = os.stat(fname)
 

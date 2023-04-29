@@ -1,11 +1,12 @@
 from PyQt6.QtWidgets import *
 from src.lambdas.register_user import User, register_user
 from datetime import datetime, date
+import src.gui.gui_window as mainWindow
 
 class RegisterScreen(QWidget):
-    def __init__(self, win: QStackedWidget):
+    def __init__(self, owner: QStackedWidget):
         QWidget.__init__(self)
-        self.win = win
+        self.owner = owner
         self.init_gui()
         self.make_layout()
 
@@ -53,6 +54,7 @@ class RegisterScreen(QWidget):
             self.show_error(err)
             return
         self.show_success()
+        self.owner.setCurrentIndex(mainWindow.MainWindow.SCREEN_DASHBOARD)
 
     def attempt_dob_parse(self) -> tuple[date | None, bool]:
         dob_text = self.txt_date_of_birth.text()

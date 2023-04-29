@@ -1,8 +1,8 @@
 from dataclasses import dataclass, asdict
-from datetime import date
 from dynamodb_json import json_util
 from src.lambdas.session import dynamo_cli
 from botocore.exceptions import ClientError
+from src.lambdas.util import create_table_if_not_exists
 
 
 @dataclass
@@ -20,6 +20,8 @@ TB_USER_PK = 'username'
 
 
 def register_user(user: User) -> str | None:
+    create_table_if_not_exists(TB_USER_NAME, TB_USER_PK, None)
+
     user_ddb = json_util.dumps(asdict(user), as_dict=True)
     try:
         dynamo_cli.put_item(
