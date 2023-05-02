@@ -1,3 +1,5 @@
+import os
+
 TOKEN_FILENAME = "user_token.txt"
 
 
@@ -15,3 +17,10 @@ def read_token():
     except FileNotFoundError:
         pass
     return jwt
+
+
+def delete_token():
+    if os.path.exists(TOKEN_FILENAME):
+        os.remove(TOKEN_FILENAME)
+        return True
+    return False
