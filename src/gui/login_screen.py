@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from PyQt6.QtWidgets import *
-from src.lambdas.login import login
+from src.lambdas.login import login, NoSuchUserException
+from src.gui.common import show_error
 import src.gui.gui_window as mainWindow
 
 
@@ -10,6 +11,8 @@ class LoginScreen(QWidget):
     btn_login: QPushButton
     btn_admin: QPushButton
     owner: QStackedWidget
+    txt_username: QLineEdit
+    txt_password: QLineEdit
 
     def __init__(self, owner: QStackedWidget):
         QWidget.__init__(self)
@@ -25,12 +28,18 @@ class LoginScreen(QWidget):
         self.btn_login.clicked.connect(self.on_login_clicked)
         self.btn_admin = QPushButton("I'm an admin")
         self.btn_admin.clicked.connect(self.on_admin_clicked)
+        self.txt_username = QLineEdit()
+        self.txt_password = QLineEdit()
 
     def make_layout(self):
-        # TODO: Add other fields to layout.
         layout_main = QVBoxLayout()
 
-        layout_main.addWidget(self.btn_login)
+        login_form = QFormLayout()
+        login_form.addRow(QLabel('Username'), self.txt_username)
+        login_form.addRow(QLabel('Password'), self.txt_password)
+        login_form.addRow(self.btn_login)
+        layout_main.addLayout(login_form)
+
         layout_main.addItem(QSpacerItem(
             1, 1, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
         layout_main.addWidget(self.btn_admin)
@@ -38,12 +47,26 @@ class LoginScreen(QWidget):
         self.setLayout(layout_main)
 
     def on_login_clicked(self):
-        self.owner.setCurrentIndex(mainWindow.MainWindow.SCREEN_DASHBOARD)
+        username = self.txt_username.text()
+        if username == '':
+            show_error('Username cannot be empty.')
+            return
+        password = self.txt_password.text()
+        if password == '':
+            show_error('Password cannot be empty.')
+            return
+        self.do_login(username, password)
 
     def on_admin_clicked(self):
         self.do_login("admin", "admin")
-        self.owner.setCurrentIndex(mainWindow.MainWindow.SCREEN_DASHBOARD)
 
     def do_login(self, username, password):
-        login(username, password)
+        try:
+            jwt = login(username, password)
+        except NoSuchUserException as e:
+            show_error(str(e))
+            return
+        else:
+            print("Logged in: " + jwt)
+        self.owner.setCurrentIndex(mainWindow.MainWindow.SCREEN_DASHBOARD)
 
