@@ -17,6 +17,6 @@ class MainWindow(QStackedWidget):
         self.setWindowTitle('klau-drive')
         self.setWindowIcon(QtGui.QIcon('res/ico.png'))
 
-        MainWindow.SCREEN_REGISTER = self.addWidget(RegisterScreen(self))
         MainWindow.SCREEN_LOGIN = self.addWidget(LoginScreen(self))
+        MainWindow.SCREEN_REGISTER = self.addWidget(RegisterScreen(self))
         MainWindow.SCREEN_DASHBOARD = self.addWidget(DashboardScreen(self))

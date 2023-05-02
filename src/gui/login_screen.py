@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from PyQt6.QtWidgets import *
+from src.lambdas.login import login
 import src.gui.gui_window as mainWindow
 
 
@@ -21,6 +22,8 @@ class LoginScreen(QWidget):
 
         self.btn_login = QPushButton("Login")
         self.btn_login.clicked.connect(self.on_login_clicked)
+        self.btn_login = QPushButton("I'm an admin")
+        self.btn_login.clicked.connect(self.on_admin_clicked)
 
     def make_layout(self):
         # TODO: Add other fields to layout.
@@ -33,6 +36,12 @@ class LoginScreen(QWidget):
         self.setLayout(layout_main)
 
     def on_login_clicked(self):
-        # TODO: Add logic.
-
         self.owner.setCurrentIndex(mainWindow.MainWindow.SCREEN_DASHBOARD)
+
+    def on_admin_clicked(self):
+        self.do_login("admin", "admin")
+        self.owner.setCurrentIndex(mainWindow.MainWindow.SCREEN_DASHBOARD)
+
+    def do_login(self, username, password):
+        login(username, password)
+
