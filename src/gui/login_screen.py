@@ -9,6 +9,7 @@ import src.gui.gui_window as mainWindow
 class LoginScreen(QWidget):
     # TODO: Declare other fields.
     btn_login: QPushButton
+    btn_register: QPushButton
     btn_admin: QPushButton
     owner: QStackedWidget
     txt_username: QLineEdit
@@ -28,6 +29,8 @@ class LoginScreen(QWidget):
         self.btn_login.clicked.connect(self.on_login_clicked)
         self.btn_admin = QPushButton("I'm an admin")
         self.btn_admin.clicked.connect(self.on_admin_clicked)
+        self.btn_register = QPushButton("Register")
+        self.btn_register.clicked.connect(self.on_register_clicked)
         self.txt_username = QLineEdit()
         self.txt_password = QLineEdit()
 
@@ -42,6 +45,7 @@ class LoginScreen(QWidget):
 
         layout_main.addItem(QSpacerItem(
             1, 1, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        layout_main.addWidget(self.btn_register)
         layout_main.addWidget(self.btn_admin)
 
         self.setLayout(layout_main)
@@ -69,4 +73,8 @@ class LoginScreen(QWidget):
         else:
             print("Logged in: " + jwt)
         self.owner.setCurrentIndex(mainWindow.MainWindow.SCREEN_DASHBOARD)
+
+    def on_register_clicked(self):
+        self.owner.setCurrentIndex(mainWindow.MainWindow.SCREEN_REGISTER)
+
 

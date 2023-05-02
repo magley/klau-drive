@@ -65,4 +65,4 @@ class RegisterScreen(QWidget):
 
         list_users()
         show_success('Successfully registered user.')
-        # self.owner.setCurrentIndex(mainWindow.MainWindow.SCREEN_DASHBOARD)
+        self.owner.setCurrentIndex(mainWindow.MainWindow.SCREEN_LOGIN)
