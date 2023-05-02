@@ -31,6 +31,10 @@ class MainWindow(QMainWindow):
         MainWindow.SCREEN_REGISTER = self.stack_widget.addWidget(RegisterScreen(self.stack_widget))
         MainWindow.SCREEN_DASHBOARD = self.stack_widget.addWidget(DashboardScreen(self.stack_widget))
 
+        # TODO: this does not yet check if token sig is valid and such
+        if token_util.read_token():
+            self.stack_widget.setCurrentIndex(MainWindow.SCREEN_DASHBOARD)
+
     def logout_clicked(self):
         token_util.delete_token()
         self.stack_widget.setCurrentIndex(MainWindow.SCREEN_LOGIN)
