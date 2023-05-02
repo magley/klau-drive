@@ -22,9 +22,10 @@ class MainWindow(QMainWindow):
 
         menu_bar = self.menuBar()
         file_menu: QMenu = menu_bar.addMenu("&File")
-        logout_action = QAction("Logout", self)
-        file_menu.addAction(logout_action)
-        logout_action.triggered.connect(self.logout_clicked)
+        self.logout_action = QAction("Logout", self)
+        file_menu.addAction(self.logout_action)
+        self.logout_action.triggered.connect(self.logout_clicked)
+        self.stack_widget.currentChanged.connect(self.page_change)
 
         MainWindow.SCREEN_LOGIN = self.stack_widget.addWidget(LoginScreen(self.stack_widget))
         MainWindow.SCREEN_REGISTER = self.stack_widget.addWidget(RegisterScreen(self.stack_widget))
@@ -33,3 +34,10 @@ class MainWindow(QMainWindow):
     def logout_clicked(self):
         token_util.delete_token()
         self.stack_widget.setCurrentIndex(MainWindow.SCREEN_LOGIN)
+
+    def page_change(self, new_index: int):
+        # TODO: might need to change this on new screen added, if having something that's not dashboard too
+        if new_index == MainWindow.SCREEN_DASHBOARD:
+            self.logout_action.setEnabled(True)
+        else:
+            self.logout_action.setEnabled(False)
