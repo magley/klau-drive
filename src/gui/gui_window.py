@@ -4,6 +4,7 @@ from src.gui.login_screen import LoginScreen
 from src.gui.dashboard_screen import DashboardScreen
 from src.gui.register_screen import RegisterScreen
 
+
 class MainWindow(QStackedWidget):
     SCREEN_LOGIN = 0
     SCREEN_REGISTER = 1
