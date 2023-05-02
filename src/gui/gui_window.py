@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
 
         menu_bar = self.menuBar()
         file_menu: QMenu = menu_bar.addMenu("&File")
-        self.logout_action = QAction("Logout", self)
+        self.logout_action = QAction("&Logout", self)
         file_menu.addAction(self.logout_action)
         self.logout_action.triggered.connect(self.logout_clicked)
         self.stack_widget.currentChanged.connect(self.page_change)
