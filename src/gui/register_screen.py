@@ -22,6 +22,8 @@ class RegisterScreen(QWidget):
         self.txt_password.setEchoMode(QLineEdit.EchoMode.Password)
         self.btn_register = QPushButton('Register')
         self.btn_register.clicked.connect(self.on_register_clicked)
+        self.btn_login = QPushButton('Back to Login')
+        self.btn_login.clicked.connect(self.on_login_clicked)
 
     def make_layout(self):
         layout = QFormLayout()
@@ -32,7 +34,11 @@ class RegisterScreen(QWidget):
         layout.addRow(QLabel('Email'), self.txt_email)
         layout.addRow(QLabel('Password'), self.txt_password)
         layout.addRow(self.btn_register)
+        layout.addRow(self.btn_login)
         self.setLayout(layout)
+
+    def on_login_clicked(self):
+        self.owner.setCurrentIndex(mainWindow.MainWindow.SCREEN_LOGIN)
 
     def on_register_clicked(self):
         dob = self.date_of_birth.dateTime().toPyDateTime()
