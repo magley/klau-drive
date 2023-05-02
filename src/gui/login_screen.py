@@ -8,6 +8,7 @@ import src.gui.gui_window as mainWindow
 class LoginScreen(QWidget):
     # TODO: Declare other fields.
     btn_login: QPushButton
+    btn_admin: QPushButton
     owner: QStackedWidget
 
     def __init__(self, owner: QStackedWidget):
@@ -22,8 +23,8 @@ class LoginScreen(QWidget):
 
         self.btn_login = QPushButton("Login")
         self.btn_login.clicked.connect(self.on_login_clicked)
-        self.btn_login = QPushButton("I'm an admin")
-        self.btn_login.clicked.connect(self.on_admin_clicked)
+        self.btn_admin = QPushButton("I'm an admin")
+        self.btn_admin.clicked.connect(self.on_admin_clicked)
 
     def make_layout(self):
         # TODO: Add other fields to layout.
@@ -32,6 +33,7 @@ class LoginScreen(QWidget):
         layout_main.addWidget(self.btn_login)
         layout_main.addItem(QSpacerItem(
             1, 1, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        layout_main.addWidget(self.btn_admin)
 
         self.setLayout(layout_main)
 
