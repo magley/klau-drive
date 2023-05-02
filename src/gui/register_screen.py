@@ -1,7 +1,9 @@
 from PyQt6.QtWidgets import *
 from src.lambdas.register_user import User, register_user, list_users
 from datetime import datetime
+from src.gui.common import show_success, show_error
 import src.gui.gui_window as mainWindow
+
 
 class RegisterScreen(QWidget):
     def __init__(self, owner: QStackedWidget):
@@ -35,17 +37,17 @@ class RegisterScreen(QWidget):
     def on_register_clicked(self):
         dob = self.date_of_birth.dateTime().toPyDateTime()
         if dob > datetime.now():
-            self.show_error('Date of birth cannot be a future date.')
+            show_error('Date of birth cannot be a future date.')
             return
 
         username = self.txt_username.text()
         if username == '':
-            self.show_error('Username cannot be empty.')
+            show_error('Username cannot be empty.')
             return
 
         password = self.txt_password.text()
         if password == '':
-            self.show_error('Password cannot be empty.')
+            show_error('Password cannot be empty.')
             return
 
         user = User(
@@ -58,24 +60,9 @@ class RegisterScreen(QWidget):
         )
         err = register_user(user)
         if err:
-            self.show_error(err)
+            show_error(err)
             return
 
         list_users()
-        self.show_success()
+        show_success('Successfully registered user.')
         # self.owner.setCurrentIndex(mainWindow.MainWindow.SCREEN_DASHBOARD)
-
-
-    def show_error(self, error):
-        msg = QMessageBox()
-        msg.setWindowTitle('Error')
-        msg.setText(error)
-        msg.setStandardButtons(QMessageBox.StandardButton.Ok)
-        msg.exec()
-
-    def show_success(self):
-        msg = QMessageBox()
-        msg.setWindowTitle('Success')
-        msg.setText('Successfully registered user.')
-        msg.setStandardButtons(QMessageBox.StandardButton.Ok)
-        msg.exec()
