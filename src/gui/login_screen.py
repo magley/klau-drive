@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import *
 from src.lambdas.login import login, NoSuchUserException
 from src.gui.common import show_error
 import src.gui.gui_window as mainWindow
+import src.gui.token_util as token_util
 
 
 @dataclass
@@ -38,8 +39,8 @@ class LoginScreen(QWidget):
         layout_main = QVBoxLayout()
 
         login_form = QFormLayout()
-        login_form.addRow(QLabel('Username'), self.txt_username)
-        login_form.addRow(QLabel('Password'), self.txt_password)
+        login_form.addRow(QLabel("Username"), self.txt_username)
+        login_form.addRow(QLabel("Password"), self.txt_password)
         login_form.addRow(self.btn_login)
         layout_main.addLayout(login_form)
 
@@ -52,12 +53,12 @@ class LoginScreen(QWidget):
 
     def on_login_clicked(self):
         username = self.txt_username.text()
-        if username == '':
-            show_error('Username cannot be empty.')
+        if username == "":
+            show_error("Username cannot be empty.")
             return
         password = self.txt_password.text()
-        if password == '':
-            show_error('Password cannot be empty.')
+        if password == "":
+            show_error("Password cannot be empty.")
             return
         self.do_login(username, password)
 
@@ -71,7 +72,8 @@ class LoginScreen(QWidget):
             show_error(str(e))
             return
         else:
-            print("Logged in: " + jwt)
+            token_util.write_token(jwt)
+            print("Logged in: " + token_util.read_token())
         self.owner.setCurrentIndex(mainWindow.MainWindow.SCREEN_DASHBOARD)
 
     def on_register_clicked(self):
