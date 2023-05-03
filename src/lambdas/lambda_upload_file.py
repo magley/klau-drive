@@ -34,23 +34,58 @@ def python_obj_to_dynamo_obj(python_obj: dict) -> dict:
     }
 
 
-def lambda_upload_file(event, context):
-    """
-    {
-        "body": {
-            "metadata": {...}
-            "data": "base 64 string"
-        },
-        ...
-    }
-    """
+def create_bucket_if_not_exists(bucket_name):
+    s3_cli.create_bucket(Bucket=bucket_name)
 
+
+def create_table_if_not_exists(table_name, pk, sk):
+    attrdef = [
+        {
+            'AttributeName': pk,
+            'AttributeType': 'S',
+        },
+    ]
+    keyschema = [
+        {
+            'AttributeName': pk,
+            'KeyType': 'HASH',
+        }
+    ]
+
+    if sk is not None:
+        attrdef.append({
+            'AttributeName': sk,
+            'AttributeType': 'S',
+        })
+        keyschema.append({
+            'AttributeName': sk,
+            'KeyType': 'RANGE',
+        })
+
+    try:
+        dynamo_cli.create_table(
+            TableName=table_name,
+            AttributeDefinitions=attrdef,
+            KeySchema=keyschema,
+            ProvisionedThroughput={
+                'ReadCapacityUnits': 5,
+                'WriteCapacityUnits': 5
+            },
+        )
+    except dynamo_cli.exceptions.ResourceInUseException:
+        pass
+
+
+def lambda_upload_file(event: Dict, context):
     body: Dict = event['body']
     metadata: Dict = body['metadata']
     metadata_dynamojson: str = python_obj_to_dynamo_obj(metadata)
     data: bytes = base64.b64decode(body['data'])
 
-    res = dynamo_cli.put_item(
+    create_bucket_if_not_exists(BUCKET_NAME)
+    create_table_if_not_exists(TB_META_NAME, TB_META_PK, TB_META_SK)
+
+    dynamo_cli.put_item(
         TableName=TB_META_NAME,
         Item=metadata_dynamojson
     )
