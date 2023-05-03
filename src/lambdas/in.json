@@ -1,0 +1,8 @@
+{
+    "body": {
+        "metadata": {
+            "name": "something"
+        },
+        "data": "ZnJvbSBQeVF0Ni5RdFdpZGdldHMgaW1wb3J0ICoNCmZyb20gUHlRdDYgaW1wb3J0IFF0R3VpDQpmcm9tIHNyYy5ndWkuZ3VpX3dpbmRvdyBpbXBvcnQgTWFpbldpbmRvdw0KDQphcHAgPSBRQXBwbGljYXRpb24oW10pDQphcHAuc2V0U3R5bGUoJ0Z1c2lvbicpICAjICdGdXNpb24nDQoNCm1haW5fd2luZG93ID0gTWFpbldpbmRvdyg2NDAsIDQ4MCkNCm1haW5fd2luZG93LnNob3coKQ0KDQoNCmFwcC5leGVjKCkNCg=="
+    }
+}
