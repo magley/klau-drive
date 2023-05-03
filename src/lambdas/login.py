@@ -1,29 +1,31 @@
-import jwt
-from src.lambdas.session import dynamo_cli
-from botocore.exceptions import ClientError
-from src.lambdas.register_user import TB_USER_NAME, TB_USER_PK
-
-SECRET = "verysecret"
+import json
+from src.lambdas.session import lambda_cli
 
 
 class NoSuchUserException(Exception):
     pass
 
+LAMBDA_NAME = "login"
+
 
 def login(username: str, password: str):
-    try:
-        response = dynamo_cli.get_item(
-            TableName=TB_USER_NAME,
-            # TODO: not good to have unhashed like this
-            Key={TB_USER_PK: {"S": username}}
-        )
-        user = response.get("Item")
-        print(user)
-        if user is None or user["password"]["S"] != password:
-            raise NoSuchUserException("No such user with that password: " + username)
-        # TODO: might need more data in jwt
-        return jwt.encode({username: username}, SECRET, algorithm="HS256")
-    except ClientError as e:
-        # TODO: should never get here
-        print(e)
-        print(e.response["Error"]["Code"])
+    payload = {
+        "body": {
+            "username": username,
+            "password": password,
+        },
+    }
+    payload_json = json.dumps(payload, default=str)
+
+    result = lambda_cli.invoke(
+        FunctionName=LAMBDA_NAME,
+        Payload=payload_json
+    )
+
+    p = json.loads(result['Payload'].read())
+    body = p['body']
+
+    if body is None:
+        raise NoSuchUserException("No such user with that password: " + username)
+
+    return body["token"]
