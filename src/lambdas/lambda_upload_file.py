@@ -34,6 +34,7 @@ def python_obj_to_dynamo_obj(python_obj: dict) -> dict:
     }
 
 
+# TODO: Create a lambda that initializes the dynamodb table and s3 bucket.
 def create_bucket_if_not_exists(bucket_name):
     s3_cli.create_bucket(Bucket=bucket_name)
 

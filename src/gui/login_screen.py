@@ -8,7 +8,6 @@ import src.gui.token_util as token_util
 
 @dataclass
 class LoginScreen(QWidget):
-    # TODO: Declare other fields.
     btn_login: QPushButton
     btn_register: QPushButton
     btn_admin: QPushButton
@@ -24,8 +23,6 @@ class LoginScreen(QWidget):
         self.make_layout()
 
     def init_gui(self):
-        # TODO: Initialize other fields.
-
         self.btn_login = QPushButton("Login")
         self.btn_login.clicked.connect(self.on_login_clicked)
         self.btn_admin = QPushButton("I'm an admin")

@@ -37,17 +37,12 @@ def python_obj_to_dynamo_obj(python_obj: dict) -> dict:
         for k, v in python_obj.items()
     }
 
+
 def dynamo_obj_to_python_obj(dynamo_obj: dict) -> dict:
     deserializer = TypeDeserializer()
     return {
         k: deserializer.deserialize(v) 
         for k, v in dynamo_obj.items()
-    }
-
-def dynamo_to_py(dynamo) -> Dict:
-    des = TypeDeserializer()
-    return {
-        k: des.deserialize(v) for k, v in dynamo.items()
     }
 
 
