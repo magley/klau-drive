@@ -5,9 +5,7 @@ import json
 import os
 from pathlib import Path
 from typing import Dict, List
-from dynamodb_json import json_util as d_json
-from src.lambdas.session import s3_cli, dynamo_cli, lambda_cli
-from src.lambdas.util import create_bucket_if_not_exists, create_table_if_not_exists
+from src.lambdas.session import lambda_cli
 
 
 @dataclass
@@ -27,6 +25,7 @@ class FileData():
 # ------------------------------------------------------------------------------
 
 LAMBDA_NAME = "upload_file"
+LAMBDA_NAME_LS = "list_files"
 BUCKET_NAME = "content"
 TB_META_NAME = 'file_meta'
 TB_META_PK = 'name'
@@ -76,40 +75,40 @@ TB_META_SK = None
 # ------------------------------------------------------------------------------
 
 
-def list_files() -> List[FileData]:
-    result = []
+# def list_files_nolambda() -> List[FileData]:
+#     result = []
 
-    try:
-        response = s3_cli.list_objects(Bucket=BUCKET_NAME)
-    except s3_cli.exceptions.NoSuchBucket:
-        return result
+#     try:
+#         response = s3_cli.list_objects(Bucket=BUCKET_NAME)
+#     except s3_cli.exceptions.NoSuchBucket:
+#         return result
 
-    contents = response.get('Contents')
-    if contents is None:
-        return result
+#     contents = response.get('Contents')
+#     if contents is None:
+#         return result
 
-    for s3_file in contents:
-        dynamo_key = {TB_META_PK: s3_file['Key']}
-        dynamo_key = d_json.dumps(dynamo_key, as_dict=True)
-        dynamo_res = dynamo_cli.get_item(TableName=TB_META_NAME, Key=dynamo_key)
-        dynamo_item = d_json.loads(dynamo_res.get('Item'), as_dict=True)
+#     for s3_file in contents:
+#         dynamo_key = {TB_META_PK: s3_file['Key']}
+#         dynamo_key = d_json.dumps(dynamo_key, as_dict=True)
+#         dynamo_res = dynamo_cli.get_item(TableName=TB_META_NAME, Key=dynamo_key)
+#         dynamo_item = d_json.loads(dynamo_res.get('Item'), as_dict=True)
 
-        item = FileData(
-            name=s3_file['Key'],
-            type=dynamo_item.get('type', ''),
-            desc=dynamo_item.get('desc', ''),
-            tags=dynamo_item.get('tags', []),
-            size=dynamo_item.get('size', 0),
-            upload_date=datetime.fromisoformat(dynamo_item.get('uploadDate', "")),
-            last_modified=datetime.fromisoformat(dynamo_item.get('modificationDate', "")),
-            creation_date=datetime.fromisoformat(dynamo_item.get('creationDate', "")),
-        )
+#         item = FileData(
+#             name=s3_file['Key'],
+#             type=dynamo_item.get('type', ''),
+#             desc=dynamo_item.get('desc', ''),
+#             tags=dynamo_item.get('tags', []),
+#             size=dynamo_item.get('size', 0),
+#             upload_date=datetime.fromisoformat(dynamo_item.get('uploadDate', "")),
+#             last_modified=datetime.fromisoformat(dynamo_item.get('modificationDate', "")),
+#             creation_date=datetime.fromisoformat(dynamo_item.get('creationDate', "")),
+#         )
 
-        result.append(item)
+#         result.append(item)
 
-    # TODO: Research if there's a way to get S3 to return items sorted by creation date
-    result = sorted(result, key=lambda item: item.upload_date, reverse=True)
-    return result
+#     # TODO: Research if there's a way to get S3 to return items sorted by creation date
+#     result = sorted(result, key=lambda item: item.upload_date, reverse=True)
+#     return result
 
 
 # def upload_file_nolambda(fname: str, desc: str, tags: List[str]):
@@ -169,3 +168,26 @@ def upload_file(fname: str, desc: str, tags: List[str]):
         FunctionName=LAMBDA_NAME,
         Payload=payload_json
     )
+
+def list_files():
+    result = lambda_cli.invoke(
+        FunctionName=LAMBDA_NAME_LS
+    )
+
+    p = json.loads(result['Payload'].read())
+    body = p['body']
+
+    res_items = [
+        FileData(
+            name=i['name'],
+            type=i.get('type', ''),
+            desc=i.get('desc', ''),
+            tags=i.get('tags', []),
+            size=i.get('size', 0),
+            upload_date=datetime.fromisoformat(i.get('upload_date', "")),
+            last_modified=datetime.fromisoformat(i.get('last_modified', "")),
+            creation_date=datetime.fromisoformat(i.get('creation_date', "")),
+        ) for i in body
+    ]
+
+    return res_items
