@@ -1,9 +1,12 @@
 from dataclasses import dataclass, asdict
+import json
+from typing import Dict
 from dynamodb_json import json_util
 from src.lambdas.session import dynamo_cli
 from botocore.exceptions import ClientError
 from src.lambdas.util import create_table_if_not_exists
 from datetime import datetime
+from src.lambdas.session import lambda_cli
 
 
 @dataclass
@@ -20,24 +23,38 @@ class User:
 
 TB_USER_NAME = 'user'
 TB_USER_PK = 'username'
+LAMBDA_NAME = "register"
 
+
+def make_payload_from(user: User) -> Dict:
+    user_dict = vars(user) # Be careful if you ever add anything fancy to `User`
+
+    return {
+        "body": {
+            "user": {
+                **user_dict
+            }
+        }
+    }
+   
 
 def register_user(user: User) -> str | None:
-    create_table_if_not_exists(TB_USER_NAME, TB_USER_PK, None)
+    payload = make_payload_from(user)
+    payload_json = json.dumps(payload, default=str)
 
-    user_ddb = json_util.dumps(asdict(user), as_dict=True)
-    try:
-        dynamo_cli.put_item(
-            TableName=TB_USER_NAME,
-            Item=user_ddb,
-            ConditionExpression='attribute_not_exists(username)'
-        )
-        return None
-    except ClientError as e:
-        if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
-            return 'Username already taken'
-        else:
-            raise e
+    result = lambda_cli.invoke(
+        FunctionName=LAMBDA_NAME,
+        Payload=payload_json
+    )
+
+    p = json.loads(result['Payload'].read())
+    body = p['body']
+    status = body['status']
+
+    if status == 400:
+        return 'Username already taken'
+    
+    return None
 
 
 def list_users():
