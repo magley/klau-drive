@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from PyQt6.QtWidgets import *
-from src.lambdas.login import login, NoSuchUserException
+from src.service.login import login, NoSuchUserException
 from src.gui.common import show_error
 import src.gui.gui_window as mainWindow
 import src.gui.token_util as token_util

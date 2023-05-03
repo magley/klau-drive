@@ -12,16 +12,12 @@ ENDPOINT = 'http://host.docker.internal:4566'
 TB_USER_NAME = 'user'
 TB_USER_PK = 'username'
 
-
-
 """
 awslocal lambda create-function --function-name register --zip-file fileb://register.zip --runtime python3.9 --handler lambda_register.lambda_register --role arn:aws:iam::000000000000:role/LambdaBasic
 awslocal lambda update-function-configuration --function-name register --timeout 5
 awslocal lambda update-function-code --function-name register --zip-file fileb://register.zip
 awslocal lambda invoke --function-name register  --payload file://in.json ./out.json
 """
-
-
 
 session = boto3.Session(aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
 dynamo_cli = session.client('dynamodb', endpoint_url=ENDPOINT)

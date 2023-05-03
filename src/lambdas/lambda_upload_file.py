@@ -4,6 +4,7 @@ from typing import Dict
 from boto3.dynamodb.types import TypeSerializer
 import boto3
 
+
 BUCKET_NAME = "content"
 TB_META_NAME = 'file_meta'
 TB_META_PK = 'name'
@@ -24,7 +25,6 @@ awslocal lambda update-function-configuration --function-name upload_file --time
 awslocal lambda update-function-code --function-name upload_file --zip-file fileb://upload_file.zip
 awslocal lambda invoke --function-name upload_file --payload file://in.json ./out.json
 """
-
 
 def python_obj_to_dynamo_obj(python_obj: dict) -> dict:
     serializer = TypeSerializer()

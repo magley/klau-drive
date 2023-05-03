@@ -1,11 +1,7 @@
-import base64
-from dataclasses import dataclass
-from datetime import datetime
-import io
-import json
-from typing import Dict, List
+from typing import Dict
 from boto3.dynamodb.types import TypeSerializer, TypeDeserializer
 import boto3
+
 
 BUCKET_NAME = "content"
 TB_META_NAME = 'file_meta'

@@ -1,5 +1,5 @@
 import json
-from src.lambdas.session import lambda_cli
+from src.service.session import lambda_cli
 
 
 class NoSuchUserException(Exception):

@@ -1,12 +1,9 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 import json
 from typing import Dict
-from dynamodb_json import json_util
-from src.lambdas.session import dynamo_cli
-from botocore.exceptions import ClientError
-from src.lambdas.util import create_table_if_not_exists
+from src.service.session import dynamo_cli
 from datetime import datetime
-from src.lambdas.session import lambda_cli
+from src.service.session import lambda_cli
 
 
 @dataclass

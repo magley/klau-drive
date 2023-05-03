@@ -5,7 +5,7 @@ import json
 import os
 from pathlib import Path
 from typing import Dict, List
-from src.lambdas.session import lambda_cli
+from src.service.session import lambda_cli
 
 
 @dataclass

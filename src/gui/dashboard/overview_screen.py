@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 
-from src.lambdas.upload_file import list_files, FileData
+from src.service.upload_file import list_files, FileData
 
 @dataclass
 class FileEdit(QGroupBox):
