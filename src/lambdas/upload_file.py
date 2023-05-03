@@ -152,7 +152,7 @@ def make_data_base64(fname: str) -> bytes:
 
 
 def upload_file(fname: str, desc: str, tags: List[str]):
-    metadata: Dict = make_metadata(fname, desc, str)
+    metadata: Dict = make_metadata(fname, desc, tags)
     data_b64: bytes = make_data_base64(fname)
 
     payload = {
