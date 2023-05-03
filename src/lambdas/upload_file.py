@@ -147,7 +147,7 @@ def make_metadata(fname: str, desc: str, tags: List[str]) -> Dict:
 def make_data_base64(fname: str) -> bytes:
     file_data_base64: bytes = None
     with open(fname, 'rb') as f:
-        file_data_base64 = base64.b64encode(f.read()).decode("utf-8") 
+        file_data_base64 = base64.b64encode(f.read()).decode()
     return file_data_base64 
 
 

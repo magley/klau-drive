@@ -96,4 +96,4 @@ def lambda_upload_file(event: Dict, context):
         Key=metadata['name']
     )
 
-    return { "metadata": metadata, "data": data }
+    return { "metadata": metadata, "data": str(data) }
