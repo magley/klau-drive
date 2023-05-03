@@ -57,11 +57,15 @@ def lambda_list_files(event: Dict, context):
     try:
         response = s3_cli.list_objects(Bucket=BUCKET_NAME)
     except s3_cli.exceptions.NoSuchBucket:
-        return result
+        return {
+            "body": result
+        }
 
     contents = response.get('Contents')
     if contents is None:
-        return result
+        return {
+            "body": result
+        }
 
     for s3_file in contents:
         dynamo_key = {TB_META_PK: s3_file['Key']}

@@ -175,6 +175,7 @@ def list_files():
     )
 
     p = json.loads(result['Payload'].read())
+    print(p)
     body = p['body']
 
     res_items = [
