@@ -45,6 +45,7 @@ def register_user(user: User) -> str | None:
     )
 
     p = json.loads(result['Payload'].read())
+    print(p)
     body = p['body']
     status = body['status']
 
