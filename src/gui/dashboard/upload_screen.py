@@ -2,7 +2,7 @@ from typing import List
 from dataclasses import dataclass, field
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import Qt
-from src.lambdas.upload_file import upload_file
+from src.service.upload_file import upload_file
 
 
 @dataclass

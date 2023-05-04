@@ -1,4 +1,4 @@
-from src.lambdas.session import dynamo_cli, s3_cli, s3_res
+from src.service.session import dynamo_cli, s3_cli, s3_res
 
 
 def create_bucket_if_not_exists(bucket_name):
