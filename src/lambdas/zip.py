@@ -3,6 +3,9 @@ import os
 from typing import List, Tuple
 
 
+COMMON_FNAME = "./common.py"
+
+
 def get_lambdas() -> List[Tuple[str, str]]:
     """
     Get filenames of all lambdas in this directory.
@@ -24,7 +27,10 @@ def zip_file(fname: Tuple[str, str]):
     zip_name = just_name[len("lambda_"):] # Minus the 'lambda_' prefix.
 
     print(f'{zip_name}.zip')
-    zipfile.ZipFile(f'{zip_name}.zip', mode='w').write(fullpath)
+
+    with zipfile.ZipFile(f'{zip_name}.zip', mode='w') as zf:
+        zf.write(fullpath)
+        zf.write(COMMON_FNAME)
 
 
 def main():

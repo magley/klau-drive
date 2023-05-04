@@ -3,20 +3,10 @@ import hashlib
 import hmac
 import json
 from typing import Dict
-import boto3
+from common import *
 
 
-ACCESS_KEY = 'test'
-SECRET_KEY = 'test'
-REGION = 'us-east-1'
-ENDPOINT = 'http://host.docker.internal:4566'
-
-TB_USER_NAME = 'user'
-TB_USER_PK = 'username'
 SECRET = "verysecret"
-
-session = boto3.Session(aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
-dynamo_cli = session.client('dynamodb', endpoint_url=ENDPOINT)
 
 """
 awslocal lambda create-function --function-name login --zip-file fileb://login.zip --runtime python3.9 --handler lambda_login.lambda_login --role arn:aws:iam::000000000000:role/LambdaBasic
@@ -58,8 +48,8 @@ def lambda_login(event: Dict, context):
     password = body['password']
 
     response = dynamo_cli.get_item(
-        TableName = TB_USER_NAME,
-        Key={TB_USER_PK: {"S": username}} # TODO: not good to have it unhashed
+        TableName = USER_TB_NAME,
+        Key={USER_TB_PK: {"S": username}} # TODO: not good to have it unhashed
     )
 
     user = response.get("Item")

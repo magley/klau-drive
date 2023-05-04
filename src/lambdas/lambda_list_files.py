@@ -1,21 +1,5 @@
 from typing import Dict
-from boto3.dynamodb.types import TypeSerializer, TypeDeserializer
-import boto3
-
-
-BUCKET_NAME = "content"
-TB_META_NAME = 'file_meta'
-TB_META_PK = 'name'
-TB_META_SK = None
-
-ACCESS_KEY = 'test'
-SECRET_KEY = 'test'
-REGION = 'us-east-1'
-ENDPOINT = 'http://host.docker.internal:4566' # Not 'localhost.localstack.cloud:4566'
-
-session = boto3.Session(aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
-s3_cli = session.client('s3', endpoint_url=ENDPOINT)
-dynamo_cli = session.client('dynamodb', endpoint_url=ENDPOINT)
+from common import *
 
 
 """
@@ -25,28 +9,11 @@ awslocal lambda update-function-code --function-name list_files --zip-file fileb
 awslocal lambda invoke --function-name list_files ./out.json
 """
 
-
-def python_obj_to_dynamo_obj(python_obj: dict) -> dict:
-    serializer = TypeSerializer()
-    return {
-        k: serializer.serialize(v)
-        for k, v in python_obj.items()
-    }
-
-
-def dynamo_obj_to_python_obj(dynamo_obj: dict) -> dict:
-    deserializer = TypeDeserializer()
-    return {
-        k: deserializer.deserialize(v) 
-        for k, v in dynamo_obj.items()
-    }
-
-
 def lambda_list_files(event: Dict, context):
     result = []
 
     try:
-        response = s3_cli.list_objects(Bucket=BUCKET_NAME)
+        response = s3_cli.list_objects(Bucket=CONTENT_BUCKET_NAME)
     except s3_cli.exceptions.NoSuchBucket:
         return {
             "body": result
@@ -59,9 +26,9 @@ def lambda_list_files(event: Dict, context):
         }
 
     for s3_file in contents:
-        dynamo_key = {TB_META_PK: s3_file['Key']}
+        dynamo_key = {CONTENT_METADATA_TB_PK: s3_file['Key']}
         dynamo_key = python_obj_to_dynamo_obj(dynamo_key)
-        dynamo_res = dynamo_cli.get_item(TableName=TB_META_NAME, Key=dynamo_key)
+        dynamo_res = dynamo_cli.get_item(TableName=CONTENT_METADATA_TB_NAME, Key=dynamo_key)
         dynamo_item = dynamo_obj_to_python_obj(dynamo_res.get('Item'))
 
         item = {
