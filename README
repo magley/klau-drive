@@ -1,0 +1,7 @@
+How to run:
+
+Navigate to root directory (where src/ is, not inside of it)
+
+Run: `python -m src.main`
+
+TODO: Fix this.
