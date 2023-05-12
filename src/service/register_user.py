@@ -45,12 +45,10 @@ def register_user(user: User) -> str | None:
     )
 
     p = json.loads(result['Payload'].read())
-    print(p)
-    body = p['body']
-    status = body['status']
+    status = p['statusCode']
 
     if status == 400:
-        return 'Username already taken'
+        return p['body']['message']
     
     return None
 

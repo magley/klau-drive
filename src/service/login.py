@@ -23,9 +23,9 @@ def login(username: str, password: str):
     )
 
     p = json.loads(result['Payload'].read())
-    body = p['body']
 
-    if body is None:
+    if p['statusCode'] == 200:
+        body = p['body']
+        return body["token"]
+    elif p['statusCode'] == 401:
         raise NoSuchUserException("No such user with that password: " + username)
-
-    return body["token"]

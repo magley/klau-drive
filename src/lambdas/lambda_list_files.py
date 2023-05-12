@@ -15,15 +15,17 @@ def lambda_list_files(event: Dict, context):
     try:
         response = s3_cli.list_objects(Bucket=CONTENT_BUCKET_NAME)
     except s3_cli.exceptions.NoSuchBucket:
-        return {
-            "body": result
+        result = {
+            "message": f"No such bucket {CONTENT_BUCKET_NAME}" 
         }
+        return http_response(result, 500)
 
     contents = response.get('Contents')
     if contents is None:
-        return {
-            "body": result
+        result = {
+            "message": f"No Contents in {CONTENT_BUCKET_NAME}" 
         }
+        return http_response(result, 500)
 
     for s3_file in contents:
         dynamo_key = {CONTENT_METADATA_TB_PK: s3_file['Key']}
@@ -44,7 +46,5 @@ def lambda_list_files(event: Dict, context):
 
         result.append(item)
     result = sorted(result, key=lambda item: item['upload_date'], reverse=True)
-    
-    return {
-        "body": result
-    }
+
+    return http_response(result, 200)

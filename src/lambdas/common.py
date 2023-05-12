@@ -76,3 +76,13 @@ def dynamo_obj_to_python_obj(dynamo_obj: dict) -> dict:
         k: deserializer.deserialize(v) 
         for k, v in dynamo_obj.items()
     }
+
+def http_response(body, status_code: int) -> dict:
+    return {
+        "body": body,
+        "isBase64Encoded": False,
+        "statusCode": status_code,
+        "headers": {
+            "content-type": "application/json"
+        }
+    }

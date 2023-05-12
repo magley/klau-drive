@@ -81,19 +81,22 @@ def list_files():
     )
 
     p = json.loads(result['Payload'].read())
+
     body = p['body']
+    if p['statusCode'] == 200:
+        res_items = [
+            FileData(
+                name=i['name'],
+                type=i.get('type', ''),
+                desc=i.get('desc', ''),
+                tags=i.get('tags', []),
+                size=i.get('size', 0),
+                upload_date=datetime.fromisoformat(i.get('upload_date', "")),
+                last_modified=datetime.fromisoformat(i.get('last_modified', "")),
+                creation_date=datetime.fromisoformat(i.get('creation_date', "")),
+            ) for i in body
+        ]
 
-    res_items = [
-        FileData(
-            name=i['name'],
-            type=i.get('type', ''),
-            desc=i.get('desc', ''),
-            tags=i.get('tags', []),
-            size=i.get('size', 0),
-            upload_date=datetime.fromisoformat(i.get('upload_date', "")),
-            last_modified=datetime.fromisoformat(i.get('last_modified', "")),
-            creation_date=datetime.fromisoformat(i.get('creation_date', "")),
-        ) for i in body
-    ]
-
-    return res_items
+        return res_items
+    else:
+        print("TODO Error case", body)

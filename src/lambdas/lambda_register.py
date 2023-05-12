@@ -22,24 +22,9 @@ def lambda_register(event: Dict, context):
             ConditionExpression='attribute_not_exists(username)'
         )
 
-        return {
-            "body": {
-                "status": 200,
-                "message": "",
-            }
-        }
+        return http_response(None, 204)
     except ClientError as e:
         if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
-            return {
-                "body": {
-                    "status": 400,
-                    "message": "Username already taken"
-                }
-            }
+            return http_response({"message": "Username already taken"}, 400)
         else:
-            return {
-                "body": {
-                    "status": 400,
-                    "message": e.response['Error']['Code']
-                }
-            }
+            return http_response({"message": e.response['Error']['Code']}, 400)

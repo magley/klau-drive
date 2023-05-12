@@ -54,12 +54,6 @@ def lambda_login(event: Dict, context):
 
     user = response.get("Item")
     if user is None or user["password"]["S"] != password:
-        return {
-            "body": None
-        }
+        return http_response(None, 401)
     
-    return {
-        "body": {
-            "token": jwt_creator(username),
-        },
-    }
+    return http_response({ "token": jwt_creator(username) }, 200)
