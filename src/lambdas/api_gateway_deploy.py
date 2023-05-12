@@ -35,6 +35,7 @@ def create_resource(rest_api_id: str, parent_id: str, path_part: str) -> str:
     )
     return response['id']
 
+
 def put_method(rest_api_id: str, resource_id: str, method: str, func_uri: str) -> None:
     apigateway_cli.put_method(
         restApiId=rest_api_id,
@@ -56,6 +57,7 @@ def put_method(rest_api_id: str, resource_id: str, method: str, func_uri: str) -
         uri=f'arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/{func_uri}/invocations',
     )
 
+
 def deploy_api(rest_api_id: str, stage_name: str) -> None:
     apigateway_cli.create_deployment(
         restApiId=rest_api_id,
@@ -73,10 +75,14 @@ def main():
     put_method(REST_API_ID, RES_SESSION, 'PUT', 'arn:aws:lambda:us-east-1:000000000000:function:login')
     put_method(REST_API_ID, RES_SESSION, 'POST', 'arn:aws:lambda:us-east-1:000000000000:function:register')
 
-    deploy_api(REST_API_ID, STAGE_NAME)
-
+    RES_FILES = create_resource(REST_API_ID, PARENT_ID, 'files')
+    print(f'http://localhost:4566/restapis/{REST_API_ID}/{STAGE_NAME}/_user_request_/files')
+    put_method(REST_API_ID, RES_FILES, 'POST', 'arn:aws:lambda:us-east-1:000000000000:function:upload_file')
+    put_method(REST_API_ID, RES_FILES, 'GET', 'arn:aws:lambda:us-east-1:000000000000:function:list_files')
     
 
+
+    deploy_api(REST_API_ID, STAGE_NAME)
 
 
 if __name__ == "__main__":
