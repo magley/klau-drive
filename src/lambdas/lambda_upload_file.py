@@ -16,7 +16,7 @@ def create_bucket_if_not_exists(bucket_name):
 
 
 def lambda_upload_file(event: Dict, context):
-    body: Dict = event['body']
+    body: Dict = json.loads(event['body'])
     metadata: Dict = body['metadata']
     metadata_dynamojson: str = python_obj_to_dynamo_obj(metadata)
     data: bytes = base64.b64decode(body['data'])

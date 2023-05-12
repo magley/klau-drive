@@ -43,7 +43,7 @@ def jwt_creator(username: str):
 
 
 def lambda_login(event: Dict, context):
-    body: Dict = event['body']
+    body: Dict = json.loads(event['body'])
     username = body['username']
     password = body['password']
 
@@ -54,6 +54,6 @@ def lambda_login(event: Dict, context):
 
     user = response.get("Item")
     if user is None or user["password"]["S"] != password:
-        return http_response(None, 401)
+        return http_response("Wrong username or password", 401)
     
     return http_response({ "token": jwt_creator(username) }, 200)

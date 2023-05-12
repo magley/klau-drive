@@ -28,9 +28,7 @@ def make_payload_from(user: User) -> Dict:
 
     return {
         "body": {
-            "user": {
-                **user_dict
-            }
+            **user_dict
         }
     }
    

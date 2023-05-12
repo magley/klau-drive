@@ -10,8 +10,8 @@ awslocal lambda invoke --function-name register  --payload file://in.json ./out.
 """
 
 def lambda_register(event: Dict, context):
-    body: Dict = event['body']
-    user_data: Dict = body['user']
+    body: Dict = json.loads(event['body'])
+    user_data: Dict = body
     user_data_ddb: Dict = python_obj_to_dynamo_obj(user_data)
 
     create_table_if_not_exists(USER_TB_NAME, USER_TB_PK, USER_TB_SK)

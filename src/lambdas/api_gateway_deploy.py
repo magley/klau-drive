@@ -12,56 +12,71 @@ session = boto3.Session(aws_access_key_id=ACCESS_KEY,
 apigateway_cli = session.client('apigateway', endpoint_url=ENDPOINT)
 
 
-
-def main():
+def create_rest_api(name: str) -> str:
     response = apigateway_cli.create_rest_api(
         name='kalu-drive API',
         description='klau-drive REST API',
     )
-    REST_API_ID = response['id']
+    return response['id']
 
+
+def get_parent_resource_id(rest_api_id: str) -> str:
     response = apigateway_cli.get_resources(
-        restApiId=REST_API_ID,
+        restApiId=rest_api_id,
     )
-    PARENT_ID = response['items'][0]['id']
+    return response['items'][0]['id']
 
+
+def create_resource(rest_api_id: str, parent_id: str, path_part: str) -> str:
     response = apigateway_cli.create_resource(
-        restApiId=REST_API_ID,
-        parentId=PARENT_ID,
-        pathPart='{id}'
+        restApiId=rest_api_id,
+        parentId=parent_id,
+        pathPart=path_part
     )
-    RESOURCE_ID = response['id']
+    return response['id']
 
-    response = apigateway_cli.put_method(
-        restApiId=REST_API_ID,
-        resourceId=RESOURCE_ID,
-        httpMethod='GET',
+def put_method(rest_api_id: str, resource_id: str, method: str, func_uri: str) -> None:
+    apigateway_cli.put_method(
+        restApiId=rest_api_id,
+        resourceId=resource_id,
+        httpMethod=method,
         authorizationType='NONE',
-        requestParameters={
-            'method.request.path.somethingId': True
-        },
+        # requestParameters={
+        #     'method.request.path.somethingId': True
+        # },
     )
 
-    func_uri = 'arn:aws:lambda:us-east-1:000000000000:function:list_files'
-    response = apigateway_cli.put_integration(
-        restApiId=REST_API_ID,
-        resourceId=RESOURCE_ID,
-        httpMethod='GET',
+    apigateway_cli.put_integration(
+        restApiId=rest_api_id,
+        resourceId=resource_id,
+        httpMethod=method,
         type='AWS_PROXY',
         integrationHttpMethod='POST',
         passthroughBehavior='WHEN_NO_MATCH',
         uri=f'arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/{func_uri}/invocations',
     )
 
-    response = apigateway_cli.create_deployment(
-        restApiId=REST_API_ID,
-        stageName='test',
+def deploy_api(rest_api_id: str, stage_name: str) -> None:
+    apigateway_cli.create_deployment(
+        restApiId=rest_api_id,
+        stageName=stage_name,
     )
 
-    print("Rest API ID:")
-    print(REST_API_ID)
-    print("Call GET on:")
-    print(f'http://localhost:4566/restapis/{REST_API_ID}/test/_user_request_/HowMuchIsTheFish')
+
+def main():
+    STAGE_NAME = 'test'
+    REST_API_ID = create_rest_api('klau-drive API')
+    PARENT_ID = get_parent_resource_id(REST_API_ID)
+
+    RES_SESSION = create_resource(REST_API_ID, PARENT_ID, 'session')
+    print(f'http://localhost:4566/restapis/{REST_API_ID}/{STAGE_NAME}/_user_request_/session')
+    put_method(REST_API_ID, RES_SESSION, 'PUT', 'arn:aws:lambda:us-east-1:000000000000:function:login')
+    put_method(REST_API_ID, RES_SESSION, 'POST', 'arn:aws:lambda:us-east-1:000000000000:function:register')
+
+    deploy_api(REST_API_ID, STAGE_NAME)
+
+    
+
 
 
 if __name__ == "__main__":
