@@ -5,7 +5,8 @@ import json
 import os
 from pathlib import Path
 from typing import Dict, List
-from src.service.session import lambda_cli
+from src.service.session import lambda_cli, BASE_URL
+import requests
 
 
 @dataclass
@@ -61,29 +62,20 @@ def upload_file(fname: str, desc: str, tags: List[str]):
     data_b64: bytes = make_data_base64(fname)
 
     payload = {
-        "body": {
-            "metadata": metadata,
-            "data": data_b64,
-        }
+        "metadata": metadata,
+        "data": data_b64,
     }
-
     payload_json = json.dumps(payload, default=str)
 
-    lambda_cli.invoke(
-        FunctionName=LAMBDA_NAME,
-        Payload=payload_json
-    )
+    requests.post(f'{BASE_URL}/files', data=payload_json)
 
 
 def list_files():
-    result = lambda_cli.invoke(
-        FunctionName=LAMBDA_NAME_LS
-    )
+    r = requests.get(f'{BASE_URL}/files')
+    status_code = r.status_code
+    body = r.json()
 
-    p = json.loads(result['Payload'].read())
-    body = json.loads(p['body'])
-
-    if p['statusCode'] == 200:
+    if status_code == 200:
         res_items = [
             FileData(
                 name=i['name'],
