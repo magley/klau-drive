@@ -81,8 +81,8 @@ def list_files():
     )
 
     p = json.loads(result['Payload'].read())
+    body = json.loads(p['body'])
 
-    body = p['body']
     if p['statusCode'] == 200:
         res_items = [
             FileData(
@@ -99,4 +99,5 @@ def list_files():
 
         return res_items
     else:
-        print("TODO Error case", body)
+        return []
+        #print("TODO Error case", body)

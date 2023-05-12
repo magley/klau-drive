@@ -48,7 +48,8 @@ def register_user(user: User) -> str | None:
     status = p['statusCode']
 
     if status == 400:
-        return p['body']['message']
+        body = json.loads(p['body'])
+        return body['message']
     
     return None
 
