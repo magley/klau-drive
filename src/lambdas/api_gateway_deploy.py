@@ -1,15 +1,5 @@
 import boto3
-
-# TODO: Use src.service.session - but then relative imports become an issue.
-ACCESS_KEY = 'test'
-SECRET_KEY = 'test'
-REGION = 'us-east-1'
-ENDPOINT = 'http://localhost.localstack.cloud:4566'
-
-session = boto3.Session(aws_access_key_id=ACCESS_KEY,
-                        aws_secret_access_key=SECRET_KEY,
-                        region_name=REGION)
-apigateway_cli = session.client('apigateway', endpoint_url=ENDPOINT)
+from common_deploy import *
 
 
 def create_rest_api(name: str) -> str:
