@@ -4,7 +4,7 @@ from common_deploy import *
 
 def create_rest_api(name: str) -> str:
     response = apigateway_cli.create_rest_api(
-        name='kalu-drive API',
+        name=name,
         description='klau-drive REST API',
     )
     return response['id']
@@ -44,7 +44,7 @@ def put_method(rest_api_id: str, resource_id: str, method: str, func_uri: str) -
         type='AWS_PROXY',
         integrationHttpMethod='POST',
         passthroughBehavior='WHEN_NO_MATCH',
-        uri=f'arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/{func_uri}/invocations',
+        uri=f'arn:aws:apigateway:{REGION}:lambda:path/2015-03-31/functions/{func_uri}/invocations',
     )
 
 
@@ -62,13 +62,13 @@ def main():
 
     RES_SESSION = create_resource(REST_API_ID, PARENT_ID, 'session')
     print(f'http://localhost:4566/restapis/{REST_API_ID}/{STAGE_NAME}/_user_request_/session')
-    put_method(REST_API_ID, RES_SESSION, 'PUT', 'arn:aws:lambda:us-east-1:000000000000:function:login')
-    put_method(REST_API_ID, RES_SESSION, 'POST', 'arn:aws:lambda:us-east-1:000000000000:function:register')
+    put_method(REST_API_ID, RES_SESSION, 'PUT', f'arn:aws:lambda:{REGION}:000000000000:function:login')
+    put_method(REST_API_ID, RES_SESSION, 'POST', f'arn:aws:lambda:{REGION}:000000000000:function:register')
 
     RES_FILES = create_resource(REST_API_ID, PARENT_ID, 'files')
     print(f'http://localhost:4566/restapis/{REST_API_ID}/{STAGE_NAME}/_user_request_/files')
-    put_method(REST_API_ID, RES_FILES, 'POST', 'arn:aws:lambda:us-east-1:000000000000:function:upload_file')
-    put_method(REST_API_ID, RES_FILES, 'GET', 'arn:aws:lambda:us-east-1:000000000000:function:list_files')
+    put_method(REST_API_ID, RES_FILES, 'POST', f'arn:aws:lambda:{REGION}:000000000000:function:upload_file')
+    put_method(REST_API_ID, RES_FILES, 'GET', f'arn:aws:lambda:{REGION}:000000000000:function:list_files')
 
     deploy_api(REST_API_ID, STAGE_NAME)
     print(REST_API_ID)

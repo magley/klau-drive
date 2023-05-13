@@ -73,9 +73,9 @@ def upload_file(fname: str, desc: str, tags: List[str]):
 def list_files():
     r = requests.get(f'{BASE_URL}/files')
     status_code = r.status_code
-    body = r.json()
-
+    
     if status_code == 200:
+        body = r.json()
         res_items = [
             FileData(
                 name=i['name'],
