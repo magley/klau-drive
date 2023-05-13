@@ -2,12 +2,6 @@ from typing import Dict
 from botocore.exceptions import ClientError
 from common import *
 
-"""
-awslocal lambda create-function --function-name register --zip-file fileb://register.zip --runtime python3.9 --handler lambda_register.lambda_register --role arn:aws:iam::000000000000:role/LambdaBasic
-awslocal lambda update-function-configuration --function-name register --timeout 50
-awslocal lambda update-function-code --function-name register --zip-file fileb://register.zip
-awslocal lambda invoke --function-name register  --payload file://in.json ./out.json
-"""
 
 def lambda_register(event: Dict, context):
     body: Dict = json.loads(event['body'])

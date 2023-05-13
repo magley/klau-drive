@@ -3,12 +3,6 @@ import io
 from typing import Dict
 from common import *
 
-"""
-awslocal lambda create-function --function-name upload_file --zip-file fileb://upload_file.zip --runtime python3.9 --handler lambda_upload_file.lambda_upload_file --role arn:aws:iam::000000000000:role/LambdaBasic
-awslocal lambda update-function-configuration --function-name upload_file --timeout 900
-awslocal lambda update-function-code --function-name upload_file --zip-file fileb://upload_file.zip
-awslocal lambda invoke --function-name upload_file --payload file://in.json ./out.json
-"""
 
 # TODO: Create a lambda that initializes the dynamodb table and s3 bucket.
 def create_bucket_if_not_exists(bucket_name):

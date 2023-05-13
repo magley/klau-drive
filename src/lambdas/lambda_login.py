@@ -8,13 +8,6 @@ from common import *
 
 SECRET = "verysecret"
 
-"""
-awslocal lambda create-function --function-name login --zip-file fileb://login.zip --runtime python3.9 --handler lambda_login.lambda_login --role arn:aws:iam::000000000000:role/LambdaBasic
-awslocal lambda update-function-configuration --function-name login --timeout 3
-awslocal lambda update-function-code --function-name login --zip-file fileb://login.zip
-awslocal lambda invoke --function-name login  --payload file://in.json ./out.json
-"""
-
 # https://stackoverflow.com/a/68409773
 
 def base64url_decode(input):

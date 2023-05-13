@@ -2,13 +2,6 @@ from typing import Dict
 from common import *
 
 
-"""
-awslocal lambda create-function --function-name list_files --zip-file fileb://list_files.zip --runtime python3.9 --handler lambda_list_files.lambda_list_files --role arn:aws:iam::000000000000:role/LambdaBasic
-awslocal lambda update-function-configuration --function-name list_files --timeout 180
-awslocal lambda update-function-code --function-name list_files --zip-file fileb://list_files.zip
-awslocal lambda invoke --function-name list_files ./out.json
-"""
-
 def lambda_list_files(event: Dict, context):
     result = []
 

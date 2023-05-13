@@ -13,6 +13,6 @@ s3_res = session.resource("s3", endpoint_url=ENDPOINT)
 dynamo_cli = session.client('dynamodb', endpoint_url=ENDPOINT)
 lambda_cli = session.client('lambda', endpoint_url=ENDPOINT)
 
-API_GATEWAY_ID = 'itjvmf2f5z'
+API_GATEWAY_ID = 'ttyozr4khe'
 BASE_URL = f'http://localhost:4566/restapis/{API_GATEWAY_ID}/test/_user_request_'
 print("Make sure to change API_GATEWAY_ID in session.py when generating a new one or restarting localstack.")
