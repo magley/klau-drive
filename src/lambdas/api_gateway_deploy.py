@@ -79,10 +79,9 @@ def main():
     print(f'http://localhost:4566/restapis/{REST_API_ID}/{STAGE_NAME}/_user_request_/files')
     put_method(REST_API_ID, RES_FILES, 'POST', 'arn:aws:lambda:us-east-1:000000000000:function:upload_file')
     put_method(REST_API_ID, RES_FILES, 'GET', 'arn:aws:lambda:us-east-1:000000000000:function:list_files')
-    
-
 
     deploy_api(REST_API_ID, STAGE_NAME)
+    print(REST_API_ID)
 
 
 if __name__ == "__main__":
