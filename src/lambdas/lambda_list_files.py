@@ -2,28 +2,23 @@ from typing import Dict
 from common import *
 
 
-"""
-awslocal lambda create-function --function-name list_files --zip-file fileb://list_files.zip --runtime python3.9 --handler lambda_list_files.lambda_list_files --role arn:aws:iam::000000000000:role/LambdaBasic
-awslocal lambda update-function-configuration --function-name list_files --timeout 180
-awslocal lambda update-function-code --function-name list_files --zip-file fileb://list_files.zip
-awslocal lambda invoke --function-name list_files ./out.json
-"""
-
 def lambda_list_files(event: Dict, context):
     result = []
 
     try:
         response = s3_cli.list_objects(Bucket=CONTENT_BUCKET_NAME)
     except s3_cli.exceptions.NoSuchBucket:
-        return {
-            "body": result
+        result = {
+            "message": f"No such bucket {CONTENT_BUCKET_NAME}" 
         }
+        return http_response(result, 500)
 
     contents = response.get('Contents')
     if contents is None:
-        return {
-            "body": result
+        result = {
+            "message": f"No Contents in {CONTENT_BUCKET_NAME}" 
         }
+        return http_response(result, 500)
 
     for s3_file in contents:
         dynamo_key = {CONTENT_METADATA_TB_PK: s3_file['Key']}
@@ -44,7 +39,5 @@ def lambda_list_files(event: Dict, context):
 
         result.append(item)
     result = sorted(result, key=lambda item: item['upload_date'], reverse=True)
-    
-    return {
-        "body": result
-    }
+
+    return http_response(result, 200)

@@ -8,13 +8,6 @@ from common import *
 
 SECRET = "verysecret"
 
-"""
-awslocal lambda create-function --function-name login --zip-file fileb://login.zip --runtime python3.9 --handler lambda_login.lambda_login --role arn:aws:iam::000000000000:role/LambdaBasic
-awslocal lambda update-function-configuration --function-name login --timeout 3
-awslocal lambda update-function-code --function-name login --zip-file fileb://login.zip
-awslocal lambda invoke --function-name login  --payload file://in.json ./out.json
-"""
-
 # https://stackoverflow.com/a/68409773
 
 def base64url_decode(input):
@@ -43,7 +36,7 @@ def jwt_creator(username: str):
 
 
 def lambda_login(event: Dict, context):
-    body: Dict = event['body']
+    body: Dict = json.loads(event['body'])
     username = body['username']
     password = body['password']
 
@@ -54,12 +47,6 @@ def lambda_login(event: Dict, context):
 
     user = response.get("Item")
     if user is None or user["password"]["S"] != password:
-        return {
-            "body": None
-        }
+        return http_response("Wrong username or password", 401)
     
-    return {
-        "body": {
-            "token": jwt_creator(username),
-        },
-    }
+    return http_response({ "token": jwt_creator(username) }, 200)

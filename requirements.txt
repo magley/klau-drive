@@ -13,3 +13,4 @@ pyjwt
 # frontend
 
 PyQt6
+requests

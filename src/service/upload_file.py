@@ -5,7 +5,8 @@ import json
 import os
 from pathlib import Path
 from typing import Dict, List
-from src.service.session import lambda_cli
+from src.service.session import lambda_cli, BASE_URL
+import requests
 
 
 @dataclass
@@ -61,39 +62,34 @@ def upload_file(fname: str, desc: str, tags: List[str]):
     data_b64: bytes = make_data_base64(fname)
 
     payload = {
-        "body": {
-            "metadata": metadata,
-            "data": data_b64,
-        }
+        "metadata": metadata,
+        "data": data_b64,
     }
-
     payload_json = json.dumps(payload, default=str)
 
-    lambda_cli.invoke(
-        FunctionName=LAMBDA_NAME,
-        Payload=payload_json
-    )
+    requests.post(f'{BASE_URL}/files', data=payload_json)
 
 
 def list_files():
-    result = lambda_cli.invoke(
-        FunctionName=LAMBDA_NAME_LS
-    )
+    r = requests.get(f'{BASE_URL}/files')
+    status_code = r.status_code
+    
+    if status_code == 200:
+        body = r.json()
+        res_items = [
+            FileData(
+                name=i['name'],
+                type=i.get('type', ''),
+                desc=i.get('desc', ''),
+                tags=i.get('tags', []),
+                size=i.get('size', 0),
+                upload_date=datetime.fromisoformat(i.get('upload_date', "")),
+                last_modified=datetime.fromisoformat(i.get('last_modified', "")),
+                creation_date=datetime.fromisoformat(i.get('creation_date', "")),
+            ) for i in body
+        ]
 
-    p = json.loads(result['Payload'].read())
-    body = p['body']
-
-    res_items = [
-        FileData(
-            name=i['name'],
-            type=i.get('type', ''),
-            desc=i.get('desc', ''),
-            tags=i.get('tags', []),
-            size=i.get('size', 0),
-            upload_date=datetime.fromisoformat(i.get('upload_date', "")),
-            last_modified=datetime.fromisoformat(i.get('last_modified', "")),
-            creation_date=datetime.fromisoformat(i.get('creation_date', "")),
-        ) for i in body
-    ]
-
-    return res_items
+        return res_items
+    else:
+        return []
+        #print("TODO Error case", body)

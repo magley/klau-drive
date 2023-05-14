@@ -129,7 +129,7 @@ class OverviewScreen(QWidget):
         self.files = list_files()
         self.table.setRowCount(len(self.files))
 
-        for row, file in enumerate(list_files()):
+        for row, file in enumerate(self.files):
             file: FileData = file
             self.put_file_in_table(file, row)
             self.table.setRowHeight(row, 8)
