@@ -1,6 +1,6 @@
 from typing import Dict
 from botocore.exceptions import ClientError
-from common import *
+from .common import *
 
 
 def lambda_register(event: Dict, context):

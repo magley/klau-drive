@@ -1,5 +1,5 @@
 from typing import Dict
-from common import *
+from .common import *
 
 
 def lambda_list_files(event: Dict, context):

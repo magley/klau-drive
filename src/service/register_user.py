@@ -35,7 +35,7 @@ def register_user(user: User) -> str | None:
     payload = make_payload_from(user)
     payload_json = json.dumps(payload, default=str)
 
-    r = requests.post(f'{BASE_URL}/session', data=payload_json)
+    r = requests.post(f'{BASE_URL}/user', data=payload_json)
     status = r.status_code
 
     if status == 400:

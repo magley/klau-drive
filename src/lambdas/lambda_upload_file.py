@@ -1,7 +1,7 @@
 import base64
 import io
 from typing import Dict
-from common import *
+from .common import *
 
 
 def lambda_upload_file(event: Dict, context):

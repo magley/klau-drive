@@ -17,7 +17,7 @@ def login(username: str, password: str):
     }
     payload_json = json.dumps(payload, default=str)
 
-    r = requests.put(f'{BASE_URL}/session', data=payload_json)
+    r = requests.post(f'{BASE_URL}/login', data=payload_json)
     status_code = r.status_code
     body = r.json()
 
@@ -26,4 +26,4 @@ def login(username: str, password: str):
     elif status_code == 401:
         raise NoSuchUserException("No such user with that password: " + username)
     else:
-        raise RuntimeError("Fatal error.")
+        raise RuntimeError("Fatal error: " + str(body))

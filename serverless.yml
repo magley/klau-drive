@@ -10,7 +10,7 @@ provider:
   stage: dev
   region: us-east-1
   memorySize: 128
-  timeout: 10
+  timeout: 30
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -39,37 +39,42 @@ package:
   individually: True
   patterns:
     - '!**/**'
-    - 'lambdas/common.py'
+    - 'src/lambdas/common.py'
 
 functions:
   listFiles:
-    handler: lambdas/lambda_list_files.lambda_list_files
+    handler: src/lambdas/lambda_list_files.lambda_list_files
+    package:
+      include: 'src/lambdas/lambda_list_files.py'
     events:
       - http:
           path: file
           method: get
-          cors: false
+          # TODO: enable cors later, better security
   login:
-    handler: lambdas/lambda_login.lambda_login
+    handler: src/lambdas/lambda_login.lambda_login
+    package:
+      include: 'src/lambdas/lambda_login.py'
     events:
       - http:
           path: login
           method: post
-          cors: false
   register:
-    handler: lambdas/lambda_register.lambda_register
+    handler: src/lambdas/lambda_register.lambda_register
+    package:
+      include: 'src/lambdas/lambda_register.py'
     events:
       - http:
           path: user
           method: post
-          cors: false
   uploadFile:
-    handler: lambdas/lambda_upload_file.lambda_upload_file
+    handler: src/lambdas/lambda_upload_file.lambda_upload_file
+    package:
+      include: 'src/lambdas/lambda_upload_file.py'
     events:
       - http:
           path: file
           method: post
-          cors: false
 
 resources:
   Resources:

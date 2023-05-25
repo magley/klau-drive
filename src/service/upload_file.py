@@ -67,11 +67,11 @@ def upload_file(fname: str, desc: str, tags: List[str]):
     }
     payload_json = json.dumps(payload, default=str)
 
-    requests.post(f'{BASE_URL}/files', data=payload_json)
+    requests.post(f'{BASE_URL}/file', data=payload_json)
 
 
 def list_files():
-    r = requests.get(f'{BASE_URL}/files')
+    r = requests.get(f'{BASE_URL}/file')
     status_code = r.status_code
     
     if status_code == 200:
