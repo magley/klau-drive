@@ -25,44 +25,6 @@ s3_cli = session.client('s3', endpoint_url=ENDPOINT)
 dynamo_cli = session.client('dynamodb', endpoint_url=ENDPOINT)
 
 
-def create_table_if_not_exists(table_name, pk, sk):
-    attrdef = [
-        {
-            'AttributeName': pk,
-            'AttributeType': 'S',
-        },
-    ]
-    keyschema = [
-        {
-            'AttributeName': pk,
-            'KeyType': 'HASH',
-        }
-    ]
-
-    if sk is not None:
-        attrdef.append({
-            'AttributeName': sk,
-            'AttributeType': 'S',
-        })
-        keyschema.append({
-            'AttributeName': sk,
-            'KeyType': 'RANGE',
-        })
-
-    try:
-        dynamo_cli.create_table(
-            TableName=table_name,
-            AttributeDefinitions=attrdef,
-            KeySchema=keyschema,
-            ProvisionedThroughput={
-                'ReadCapacityUnits': 5,
-                'WriteCapacityUnits': 5
-            },
-        )
-    except dynamo_cli.exceptions.ResourceInUseException:
-        pass
-
-
 def python_obj_to_dynamo_obj(python_obj: dict) -> dict:
     serializer = TypeSerializer()
     return {

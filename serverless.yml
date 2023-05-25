@@ -1,0 +1,105 @@
+service: klau-drive
+frameworkVersion: '3'
+
+plugins:
+  - serverless-localstack
+
+provider:
+  name: aws
+  runtime: python3.9
+  stage: dev
+  region: us-east-1
+  memorySize: 128
+  timeout: 10
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "Fn::GetAtt": [userTable, Arn]
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "Fn::GetAtt": [fileMetaTable, Arn]
+
+package:
+  individually: True
+  patterns:
+    - '!**/**'
+    - 'lambdas/common.py'
+
+functions:
+  listFiles:
+    handler: lambdas/lambda_list_files.lambda_list_files
+    events:
+      - http:
+          path: file
+          method: get
+          cors: false
+  login:
+    handler: lambdas/lambda_login.lambda_login
+    events:
+      - http:
+          path: login
+          method: post
+          cors: false
+  register:
+    handler: lambdas/lambda_register.lambda_register
+    events:
+      - http:
+          path: user
+          method: post
+          cors: false
+  uploadFile:
+    handler: lambdas/lambda_upload_file.lambda_upload_file
+    events:
+      - http:
+          path: file
+          method: post
+          cors: false
+
+resources:
+  Resources:
+    userTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: user
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    fileMetaTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: file_meta
+        AttributeDefinitions:
+          - AttributeName: name
+            AttributeType: S
+        KeySchema:
+          - AttributeName: name
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    contentBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: content
