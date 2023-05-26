@@ -10,7 +10,7 @@ import requests
 
 
 @dataclass
-class FileData():
+class FileData:
     name: str
     type: str
     desc: str
@@ -27,6 +27,7 @@ BUCKET_NAME = "content"
 TB_META_NAME = 'file_meta'
 TB_META_PK = 'name'
 TB_META_SK = None
+
 
 def make_metadata(fname: str, desc: str, tags: List[str]) -> Dict:
     stat: os.stat_result = os.stat(fname)
@@ -54,7 +55,7 @@ def make_data_base64(fname: str) -> bytes:
     file_data_base64: bytes = None
     with open(fname, 'rb') as f:
         file_data_base64 = base64.b64encode(f.read()).decode()
-    return file_data_base64 
+    return file_data_base64
 
 
 def upload_file(fname: str, desc: str, tags: List[str]):
@@ -73,7 +74,7 @@ def upload_file(fname: str, desc: str, tags: List[str]):
 def list_files():
     r = requests.get(f'{BASE_URL}/file')
     status_code = r.status_code
-    
+
     if status_code == 200:
         body = r.json()
         res_items = [
@@ -92,4 +93,4 @@ def list_files():
         return res_items
     else:
         return []
-        #print("TODO Error case", body)
+        # print("TODO Error case", body)

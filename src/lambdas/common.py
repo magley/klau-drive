@@ -3,22 +3,23 @@
 # So mind the name clashing!
 import json
 import boto3
+from os import environ
 from boto3.dynamodb.types import TypeSerializer, TypeDeserializer
 
-CONTENT_BUCKET_NAME = "content"
-CONTENT_METADATA_TB_NAME = "file_meta"
+CONTENT_BUCKET_NAME = environ["CONTENT_BUCKET_NAME"]
+CONTENT_METADATA_TB_NAME = environ["CONTENT_METADATA_TB_NAME"]
 CONTENT_METADATA_TB_PK = "name"
-CONTENT_METADATA_TB_SK = None
 
-USER_TB_NAME = "user"
+USER_TB_NAME = environ["USER_TB_NAME"]
 USER_TB_PK = "username"
-USER_TB_SK = None
 
 ACCESS_KEY = 'test'
 SECRET_KEY = 'test'
 REGION = 'us-east-1'
-ENDPOINT = 'http://host.docker.internal:4566'  # Not 'localhost.localstack.cloud:4566'
-# ENDPOINT = 'http://172.17.0.2:4566'  # linux
+
+ENDPOINT = environ["ENDPOINT"]
+if "ENDPOINT" not in environ:
+    raise Exception("Please add ENDPOINT to env")
 
 session = boto3.Session(aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
 s3_cli = session.client('s3', endpoint_url=ENDPOINT)

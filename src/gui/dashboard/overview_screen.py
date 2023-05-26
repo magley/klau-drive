@@ -95,6 +95,7 @@ class OverviewScreen(QWidget):
         self.init_gui()
         self.make_layout()
 
+        # FIXME: this is where the request error happens
         self.refresh()
 
     def init_gui(self):

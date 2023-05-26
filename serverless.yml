@@ -11,6 +11,14 @@ provider:
   region: us-east-1
   memorySize: 128
   timeout: 30
+  environment:
+    CONTENT_BUCKET_NAME:
+      Ref: contentBucket
+    CONTENT_METADATA_TB_NAME:
+      Ref: fileMetaTable
+    USER_TB_NAME:
+      Ref: userTable
+    ENDPOINT: ${env:ENDPOINT}
   iamRoleStatements:
     - Effect: Allow
       Action:
