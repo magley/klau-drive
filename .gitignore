@@ -133,3 +133,7 @@ dmypy.json
 
 # Token
 user_token.txt
+
+# Node
+node_modules/
+.serverless

@@ -1,13 +1,11 @@
 import json
 
 import requests
-from src.service.session import BASE_URL, lambda_cli
+from src.service.session import BASE_URL
 
 
 class NoSuchUserException(Exception):
     pass
-
-LAMBDA_NAME = "login"
 
 
 def login(username: str, password: str):
@@ -17,7 +15,7 @@ def login(username: str, password: str):
     }
     payload_json = json.dumps(payload, default=str)
 
-    r = requests.put(f'{BASE_URL}/session', data=payload_json)
+    r = requests.post(f'{BASE_URL}/login', data=payload_json)
     status_code = r.status_code
     body = r.json()
 
@@ -26,4 +24,4 @@ def login(username: str, password: str):
     elif status_code == 401:
         raise NoSuchUserException("No such user with that password: " + username)
     else:
-        raise RuntimeError("Fatal error.")
+        raise RuntimeError("Fatal error: " + str(body))

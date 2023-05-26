@@ -95,8 +95,6 @@ class OverviewScreen(QWidget):
         self.init_gui()
         self.make_layout()
 
-        self.refresh()
-
     def init_gui(self):
         self.table = QTableWidget()
         self.table.setColumnCount(len(self.columns))

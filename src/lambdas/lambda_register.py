@@ -1,6 +1,6 @@
 from typing import Dict
 from botocore.exceptions import ClientError
-from common import *
+from .common import *
 
 
 def lambda_register(event: Dict, context):
@@ -8,7 +8,6 @@ def lambda_register(event: Dict, context):
     user_data: Dict = body
     user_data_ddb: Dict = python_obj_to_dynamo_obj(user_data)
 
-    create_table_if_not_exists(USER_TB_NAME, USER_TB_PK, USER_TB_SK)
     try:
         dynamo_cli.put_item(
             TableName=USER_TB_NAME,
