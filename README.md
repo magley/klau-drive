@@ -1,5 +1,9 @@
 ### How to deploy:
 
+Set env vars on windows (null on end is not 100% necessary):
+
+`$env:FOO='BAR'; .\myscript; $env:FOO=$null`
+
 Navigate to root directory (where src/ is, not inside of it)
 
 First run this to pickup serverless: `npm ci`
