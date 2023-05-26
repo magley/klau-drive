@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import *
-from src.service.register_user import User, register_user, list_users
+from src.service.register_user import User, register_user
 from datetime import datetime
 from src.gui.common import show_success, show_error
 import src.gui.gui_window as mainWindow
