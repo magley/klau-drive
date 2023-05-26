@@ -136,3 +136,4 @@ user_token.txt
 
 # Node
 node_modules/
+.serverless
