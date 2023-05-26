@@ -1,13 +1,11 @@
 import json
 
 import requests
-from src.service.session import BASE_URL, lambda_cli
+from src.service.session import BASE_URL
 
 
 class NoSuchUserException(Exception):
     pass
-
-LAMBDA_NAME = "login"
 
 
 def login(username: str, password: str):
