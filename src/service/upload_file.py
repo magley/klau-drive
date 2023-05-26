@@ -5,7 +5,7 @@ import json
 import os
 from pathlib import Path
 from typing import Dict, List
-from src.service.session import lambda_cli, BASE_URL
+from src.service.session import BASE_URL
 import requests
 
 

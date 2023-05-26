@@ -3,9 +3,8 @@ import json
 from typing import Dict
 
 import requests
-from src.service.session import BASE_URL, dynamo_cli
+from src.service.session import BASE_URL
 from datetime import datetime
-from src.service.session import lambda_cli
 
 
 @dataclass
@@ -43,8 +42,3 @@ def register_user(user: User) -> str | None:
         return body['message']
     
     return None
-
-
-def list_users():
-    for user in dynamo_cli.scan(TableName=TB_USER_NAME)['Items']:
-        print(user)
