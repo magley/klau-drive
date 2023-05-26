@@ -45,7 +45,8 @@ functions:
   listFiles:
     handler: src/lambdas/lambda_list_files.lambda_list_files
     package:
-      include: 'src/lambdas/lambda_list_files.py'
+      patterns:
+        - 'src/lambdas/lambda_list_files.py'
     events:
       - http:
           path: file
@@ -54,7 +55,8 @@ functions:
   login:
     handler: src/lambdas/lambda_login.lambda_login
     package:
-      include: 'src/lambdas/lambda_login.py'
+      patterns:
+        - 'src/lambdas/lambda_login.py'
     events:
       - http:
           path: login
@@ -62,7 +64,8 @@ functions:
   register:
     handler: src/lambdas/lambda_register.lambda_register
     package:
-      include: 'src/lambdas/lambda_register.py'
+      patterns:
+        - 'src/lambdas/lambda_register.py'
     events:
       - http:
           path: user
@@ -70,7 +73,8 @@ functions:
   uploadFile:
     handler: src/lambdas/lambda_upload_file.lambda_upload_file
     package:
-      include: 'src/lambdas/lambda_upload_file.py'
+      patterns:
+        - 'src/lambdas/lambda_upload_file.py'
     events:
       - http:
           path: file
