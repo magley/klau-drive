@@ -10,7 +10,7 @@ provider:
   stage: dev
   region: us-east-1
   memorySize: 128
-  timeout: 30
+  timeout: 20
   environment:
     CONTENT_BUCKET_NAME:
       Ref: contentBucket
