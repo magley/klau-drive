@@ -15,9 +15,14 @@ class FileEdit(QGroupBox):
     btn_update: QPushButton
     lbl_upload_date: QLabel
     lbl_modify_date: QLabel
+    txt_tag: QLineEdit
+    btn_tag_add: QPushButton
+    btn_tag_rem: QPushButton
     lst_tags: QListWidget
     lbl_size: QLabel
     owner: "OverviewScreen"
+
+    tags: List[str]
 
     def __init__(self, owner: "OverviewScreen"):
         QGroupBox.__init__(self)
@@ -28,13 +33,25 @@ class FileEdit(QGroupBox):
 
     def init_gui(self):
         self.real_name = ""
+        self.tags = []
         self.txt_name = QLineEdit()
         self.txt_desc = QTextEdit()
+        self.txt_tag = QLineEdit()
+        self.btn_tag_add = QPushButton('Add Tag')
+        self.btn_tag_rem = QPushButton('Remove Tag')
         self.lst_tags = QListWidget()
         self.lbl_upload_date = QLabel()
         self.lbl_modify_date = QLabel()
         self.lbl_size = QLabel()
         self.btn_update = QPushButton("Save Changes")
+
+        self.txt_tag.setPlaceholderText("Enter tag name")
+        self.txt_tag.textEdited.connect(self.set_btn_tag_add_enabled)
+        self.btn_tag_add.clicked.connect(self.add_tag)
+        self.btn_tag_add.clicked.connect(self.set_btn_tag_add_enabled)
+        self.btn_tag_rem.clicked.connect(self.rem_tag)
+        self.lst_tags.itemSelectionChanged.connect(self.set_btn_tag_rem_enabled)
+        self.btn_update.clicked.connect(self.on_click_update)
 
     def init_layout(self):
         layout_main = QVBoxLayout()
@@ -51,14 +68,21 @@ class FileEdit(QGroupBox):
         h3.addWidget(QLabel("Modified: "))
         h3.addWidget(self.lbl_modify_date)
 
-        self.btn_update.clicked.connect(self.on_click_update)
-
         layout_main.addWidget(QLabel("Name:"))
         layout_main.addWidget(self.txt_name)
         layout_main.addWidget(QLabel("Description:"))
         layout_main.addWidget(self.txt_desc)
+
         layout_main.addWidget(QLabel("Tags:"))
+
+        h4 = QHBoxLayout()
+        h4.addWidget(self.txt_tag)
+        h4.addWidget(self.btn_tag_add)
+        h4.addWidget(self.btn_tag_rem)
+
+        layout_main.addLayout(h4)
         layout_main.addWidget(self.lst_tags)
+
         layout_main.addLayout(h1)
         layout_main.addLayout(h2)
         layout_main.addLayout(h3)
@@ -80,6 +104,7 @@ class FileEdit(QGroupBox):
         self.lst_tags.clear()
         for tag in file.tags:
             self.lst_tags.addItem(QListWidgetItem(tag))
+            self.tags.append(tag)
 
     def on_click_update(self):
         new_name: str = self.txt_name.text()
@@ -92,6 +117,30 @@ class FileEdit(QGroupBox):
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         update_file(self.real_name, new_name, new_desc, new_tags)
         QApplication.restoreOverrideCursor()
+
+    def set_btn_tag_add_enabled(self):
+        if self.txt_tag.text().strip() == "":
+            self.btn_tag_add.setEnabled(False)
+        else:
+            self.btn_tag_add.setEnabled(True)  
+
+    def set_btn_tag_rem_enabled(self):
+        if len(self.lst_tags.selectedIndexes()) == 0:
+            self.btn_tag_rem.setEnabled(False)
+        else:
+            self.btn_tag_rem.setEnabled(True)
+
+    def add_tag(self):
+        new_tag = self.txt_tag.text()
+        self.tags.append(new_tag)
+        self.lst_tags.addItem(QListWidgetItem(new_tag))
+        self.txt_tag.setText("")
+
+    def rem_tag(self):
+        selected_rows = [t.row() for t in self.lst_tags.selectedIndexes()]
+        for row in selected_rows:
+            self.tags.remove(self.tags[row])
+            self.lst_tags.takeItem(row)
 
 
 @dataclass
