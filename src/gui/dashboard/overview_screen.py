@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 
+from src.service.update_file import update_file
 from src.service.upload_file import list_files, FileData
 
 @dataclass
@@ -32,7 +33,6 @@ class FileEdit(QGroupBox):
         self.lbl_modify_date = QLabel()
         self.lbl_size = QLabel()
         self.btn_update = QPushButton("Save Changes")
-        self.btn_update.setEnabled(False)
 
     def init_layout(self):
         layout_main = QVBoxLayout()
@@ -48,6 +48,8 @@ class FileEdit(QGroupBox):
         h3 = QHBoxLayout()
         h3.addWidget(QLabel("Modified: "))
         h3.addWidget(self.lbl_modify_date)
+
+        self.btn_update.clicked.connect(self.on_click_update)
 
         layout_main.addWidget(QLabel("Name:"))
         layout_main.addWidget(self.txt_name)
@@ -75,6 +77,18 @@ class FileEdit(QGroupBox):
         self.lst_tags.clear()
         for tag in file.tags:
             self.lst_tags.addItem(QListWidgetItem(tag))
+
+    def on_click_update(self):
+        new_name: str = self.txt_name.text()
+        new_desc: str = self.txt_desc.toPlainText()
+
+        new_tags = []
+        for x in range(self.lst_tags.count()):
+            new_tags.append(self.lst_tags.item(x).text())
+
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        update_file(new_name, new_desc, new_tags)
+        QApplication.restoreOverrideCursor()
 
 
 @dataclass
