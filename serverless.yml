@@ -87,6 +87,15 @@ functions:
       - http:
           path: file
           method: post
+  updateFile:
+    handler: src/lambdas/lambda_update_file.lambda_update_file
+    package:
+      patterns:
+        - 'src/lambdas/lambda_update_file.py'
+    events:
+      - http:
+          path: file
+          method: put
 
 resources:
   Resources:
