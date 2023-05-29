@@ -7,10 +7,13 @@ from pathlib import Path
 from typing import Dict, List
 from src.service.session import BASE_URL
 import requests
+import boto3
+from os import environ
 
 
-def make_metadata(name: str, desc: str, tags: List[str]) -> Dict:
+def make_metadata(old_name: str, name: str, desc: str, tags: List[str]) -> Dict:
     metadata = {
+        'old_name': old_name,
         'name': name,
         'desc': desc,
         'tags': tags,
@@ -27,8 +30,9 @@ def make_data_base64(fname: str) -> bytes:
     return file_data_base64
 
 
-def update_file(fname: str, desc: str, tags: List[str]):
-    metadata: Dict = make_metadata(fname, desc, tags)
+
+def update_file(old_name: str, name: str, desc: str, tags: List[str]):
+    metadata: Dict = make_metadata(old_name, name, desc, tags)
     #data_b64: bytes = make_data_base64(fname)
 
     payload = {
