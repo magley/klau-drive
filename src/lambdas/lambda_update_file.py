@@ -1,3 +1,5 @@
+import base64
+import io
 from typing import Dict
 from .common import *
 
@@ -55,5 +57,16 @@ def lambda_update_file(event: Dict, context):
         ExpressionAttributeNames=expression_attr_names,
         ExpressionAttributeValues=python_obj_to_dynamo_obj(expression_attr_vals)
     )
+
+    # Update the contents
+
+    if 'data' in body:
+        data: bytes = base64.b64decode(body['data'])
+
+        s3_cli.upload_fileobj(
+            Fileobj=io.BytesIO(data),
+            Bucket=CONTENT_BUCKET_NAME,
+            Key=metadata['uuid']
+        )
 
     return http_response(None, 204)

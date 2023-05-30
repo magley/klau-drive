@@ -75,6 +75,8 @@ def upload_file(fname: str, desc: str, tags: List[str]):
     }
     payload_json = json.dumps(payload, default=str)
 
+    print(f"Uploading http://localhost:4566/content/{metadata['uuid']}")
+
     requests.post(f'{BASE_URL}/file', data=payload_json)
 
 

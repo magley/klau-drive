@@ -50,6 +50,6 @@ def update_file(uuid: str, new_name: str, new_desc: str, new_tags: List[str], ne
 
     payload_json = json.dumps(payload, default=str)
 
-    print(payload_json)
+    print(f"Upading http://localhost:4566/content/{metadata['uuid']}")
 
     requests.put(f'{BASE_URL}/file', data=payload_json)
