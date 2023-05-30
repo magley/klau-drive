@@ -18,7 +18,7 @@ def lambda_upload_file(event: Dict, context):
     s3_cli.upload_fileobj(
         Fileobj=io.BytesIO(data),
         Bucket=CONTENT_BUCKET_NAME,
-        Key=metadata['name']
+        Key=metadata['uuid']
     )
 
     return http_response(None, 204)

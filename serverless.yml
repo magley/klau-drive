@@ -117,11 +117,15 @@ resources:
       Properties:
         TableName: file_meta
         AttributeDefinitions:
-          - AttributeName: name
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: uuid
             AttributeType: S
         KeySchema:
-          - AttributeName: name
+          - AttributeName: username
             KeyType: HASH
+          - AttributeName: uuid
+            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5

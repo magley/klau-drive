@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Dict, List
 from src.service.session import BASE_URL
 import requests
+import uuid
 
 
 @dataclass
@@ -38,6 +39,9 @@ def make_metadata(fname: str, desc: str, tags: List[str]) -> Dict:
     just_name = Path(fname).stem
 
     metadata = {
+        'username': 'TODO',
+        'uuid': str(uuid.uuid4()),
+
         'name': just_name,
         'size': size_in_bytes,
         'creationDate': creation_time,
@@ -72,7 +76,12 @@ def upload_file(fname: str, desc: str, tags: List[str]):
 
 
 def list_files():
-    r = requests.get(f'{BASE_URL}/file')
+    payload = {
+        "username": "TODO"
+    }
+    payload_json = json.dumps(payload, default=str)
+
+    r = requests.get(f'{BASE_URL}/file', data=payload_json)
     status_code = r.status_code
 
     if status_code == 200:
@@ -84,9 +93,9 @@ def list_files():
                 desc=i.get('desc', ''),
                 tags=i.get('tags', []),
                 size=i.get('size', 0),
-                upload_date=datetime.fromisoformat(i.get('upload_date', "")),
-                last_modified=datetime.fromisoformat(i.get('last_modified', "")),
-                creation_date=datetime.fromisoformat(i.get('creation_date', "")),
+                upload_date=datetime.fromisoformat(i.get('uploadDate', "")),
+                last_modified=datetime.fromisoformat(i.get('modificationDate', "")),
+                creation_date=datetime.fromisoformat(i.get('creationDate', "")),
             ) for i in body
         ]
 

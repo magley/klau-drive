@@ -31,14 +31,15 @@ def make_data_base64(fname: str) -> bytes:
 
 
 
-def update_file(old_name: str, name: str, desc: str, tags: List[str]):
+def update_file(old_name: str, name: str, desc: str, tags: List[str], new_fname: str):
     metadata: Dict = make_metadata(old_name, name, desc, tags)
-    #data_b64: bytes = make_data_base64(fname)
 
     payload = {
         "metadata": metadata,
-        #"data": data_b64,
     }
-    payload_json = json.dumps(payload, default=str)
+    if new_fname != None:
+        data_b64: bytes = make_data_base64(new_fname)
+        payload['data'] = data_b64
 
+    payload_json = json.dumps(payload, default=str)
     requests.put(f'{BASE_URL}/file', data=payload_json)

@@ -19,9 +19,10 @@ class FileEdit(QGroupBox):
     btn_tag_add: QPushButton
     btn_tag_rem: QPushButton
     lst_tags: QListWidget
+    btn_switch_file: QPushButton
     lbl_size: QLabel
     owner: "OverviewScreen"
-
+    new_fname: str
     tags: List[str]
 
     def __init__(self, owner: "OverviewScreen"):
@@ -33,6 +34,7 @@ class FileEdit(QGroupBox):
 
     def init_gui(self):
         self.real_name = ""
+        self.new_fname = None
         self.tags = []
         self.txt_name = QLineEdit()
         self.txt_desc = QTextEdit()
@@ -44,6 +46,7 @@ class FileEdit(QGroupBox):
         self.lbl_modify_date = QLabel()
         self.lbl_size = QLabel()
         self.btn_update = QPushButton("Save Changes")
+        self.btn_switch_file = QPushButton("Change File")
 
         self.txt_tag.setPlaceholderText("Enter tag name")
         self.txt_tag.textEdited.connect(self.set_btn_tag_add_enabled)
@@ -88,6 +91,8 @@ class FileEdit(QGroupBox):
         layout_main.addLayout(h3)
 
         layout_main.addItem(QSpacerItem(1, 1, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+
+        layout_main.addWidget(self.btn_switch_file)
         layout_main.addWidget(self.btn_update)
 
         self.setLayout(layout_main)
@@ -115,8 +120,10 @@ class FileEdit(QGroupBox):
             new_tags.append(self.lst_tags.item(x).text())
 
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-        update_file(self.real_name, new_name, new_desc, new_tags)
+        update_file(self.real_name, new_name, new_desc, new_tags, self.new_fname)
         QApplication.restoreOverrideCursor()
+        
+        self.new_fname = ""
 
     def set_btn_tag_add_enabled(self):
         if self.txt_tag.text().strip() == "":
@@ -141,6 +148,13 @@ class FileEdit(QGroupBox):
         for row in selected_rows:
             self.tags.remove(self.tags[row])
             self.lst_tags.takeItem(row)
+
+    def pick_file(self):
+        fname, _ = QFileDialog.getOpenFileName(self, 'Open File')
+        if fname == "":
+            self.new_fname = None
+        else:
+            self.new_fname = fname
 
 
 @dataclass

@@ -8,7 +8,8 @@ from boto3.dynamodb.types import TypeSerializer, TypeDeserializer
 
 CONTENT_BUCKET_NAME = environ["CONTENT_BUCKET_NAME"]
 CONTENT_METADATA_TB_NAME = environ["CONTENT_METADATA_TB_NAME"]
-CONTENT_METADATA_TB_PK = "name"
+CONTENT_METADATA_TB_PK = "username"
+CONTENT_METADATA_TB_SK = "uuid"
 
 USER_TB_NAME = environ["USER_TB_NAME"]
 USER_TB_PK = "username"

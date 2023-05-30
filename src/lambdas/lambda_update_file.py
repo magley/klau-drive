@@ -6,7 +6,6 @@ def lambda_update_file(event: Dict, context):
     body: Dict = json.loads(event['body'])
     metadata: Dict = body['metadata']
 
-
     # TODO: This doesn't change the name. We can't change it normally since 
     # it's a partition key. Change the dynamodb structure!
 
@@ -52,5 +51,24 @@ def lambda_update_file(event: Dict, context):
         ExpressionAttributeNames=expression_attr_names,
         ExpressionAttributeValues=python_obj_to_dynamo_obj(expression_attr_vals)
     )
+
+    #########
+
+    # Update the file content (if possible)
+
+    ## TODO: Split into 2 functions, one for meta only, other for file
+
+    # data: bytes = base64.b64decode(body['data'])
+
+    # dynamo_cli.put_item(
+    #     TableName=CONTENT_METADATA_TB_NAME,
+    #     Item=metadata_dynamojson
+    # )
+
+    # s3_cli.upload_fileobj(
+    #     Fileobj=io.BytesIO(data),
+    #     Bucket=CONTENT_BUCKET_NAME,
+    #     Key=metadata['name']
+    # )
 
     return http_response(None, 204)
