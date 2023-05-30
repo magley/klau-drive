@@ -9,14 +9,16 @@ from src.service.session import BASE_URL
 import requests
 import boto3
 from os import environ
+import src.service.session as session
 
 
-def make_metadata(old_name: str, name: str, desc: str, tags: List[str]) -> Dict:
+def make_metadata(username: str, uuid: str, new_name: str, new_desc: str, new_tags: List[str]) -> Dict:
     metadata = {
-        'old_name': old_name,
-        'name': name,
-        'desc': desc,
-        'tags': tags,
+        'username': username,
+        'uuid': uuid,
+        'name': new_name,
+        'desc': new_desc,
+        'tags': new_tags,
         'modificationDate': datetime.now(),
     }
 
@@ -31,15 +33,10 @@ def make_data_base64(fname: str) -> bytes:
 
 
 
-def update_file(old_name: str, name: str, desc: str, tags: List[str], new_fname: str):
-    metadata: Dict = make_metadata(old_name, name, desc, tags)
-
+def update_file(uuid: str, new_name: str, new_desc: str, new_tags: List[str]):   
+    metadata: Dict = make_metadata(session.get_username(), uuid, new_name, new_desc, new_tags)
     payload = {
-        "metadata": metadata,
+        "metadata": metadata
     }
-    if new_fname != None:
-        data_b64: bytes = make_data_base64(new_fname)
-        payload['data'] = data_b64
-
     payload_json = json.dumps(payload, default=str)
     requests.put(f'{BASE_URL}/file', data=payload_json)

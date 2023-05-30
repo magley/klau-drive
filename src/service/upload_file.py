@@ -13,6 +13,8 @@ import src.service.session as session
 
 @dataclass
 class FileData:
+    username: str
+    uuid: str
     name: str
     type: str
     desc: str
@@ -89,6 +91,8 @@ def list_files():
         body = r.json()
         res_items = [
             FileData(
+                username=i['username'],
+                uuid=i['uuid'],
                 name=i['name'],
                 type=i.get('type', ''),
                 desc=i.get('desc', ''),

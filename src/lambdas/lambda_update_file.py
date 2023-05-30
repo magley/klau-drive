@@ -2,41 +2,10 @@ from typing import Dict
 from .common import *
 
 
-def lambda_update_file(event: Dict, context):
-    body: Dict = json.loads(event['body'])
-    metadata: Dict = body['metadata']
-
-    # TODO: This doesn't change the name. We can't change it normally since 
-    # it's a partition key. Change the dynamodb structure!
-
-    old_key = {
-        CONTENT_METADATA_TB_PK: metadata['old_name']
-    }
-
-    key = {
-        CONTENT_METADATA_TB_PK: metadata['name']
-    }
-
-    # Get everything from the old object
-
-    response = dynamo_cli.get_item(
-        TableName=CONTENT_METADATA_TB_NAME,
-        Key=python_obj_to_dynamo_obj(old_key)
-    )
-
-    if 'Item' not in response:
-        return http_response(f"No element under key {metadata['old_name']} exists!", 404)
-
-    new_obj: Dict = {}
-    for k, v in metadata.items():
-        if k not in ['name', 'old_name']:
-            new_obj[k] = v
-
-    # Update the object
-
+def build_expression(data: Dict):
     expression_attr_names = {}
     expression_attr_vals = {}
-    for i, (k, v) in enumerate(new_obj.items()):
+    for i, (k, v) in enumerate(data.items()):
         expression_attr_names[f'#f{i}'] = k
         expression_attr_vals[f':f{i}'] = v
     update_expression = "SET "
@@ -44,31 +13,47 @@ def lambda_update_file(event: Dict, context):
         update_expression += f'#f{i} = :f{i}, '
     update_expression = update_expression[:-2]
 
+    return update_expression, expression_attr_names, expression_attr_vals
+
+
+def lambda_update_file(event: Dict, context):
+    body: Dict = json.loads(event['body'])
+    metadata: Dict = body['metadata']
+
+    primary_key = {
+        CONTENT_METADATA_TB_PK: metadata['username'],
+        CONTENT_METADATA_TB_SK: metadata['uuid']
+    }
+
+    # Get the whole object
+
+    response = dynamo_cli.get_item(
+        TableName=CONTENT_METADATA_TB_NAME,
+        Key=python_obj_to_dynamo_obj(primary_key)
+    )
+
+    if 'Item' not in response:
+        return http_response(f"No element under key {metadata['old_name']} exists!", 404)
+    
+    # Get all fields that were updated (except key fields!)
+
+    new_obj: Dict = {}
+    for k, v in metadata.items():
+        if k not in ['username', 'uuid']:
+            new_obj[k] = v
+
+    # Build update expression 
+
+    update_expression, expression_attr_names, expression_attr_vals = build_expression(new_obj)
+
+    # Apply updating
+
     dynamo_cli.update_item(
-        Key=python_obj_to_dynamo_obj(key),
+        Key=python_obj_to_dynamo_obj(primary_key),
         TableName=CONTENT_METADATA_TB_NAME,
         UpdateExpression=update_expression,
         ExpressionAttributeNames=expression_attr_names,
         ExpressionAttributeValues=python_obj_to_dynamo_obj(expression_attr_vals)
     )
-
-    #########
-
-    # Update the file content (if possible)
-
-    ## TODO: Split into 2 functions, one for meta only, other for file
-
-    # data: bytes = base64.b64decode(body['data'])
-
-    # dynamo_cli.put_item(
-    #     TableName=CONTENT_METADATA_TB_NAME,
-    #     Item=metadata_dynamojson
-    # )
-
-    # s3_cli.upload_fileobj(
-    #     Fileobj=io.BytesIO(data),
-    #     Bucket=CONTENT_BUCKET_NAME,
-    #     Key=metadata['name']
-    # )
 
     return http_response(None, 204)

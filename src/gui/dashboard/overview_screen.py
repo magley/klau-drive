@@ -9,7 +9,7 @@ from src.service.upload_file import list_files, FileData
 
 @dataclass
 class FileEdit(QGroupBox):
-    real_name: str
+    file_uuid: str
     txt_name: QLineEdit
     txt_desc: QTextEdit
     btn_update: QPushButton
@@ -33,7 +33,7 @@ class FileEdit(QGroupBox):
         self.init_layout()
 
     def init_gui(self):
-        self.real_name = ""
+        self.file_uuid = ""
         self.new_fname = None
         self.tags = []
         self.txt_name = QLineEdit()
@@ -99,7 +99,7 @@ class FileEdit(QGroupBox):
 
     def on_selected_file(self, file: FileData):
         self.txt_name.setText(file.name)
-        self.real_name = file.name
+        self.file_uuid = file.uuid
         self.txt_desc.setText(file.desc)
         
         self.lbl_size.setText(f"{file.size} B")
@@ -120,7 +120,13 @@ class FileEdit(QGroupBox):
             new_tags.append(self.lst_tags.item(x).text())
 
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-        update_file(self.real_name, new_name, new_desc, new_tags, self.new_fname)
+
+        update_file(
+            self.file_uuid,
+            new_name,
+            new_desc,
+            new_tags
+        )
         QApplication.restoreOverrideCursor()
         
         self.new_fname = ""
