@@ -46,7 +46,7 @@ class FileEdit(QGroupBox):
         self.lbl_modify_date = QLabel()
         self.lbl_size = QLabel()
         self.btn_update = QPushButton("Save Changes")
-        self.btn_switch_file = QPushButton("Change File")
+        self.btn_switch_file = QPushButton("Pick Different File")
 
         self.txt_tag.setPlaceholderText("Enter tag name")
         self.txt_tag.textEdited.connect(self.set_btn_tag_add_enabled)
@@ -54,6 +54,7 @@ class FileEdit(QGroupBox):
         self.btn_tag_add.clicked.connect(self.set_btn_tag_add_enabled)
         self.btn_tag_rem.clicked.connect(self.rem_tag)
         self.lst_tags.itemSelectionChanged.connect(self.set_btn_tag_rem_enabled)
+        self.btn_switch_file.clicked.connect(self.pick_file)
         self.btn_update.clicked.connect(self.on_click_update)
 
     def init_layout(self):
@@ -125,7 +126,8 @@ class FileEdit(QGroupBox):
             self.file_uuid,
             new_name,
             new_desc,
-            new_tags
+            new_tags,
+            self.new_fname
         )
         QApplication.restoreOverrideCursor()
         
