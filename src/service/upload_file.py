@@ -8,6 +8,7 @@ from typing import Dict, List
 from src.service.session import BASE_URL
 import requests
 import uuid
+import src.service.session as session
 
 
 @dataclass
@@ -39,7 +40,7 @@ def make_metadata(fname: str, desc: str, tags: List[str]) -> Dict:
     just_name = Path(fname).stem
 
     metadata = {
-        'username': 'TODO',
+        'username': session.get_username(),
         'uuid': str(uuid.uuid4()),
 
         'name': just_name,
@@ -77,7 +78,7 @@ def upload_file(fname: str, desc: str, tags: List[str]):
 
 def list_files():
     payload = {
-        "username": "TODO"
+        "username": session.get_username()
     }
     payload_json = json.dumps(payload, default=str)
 
