@@ -3,7 +3,9 @@ from dataclasses import dataclass
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
+import requests
 
+from src.gui.common import show_success, show_error
 from src.service.update_file import update_file
 from src.service.upload_file import FileData
 from src.service.list_files import list_files
@@ -174,8 +176,11 @@ class FileEdit(QGroupBox):
         uuid = self.file_uuid
         
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-        delete_file(uuid)
+        result: requests.Response = delete_file(uuid)
         QApplication.restoreOverrideCursor()
+
+        if result.status_code in [401, 403, 404]:
+            show_error(result.json())
 
 
 

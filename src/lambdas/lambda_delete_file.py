@@ -20,9 +20,15 @@ def manage_token(auth_header: str) -> str:
 def lambda_delete_file(event: Dict, context):
     body: Dict = json.loads(event['body'])
     headers: Dict = event['headers']
+    file_uuid: str = body['uuid']
+
+    username: str = jwt_decode(headers)
+    if not user_exists(username):
+        return http_response("Forbidden", 401)
+
     key = {
-        CONTENT_METADATA_TB_PK: body['username'],
-        CONTENT_METADATA_TB_SK: body['uuid']
+        CONTENT_METADATA_TB_PK: username,
+        CONTENT_METADATA_TB_SK: file_uuid
     }
 
     dynamo_cli.delete_item(
@@ -35,4 +41,4 @@ def lambda_delete_file(event: Dict, context):
         Key=key['uuid']
     )
 
-    return http_response(manage_token(headers['Authorization']), 200)
+    return http_response(None, 204)
