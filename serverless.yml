@@ -96,6 +96,15 @@ functions:
       - http:
           path: file
           method: put
+  deleteFile:
+    handler: src/lambdas/lambda_delete_file.lambda_delete_file
+    package:
+      patterns:
+        - 'src/lambdas/lambda_delete_file.py'
+    events:
+      - http:
+          path: file
+          method: delete   
 
 resources:
   Resources:

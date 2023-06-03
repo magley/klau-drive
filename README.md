@@ -25,3 +25,13 @@ Install the requirements: `python -m pip install -r requirements.txt`
 Run: `BASE_URL=<your deployed url> python -m src.main`
 
 Example: `BASE_URL='http://localhost:4566/restapis/3ojfyrsn1f/dev/_user_request_' python -m src.main`
+
+
+# Win
+
+$env:ENDPOINT='http://host.docker.internal:4566'
+npm ci
+localstack start
+npm run sls deploy
+$env:BASE_URL='http://localhost:4566/restapis/3ojfyrsn1f/dev/_user_request_'
+python -m src.main
