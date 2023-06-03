@@ -20,3 +20,8 @@ def get_username() -> str:
 
     decoded = jwt.decode(token, options={"verify_signature": False})
     return decoded['username']
+
+
+def get_jwt() -> str:
+    with open(TOKEN_FILENAME, "r") as token_file:
+        return token_file.readline().strip()

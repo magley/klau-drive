@@ -35,3 +35,4 @@ localstack start
 npm run sls deploy
 $env:BASE_URL=
 python -m src.main
+npm run sls -- deploy function --function deleteFile

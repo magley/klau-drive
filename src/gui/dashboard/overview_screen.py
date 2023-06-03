@@ -5,7 +5,8 @@ from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 
 from src.service.update_file import update_file
-from src.service.upload_file import list_files, FileData
+from src.service.upload_file import FileData
+from src.service.list_files import list_files
 from src.service.delete_file import delete_file
 
 @dataclass

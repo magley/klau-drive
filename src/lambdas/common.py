@@ -43,16 +43,13 @@ def dynamo_obj_to_python_obj(dynamo_obj: dict) -> dict:
     }
 
 
+def verify_user(token: str) -> None:
+    pass
+
+
 def http_response(body, status_code: int) -> dict:
     return {
-        "body": json.dumps(body, default=str),  # TODO: API Gateway does NOT
-        # allow the value to be just `body` i.e. a Python object (e.g. a list),
-        # and we HAVE TO convert it into a json string. This becomes a problem
-        # on the frontend where we then have to do json.loads(p['body']) even
-        # though p was already `json.loads`-ed. It's pointless. If we try to
-        # move the json.dumps(...) to wrap this entire return value i.e. the
-        # whole dictionary, then we would have to do json.loads() twice on the
-        # frontend when fetching lambda response payload.
+        "body": json.dumps(body, default=str),
         "isBase64Encoded": False,
         "statusCode": status_code,
         "headers": {

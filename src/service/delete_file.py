@@ -11,5 +11,6 @@ def delete_file(file_uuid: str):
     }
     payload_json = json.dumps(payload, default=str)
 
-    result = requests.delete(f'{BASE_URL}/file', data=payload_json)
-    print(result)
+    header = {'Authorization': f'Bearer {session.get_jwt()}'}
+    result = requests.delete(f'{BASE_URL}/file', data=payload_json, headers=header)
+    print(result.json())
