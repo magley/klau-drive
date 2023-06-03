@@ -33,5 +33,5 @@ $env:ENDPOINT='http://host.docker.internal:4566'
 npm ci
 localstack start
 npm run sls deploy
-$env:BASE_URL='http://localhost:4566/restapis/3ojfyrsn1f/dev/_user_request_'
+$env:BASE_URL=
 python -m src.main

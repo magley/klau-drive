@@ -6,6 +6,7 @@ from PyQt6.QtCore import *
 
 from src.service.update_file import update_file
 from src.service.upload_file import list_files, FileData
+from src.service.delete_file import delete_file
 
 @dataclass
 class FileEdit(QGroupBox):
@@ -20,6 +21,7 @@ class FileEdit(QGroupBox):
     btn_tag_rem: QPushButton
     lst_tags: QListWidget
     btn_switch_file: QPushButton
+    btn_delete: QPushButton
     lbl_size: QLabel
     owner: "OverviewScreen"
     new_fname: str
@@ -47,6 +49,7 @@ class FileEdit(QGroupBox):
         self.lbl_size = QLabel()
         self.btn_update = QPushButton("Save Changes")
         self.btn_switch_file = QPushButton("Pick Different File")
+        self.btn_delete = QPushButton("Delete")
 
         self.txt_tag.setPlaceholderText("Enter tag name")
         self.txt_tag.textEdited.connect(self.set_btn_tag_add_enabled)
@@ -55,6 +58,7 @@ class FileEdit(QGroupBox):
         self.btn_tag_rem.clicked.connect(self.rem_tag)
         self.lst_tags.itemSelectionChanged.connect(self.set_btn_tag_rem_enabled)
         self.btn_switch_file.clicked.connect(self.pick_file)
+        self.btn_delete.clicked.connect(self.delete_file)
         self.btn_update.clicked.connect(self.on_click_update)
 
     def init_layout(self):
@@ -95,6 +99,7 @@ class FileEdit(QGroupBox):
 
         layout_main.addWidget(self.btn_switch_file)
         layout_main.addWidget(self.btn_update)
+        layout_main.addWidget(self.btn_delete)
 
         self.setLayout(layout_main)
 
@@ -163,6 +168,14 @@ class FileEdit(QGroupBox):
             self.new_fname = None
         else:
             self.new_fname = fname
+
+    def delete_file(self):
+        uuid = self.file_uuid
+        
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        delete_file(uuid)
+        QApplication.restoreOverrideCursor()
+
 
 
 @dataclass
