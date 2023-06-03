@@ -4,7 +4,11 @@ from .common import *
 
 def lambda_list_files(event: Dict, context):
     body: Dict = json.loads(event['body'])
-    username: str = body['username']
+    headers: Dict = event['headers']
+
+    username: str = jwt_decode(headers)
+    if not user_exists(username):
+        return http_response("Forbidden", 401)
 
     response = dynamo_cli.query(
         TableName=CONTENT_METADATA_TB_NAME,

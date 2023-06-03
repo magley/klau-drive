@@ -77,4 +77,5 @@ def upload_file(fname: str, desc: str, tags: List[str]):
 
     print(f"Uploading http://localhost:4566/content/{metadata['uuid']}")
 
-    requests.post(f'{BASE_URL}/file', data=payload_json)
+    header = {'Authorization': f'Bearer {session.get_jwt()}'}
+    requests.post(f'{BASE_URL}/file', data=payload_json, headers=header)

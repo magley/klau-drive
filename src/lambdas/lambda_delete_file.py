@@ -20,11 +20,12 @@ def manage_token(auth_header: str) -> str:
 def lambda_delete_file(event: Dict, context):
     body: Dict = json.loads(event['body'])
     headers: Dict = event['headers']
-    file_uuid: str = body['uuid']
 
     username: str = jwt_decode(headers)
     if not user_exists(username):
         return http_response("Forbidden", 401)
+    
+    file_uuid: str = body['uuid']
 
     key = {
         CONTENT_METADATA_TB_PK: username,

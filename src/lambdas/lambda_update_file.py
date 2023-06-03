@@ -20,6 +20,12 @@ def build_expression(data: Dict):
 
 def lambda_update_file(event: Dict, context):
     body: Dict = json.loads(event['body'])
+    headers: Dict = event['headers']
+
+    username: str = jwt_decode(headers)
+    if not user_exists(username):
+        return http_response("Forbidden", 401)
+    
     metadata: Dict = body['metadata']
 
     primary_key = {

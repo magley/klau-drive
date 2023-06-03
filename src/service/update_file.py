@@ -52,4 +52,5 @@ def update_file(uuid: str, new_name: str, new_desc: str, new_tags: List[str], ne
 
     print(f"Upading http://localhost:4566/content/{metadata['uuid']}")
 
-    requests.put(f'{BASE_URL}/file', data=payload_json)
+    header = {'Authorization': f'Bearer {session.get_jwt()}'}
+    requests.put(f'{BASE_URL}/file', data=payload_json, headers=header)

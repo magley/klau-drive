@@ -12,7 +12,8 @@ def list_files():
     }
     payload_json = json.dumps(payload, default=str)
 
-    r = requests.get(f'{BASE_URL}/file', data=payload_json)
+    header = {'Authorization': f'Bearer {session.get_jwt()}'}
+    r = requests.get(f'{BASE_URL}/file', data=payload_json, headers=header)
 
     status_code = r.status_code
 
