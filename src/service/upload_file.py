@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 import os
 from pathlib import Path
-, List
+from typing import List
 from src.service.session import BASE_URL
 import requests
 import uuid
