@@ -1,10 +1,10 @@
-from typing import Dict
+
 from .common import *
 
 
-def lambda_list_files(event: Dict, context):
-    body: Dict = json.loads(event['body'])
-    headers: Dict = event['headers']
+def lambda_list_files(event: dict, context):
+    body: dict = json.loads(event['body'])
+    headers: dict = event['headers']
 
     username: str = jwt_decode(headers)
     if not user_exists(username):

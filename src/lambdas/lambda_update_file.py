@@ -1,10 +1,10 @@
 import base64
 import io
-from typing import Dict
+
 from .common import *
 
 
-def build_expression(data: Dict):
+def build_expression(data: dict):
     expression_attr_names = {}
     expression_attr_vals = {}
     for i, (k, v) in enumerate(data.items()):
@@ -18,15 +18,15 @@ def build_expression(data: Dict):
     return update_expression, expression_attr_names, expression_attr_vals
 
 
-def lambda_update_file(event: Dict, context):
-    body: Dict = json.loads(event['body'])
-    headers: Dict = event['headers']
+def lambda_update_file(event: dict, context):
+    body: dict = json.loads(event['body'])
+    headers: dict = event['headers']
 
     username: str = jwt_decode(headers)
     if not user_exists(username):
         return http_response("Forbidden", 401)
     
-    metadata: Dict = body['metadata']
+    metadata: dict = body['metadata']
 
     primary_key = {
         CONTENT_METADATA_TB_PK: metadata['username'],
@@ -45,7 +45,7 @@ def lambda_update_file(event: Dict, context):
     
     # Get all fields that were updated (except key fields!)
 
-    new_obj: Dict = {}
+    new_obj: dict = {}
     for k, v in metadata.items():
         if k not in ['username', 'uuid']:
             new_obj[k] = v

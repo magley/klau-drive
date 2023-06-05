@@ -1,4 +1,3 @@
-from typing import Dict
 import base64
 import json
 import boto3
@@ -67,13 +66,13 @@ def http_response(body, status_code: int) -> dict:
         }
     }
 
-def jwt_decode(headers: Dict) -> str:
+def jwt_decode(headers: dict) -> str:
     auth_header: str = headers['Authorization']
     parts = auth_header.split()
     jwt = parts[1]
 
     jwt_body_str: str = jwt.split('.')[1]
-    jwt_body: Dict = json.loads(base64url_decode(jwt_body_str))
+    jwt_body: dict = json.loads(base64url_decode(jwt_body_str))
     username = jwt_body['username']
 
     return username

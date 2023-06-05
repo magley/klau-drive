@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 import os
 from pathlib import Path
-from typing import Dict, List
+, List
 from src.service.session import BASE_URL
 import requests
 import uuid
@@ -33,7 +33,7 @@ TB_META_PK = 'name'
 TB_META_SK = None
 
 
-def make_metadata(fname: str, desc: str, tags: List[str]) -> Dict:
+def make_metadata(fname: str, desc: str, tags: List[str]) -> dict:
     stat: os.stat_result = os.stat(fname)
     size_in_bytes = stat.st_size
     creation_time = datetime.fromtimestamp(stat.st_ctime)
@@ -66,7 +66,7 @@ def make_data_base64(fname: str) -> bytes:
 
 
 def upload_file(fname: str, desc: str, tags: List[str]):
-    metadata: Dict = make_metadata(fname, desc, tags)
+    metadata: dict = make_metadata(fname, desc, tags)
     data_b64: bytes = make_data_base64(fname)
 
     payload = {

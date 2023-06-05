@@ -1,4 +1,3 @@
-from typing import Dict
 from .common import *
 import base64
 
@@ -11,15 +10,15 @@ def manage_token(auth_header: str) -> str:
     jwt = parts[1]
 
     jwt_body_str: str = jwt.split('.')[1]
-    jwt_body: Dict = json.loads(base64url_decode(jwt_body_str))
+    jwt_body: dict = json.loads(base64url_decode(jwt_body_str))
     username = jwt_body['username']
 
     return username
 
 
-def lambda_delete_file(event: Dict, context):
-    body: Dict = json.loads(event['body'])
-    headers: Dict = event['headers']
+def lambda_delete_file(event: dict, context):
+    body: dict = json.loads(event['body'])
+    headers: dict = event['headers']
 
     username: str = jwt_decode(headers)
     if not user_exists(username):

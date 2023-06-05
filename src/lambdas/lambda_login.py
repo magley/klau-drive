@@ -1,6 +1,6 @@
 import hashlib
 import hmac
-from typing import Dict
+
 from .common import *
 
 SECRET = "verysecret"
@@ -21,8 +21,8 @@ def jwt_creator(username: str):
     return token
 
 
-def lambda_login(event: Dict, context):
-    body: Dict = json.loads(event['body'])
+def lambda_login(event: dict, context):
+    body: dict = json.loads(event['body'])
     username = body['username']
     password = body['password']
 
