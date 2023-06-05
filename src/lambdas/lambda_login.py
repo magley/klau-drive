@@ -1,21 +1,9 @@
-import base64
 import hashlib
 import hmac
-from typing import Dict
+
 from .common import *
 
 SECRET = "verysecret"
-
-
-# https://stackoverflow.com/a/68409773
-def base64url_decode(input):
-    return base64.urlsafe_b64decode(input + '==')
-
-
-def base64url_encode(input):
-    stringAsBytes = input.encode('ascii')
-    stringAsBase64 = base64.urlsafe_b64encode(stringAsBytes).decode('utf-8').replace('=', '')
-    return stringAsBase64
 
 
 def jwt_creator(username: str):
@@ -33,8 +21,8 @@ def jwt_creator(username: str):
     return token
 
 
-def lambda_login(event: Dict, context):
-    body: Dict = json.loads(event['body'])
+def lambda_login(event: dict, context):
+    body: dict = json.loads(event['body'])
     username = body['username']
     password = body['password']
 

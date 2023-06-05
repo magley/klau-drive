@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import json
-from typing import Dict
+
 
 import requests
 from src.service.session import BASE_URL
@@ -24,7 +24,7 @@ TB_USER_PK = 'username'
 LAMBDA_NAME = "register"
 
 
-def make_payload_from(user: User) -> Dict:
+def make_payload_from(user: User) -> dict:
     user_dict = vars(user) # Be careful if you ever add anything fancy to `User`
 
     return user_dict

@@ -87,6 +87,24 @@ functions:
       - http:
           path: file
           method: post
+  updateFile:
+    handler: src/lambdas/lambda_update_file.lambda_update_file
+    package:
+      patterns:
+        - 'src/lambdas/lambda_update_file.py'
+    events:
+      - http:
+          path: file
+          method: put
+  deleteFile:
+    handler: src/lambdas/lambda_delete_file.lambda_delete_file
+    package:
+      patterns:
+        - 'src/lambdas/lambda_delete_file.py'
+    events:
+      - http:
+          path: file
+          method: delete   
 
 resources:
   Resources:
@@ -108,11 +126,15 @@ resources:
       Properties:
         TableName: file_meta
         AttributeDefinitions:
-          - AttributeName: name
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: uuid
             AttributeType: S
         KeySchema:
-          - AttributeName: name
+          - AttributeName: username
             KeyType: HASH
+          - AttributeName: uuid
+            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5

@@ -1,6 +1,4 @@
-# By convention, every lambda function imports this as
-# from common import *
-# So mind the name clashing!
+import base64
 import json
 import boto3
 from os import environ
@@ -8,7 +6,8 @@ from boto3.dynamodb.types import TypeSerializer, TypeDeserializer
 
 CONTENT_BUCKET_NAME = environ["CONTENT_BUCKET_NAME"]
 CONTENT_METADATA_TB_NAME = environ["CONTENT_METADATA_TB_NAME"]
-CONTENT_METADATA_TB_PK = "name"
+CONTENT_METADATA_TB_PK = "username"
+CONTENT_METADATA_TB_SK = "uuid"
 
 USER_TB_NAME = environ["USER_TB_NAME"]
 USER_TB_PK = "username"
@@ -42,19 +41,68 @@ def dynamo_obj_to_python_obj(dynamo_obj: dict) -> dict:
     }
 
 
+# https://stackoverflow.com/a/68409773
+def base64url_decode(input):
+    return base64.urlsafe_b64decode(input + '==')
+
+
+def base64url_encode(input):
+    stringAsBytes = input.encode('ascii')
+    stringAsBase64 = base64.urlsafe_b64encode(stringAsBytes).decode('utf-8').replace('=', '')
+    return stringAsBase64
+
+
+def verify_user(token: str) -> None:
+    pass
+
+
 def http_response(body, status_code: int) -> dict:
     return {
-        "body": json.dumps(body, default=str),  # TODO: API Gateway does NOT
-        # allow the value to be just `body` i.e. a Python object (e.g. a list),
-        # and we HAVE TO convert it into a json string. This becomes a problem
-        # on the frontend where we then have to do json.loads(p['body']) even
-        # though p was already `json.loads`-ed. It's pointless. If we try to
-        # move the json.dumps(...) to wrap this entire return value i.e. the
-        # whole dictionary, then we would have to do json.loads() twice on the
-        # frontend when fetching lambda response payload.
+        "body": json.dumps(body, default=str),
         "isBase64Encoded": False,
         "statusCode": status_code,
         "headers": {
             "content-type": "application/json"
         }
     }
+
+def jwt_decode(headers: dict) -> str:
+    auth_header: str = headers['Authorization']
+    parts = auth_header.split()
+    jwt = parts[1]
+
+    jwt_body_str: str = jwt.split('.')[1]
+    jwt_body: dict = json.loads(base64url_decode(jwt_body_str))
+    username = jwt_body['username']
+
+    return username
+
+
+def owns_that_file(username: str, file_uuid: str) -> bool:
+    key = {
+        CONTENT_METADATA_TB_PK: username,
+        CONTENT_METADATA_TB_SK: file_uuid
+    }
+
+    response = dynamo_cli.get_item(
+        TableName=CONTENT_METADATA_TB_NAME,
+        Key=python_obj_to_dynamo_obj(key)
+    )
+
+    if 'Item' not in response:
+        return False
+    return True
+
+def user_exists(username: str) -> bool:
+    key = {
+        USER_TB_PK: username,
+    }
+
+    response = dynamo_cli.get_item(
+        TableName=USER_TB_NAME,
+        Key=python_obj_to_dynamo_obj(key)
+    )
+
+    if 'Item' not in response:
+        return False
+    return True

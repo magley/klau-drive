@@ -4,13 +4,17 @@ from datetime import datetime
 import json
 import os
 from pathlib import Path
-from typing import Dict, List
+from typing import List
 from src.service.session import BASE_URL
 import requests
+import uuid
+import src.service.session as session
 
 
 @dataclass
 class FileData:
+    username: str
+    uuid: str
     name: str
     type: str
     desc: str
@@ -29,7 +33,7 @@ TB_META_PK = 'name'
 TB_META_SK = None
 
 
-def make_metadata(fname: str, desc: str, tags: List[str]) -> Dict:
+def make_metadata(fname: str, desc: str, tags: List[str]) -> dict:
     stat: os.stat_result = os.stat(fname)
     size_in_bytes = stat.st_size
     creation_time = datetime.fromtimestamp(stat.st_ctime)
@@ -38,6 +42,9 @@ def make_metadata(fname: str, desc: str, tags: List[str]) -> Dict:
     just_name = Path(fname).stem
 
     metadata = {
+        'username': session.get_username(),
+        'uuid': str(uuid.uuid4()),
+
         'name': just_name,
         'size': size_in_bytes,
         'creationDate': creation_time,
@@ -59,7 +66,7 @@ def make_data_base64(fname: str) -> bytes:
 
 
 def upload_file(fname: str, desc: str, tags: List[str]):
-    metadata: Dict = make_metadata(fname, desc, tags)
+    metadata: dict = make_metadata(fname, desc, tags)
     data_b64: bytes = make_data_base64(fname)
 
     payload = {
@@ -68,29 +75,7 @@ def upload_file(fname: str, desc: str, tags: List[str]):
     }
     payload_json = json.dumps(payload, default=str)
 
-    requests.post(f'{BASE_URL}/file', data=payload_json)
+    print(f"Uploading http://localhost:4566/content/{metadata['uuid']}")
 
-
-def list_files():
-    r = requests.get(f'{BASE_URL}/file')
-    status_code = r.status_code
-
-    if status_code == 200:
-        body = r.json()
-        res_items = [
-            FileData(
-                name=i['name'],
-                type=i.get('type', ''),
-                desc=i.get('desc', ''),
-                tags=i.get('tags', []),
-                size=i.get('size', 0),
-                upload_date=datetime.fromisoformat(i.get('upload_date', "")),
-                last_modified=datetime.fromisoformat(i.get('last_modified', "")),
-                creation_date=datetime.fromisoformat(i.get('creation_date', "")),
-            ) for i in body
-        ]
-
-        return res_items
-    else:
-        return []
-        # print("TODO Error case", body)
+    header = {'Authorization': f'Bearer {session.get_jwt()}'}
+    requests.post(f'{BASE_URL}/file', data=payload_json, headers=header)

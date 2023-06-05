@@ -1,12 +1,12 @@
-from typing import Dict
+
 from botocore.exceptions import ClientError
 from .common import *
 
 
-def lambda_register(event: Dict, context):
-    body: Dict = json.loads(event['body'])
-    user_data: Dict = body
-    user_data_ddb: Dict = python_obj_to_dynamo_obj(user_data)
+def lambda_register(event: dict, context):
+    body: dict = json.loads(event['body'])
+    user_data: dict = body
+    user_data_ddb: dict = python_obj_to_dynamo_obj(user_data)
 
     try:
         dynamo_cli.put_item(
