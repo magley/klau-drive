@@ -29,8 +29,8 @@ def lambda_update_file(event: dict, context):
     metadata: dict = body['metadata']
 
     primary_key = {
-        CONTENT_METADATA_TB_PK: metadata['username'],
-        CONTENT_METADATA_TB_SK: metadata['uuid']
+        CONTENT_METADATA_TB_PK: metadata[CONTENT_METADATA_TB_PK],
+        CONTENT_METADATA_TB_SK: metadata[CONTENT_METADATA_TB_SK]
     }
 
     # Get the whole object
@@ -47,7 +47,7 @@ def lambda_update_file(event: dict, context):
 
     new_obj: dict = {}
     for k, v in metadata.items():
-        if k not in ['username', 'uuid']:
+        if k not in [CONTENT_METADATA_TB_PK, CONTENT_METADATA_TB_SK]:
             new_obj[k] = v
 
     # Build update expression 
@@ -72,7 +72,7 @@ def lambda_update_file(event: dict, context):
         s3_cli.upload_fileobj(
             Fileobj=io.BytesIO(data),
             Bucket=CONTENT_BUCKET_NAME,
-            Key=metadata['uuid']
+            Key=metadata[CONTENT_METADATA_TB_SK]
         )
 
     return http_response(None, 204)

@@ -24,7 +24,7 @@ def lambda_delete_file(event: dict, context):
     if not user_exists(username):
         return http_response("Forbidden", 401)
     
-    file_uuid: str = body['uuid']
+    file_uuid: str = body[CONTENT_METADATA_TB_SK]
 
     key = {
         CONTENT_METADATA_TB_PK: username,
@@ -38,7 +38,7 @@ def lambda_delete_file(event: dict, context):
 
     s3_cli.delete_object(
         Bucket=CONTENT_BUCKET_NAME,
-        Key=key['uuid']
+        Key=key[CONTENT_METADATA_TB_SK]
     )
 
     return http_response(None, 204)
