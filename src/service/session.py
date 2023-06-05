@@ -13,8 +13,7 @@ TOKEN_FILENAME = "user_token.txt"
 def get_username() -> str:
     token = ""
     try:
-        with open(TOKEN_FILENAME, "r") as token_file:
-            token = token_file.readline().strip()
+        token = get_jwt()
     except FileNotFoundError:
         pass
 
