@@ -138,6 +138,40 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
+    userAlbums:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: user_albums
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: album_uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
+            KeyType: HASH
+          - AttributeName: album_uuid
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    albumFiles:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: album_files
+        AttributeDefinitions:
+          - AttributeName: album_uuid
+            AttributeType: S
+          - AttributeName: uuid # can be album_uuid or file_uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: album_uuid
+            KeyType: HASH
+          - AttributeName: uuid
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
     contentBucket:
       Type: AWS::S3::Bucket
       Properties:

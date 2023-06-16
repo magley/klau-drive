@@ -8,7 +8,7 @@ from src.service.upload_file import FileData
 
 def list_files():
     payload = {
-        "username": session.get_username()
+        "album_uuid": f"{session.get_username()}_root",
     }
     payload_json = json.dumps(payload, default=str)
 
@@ -19,20 +19,42 @@ def list_files():
 
     if status_code == 200:
         body = r.json()
-        res_items = [
-            FileData(
-                username=i['username'],
-                uuid=i['uuid'],
-                name=i['name'],
-                type=i.get('type', ''),
-                desc=i.get('desc', ''),
-                tags=i.get('tags', []),
-                size=i.get('size', 0),
-                upload_date=datetime.fromisoformat(i.get('uploadDate', "")),
-                last_modified=datetime.fromisoformat(i.get('modificationDate', "")),
-                creation_date=datetime.fromisoformat(i.get('creationDate', "")),
-            ) for i in body
-        ]
+        res_items = []
+
+        for item in body:
+
+            print(item)
+            if item['type'] == 'file':
+                i = item['content']
+                res_items.append(
+                    FileData(
+                        username=i['username'],
+                        uuid=i['uuid'],
+                        name=i['name'],
+                        type=i.get('type', ''),
+                        desc=i.get('desc', ''),
+                        tags=i.get('tags', []),
+                        size=i.get('size', 0),
+                        upload_date=datetime.fromisoformat(i.get('uploadDate', "")),
+                        last_modified=datetime.fromisoformat(i.get('modificationDate', "")),
+                        creation_date=datetime.fromisoformat(i.get('creationDate', "")),
+                    )
+                )
+            else:
+                i = item['content']
+                res_items.append(FileData(
+                        username=i['username'],
+                        uuid=i['uuid'],
+                        name=i['name'],
+                        type='Album',
+                        desc=i.get('desc', ''),
+                        tags=i.get('tags', []),
+                        size=i.get('size', 0),
+                        upload_date=datetime.fromisoformat(i.get('uploadDate', "")),
+                        last_modified=datetime.fromisoformat(i.get('modificationDate', "")),
+                        creation_date=datetime.fromisoformat(i.get('creationDate', "")),
+                    )
+                )
 
         return res_items
     else:

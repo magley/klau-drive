@@ -44,7 +44,6 @@ def make_metadata(fname: str, desc: str, tags: List[str]) -> dict:
     metadata = {
         'username': session.get_username(),
         'uuid': str(uuid.uuid4()),
-
         'name': just_name,
         'size': size_in_bytes,
         'creationDate': creation_time,
@@ -71,6 +70,7 @@ def upload_file(fname: str, desc: str, tags: List[str]):
 
     payload = {
         "metadata": metadata,
+        "album_uuid": f"{session.get_username()}_root",
         "data": data_b64,
     }
     payload_json = json.dumps(payload, default=str)
