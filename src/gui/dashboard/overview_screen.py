@@ -13,6 +13,44 @@ from src.service.upload_file import FileData
 from src.service.list_files import list_files
 from src.service.delete_file import delete_file
 from src.service.create_album import create_album
+from src.service.move_file import move_file
+
+
+@dataclass
+class MoveFilePopup(QDialog):
+    txt_new_album: QLineEdit
+    btn_ok: QPushButton
+    owner: "FileEdit"
+
+    def __init__(self, owner: "FileEdit"):
+        QDialog.__init__(self)
+        self.owner = owner
+
+        self.setModal(True)
+        self.setWindowTitle("Move to different album")
+        self.init_gui()
+        self.make_layout()
+
+    def init_gui(self):
+        self.txt_new_album = QLineEdit()
+        self.btn_ok = QPushButton("Add")
+        self.btn_ok.clicked.connect(self.on_ok)
+
+    def make_layout(self):
+        main_layout = QVBoxLayout(self)
+
+        main_layout.addWidget(self.txt_new_album)
+        main_layout.addWidget(self.btn_ok)
+
+    def on_ok(self):
+        album_uuid = self.txt_new_album.text()
+
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        print(self.owner.file_uuid, self.owner.owner.current_album_uuid, album_uuid)
+        move_file(self.owner.owner.current_album_uuid, album_uuid, self.owner.file_uuid)
+        QApplication.restoreOverrideCursor()
+
+        self.close()
 
 
 @dataclass
@@ -65,6 +103,8 @@ class FileEdit(QGroupBox):
     lst_tags: QListWidget
     btn_switch_file: QPushButton
     btn_delete: QPushButton
+    btn_move: QPushButton
+    btn_move_dialog: MoveFilePopup
     lbl_size: QLabel
     owner: "OverviewScreen"
     new_fname: str
@@ -94,6 +134,7 @@ class FileEdit(QGroupBox):
         self.btn_update = QPushButton("Save Changes")
         self.btn_switch_file = QPushButton("Pick Different File")
         self.btn_delete = QPushButton("Delete")
+        self.btn_move = QPushButton("Move")
 
         self.txt_tag.setPlaceholderText("Enter tag name")
         self.txt_tag.textEdited.connect(self.set_btn_tag_add_enabled)
@@ -104,6 +145,7 @@ class FileEdit(QGroupBox):
         self.btn_switch_file.clicked.connect(self.pick_file)
         self.btn_delete.clicked.connect(self.delete_file)
         self.btn_update.clicked.connect(self.on_click_update)
+        self.btn_move.clicked.connect(self.on_click_move)
 
     def init_layout(self):
         layout_main = QVBoxLayout()
@@ -141,6 +183,7 @@ class FileEdit(QGroupBox):
 
         layout_main.addItem(QSpacerItem(1, 1, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
+        layout_main.addWidget(self.btn_move)
         layout_main.addWidget(self.btn_switch_file)
         layout_main.addWidget(self.btn_update)
         layout_main.addWidget(self.btn_delete)
@@ -222,6 +265,10 @@ class FileEdit(QGroupBox):
 
         if result.status_code in [401, 403, 404]:
             show_error(result.json())
+
+    def on_click_move(self):
+        self.btn_move_dialog = MoveFilePopup(self)
+        self.btn_move_dialog.show()
 
 
 @dataclass

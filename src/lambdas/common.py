@@ -127,3 +127,19 @@ def user_exists(username: str) -> bool:
     if 'Item' not in response:
         return False
     return True
+
+
+def get_album_files(album_uuid: str) -> list:
+    statement = f"""
+        SELECT * FROM {TB_ALBUM_FILES_NAME}
+        WHERE
+            {TB_ALBUM_FILES_PK}=?
+    """
+    parameters = python_obj_to_dynamo_obj([album_uuid])
+
+    response = dynamo_cli.execute_statement(    
+        Statement=statement,
+        Parameters=parameters
+    )
+
+    return response['Items']

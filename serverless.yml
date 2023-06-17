@@ -113,7 +113,16 @@ functions:
     events:
       - http:
           path: album
-          method: post 
+          method: post
+  fileMove:
+    handler: src/lambdas/lambda_move_file.lambda_move_file
+    package:
+      patterns:
+        - 'src/lambdas/lambda_move_file.py'
+    events:
+      - http:
+          path: move
+          method: put
 
 resources:
   Resources:

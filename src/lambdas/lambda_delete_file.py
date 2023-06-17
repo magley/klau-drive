@@ -41,21 +41,6 @@ def remove_single_file(username: str, album_uuid: str, file_uuid: str):
     )
 
 
-def get_album_files(album_uuid: str) -> list:
-    statement = f"""
-        SELECT * FROM {TB_ALBUM_FILES_NAME}
-        WHERE
-            {TB_ALBUM_FILES_PK}=?
-    """
-    parameters = python_obj_to_dynamo_obj([album_uuid])
-
-    response = dynamo_cli.execute_statement(    
-        Statement=statement,
-        Parameters=parameters
-    )
-
-    return response['Items']
-
 
 def remove_album(username: str, album_uuid: str):
     # Remove from user's list of albums.

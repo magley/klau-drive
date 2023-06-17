@@ -11,9 +11,6 @@ def list_files(album_uuid: str):
         "album_uuid": album_uuid
     }
     payload_json = json.dumps(payload, default=str)
-
-    print(f'{session.get_username()} {payload_json}')
-
     header = {'Authorization': f'Bearer {session.get_jwt()}'}
     r = requests.get(f'{BASE_URL}/file', data=payload_json, headers=header)
 
