@@ -269,10 +269,15 @@ class OverviewScreen(QWidget):
 
         self.btn_add_album = QPushButton("New Album")
         self.btn_add_album.clicked.connect(self.on_click_add_album)
-        self.btn_to_root = QPushButton("Jump to home")
-        self.btn_to_root.clicked.connect(self.on_click_to_root)
+        self.btn_add_album.setIcon(QIcon('res/ico_add_folder.png'))
+
         self.btn_upload = QPushButton("Upload file")
         self.btn_upload.clicked.connect(self.on_click_upload)
+        self.btn_upload.setIcon(QIcon('res/ico_add_file.png'))
+
+        self.btn_to_root = QPushButton("Jump to home")
+        self.btn_to_root.clicked.connect(self.on_click_to_root)
+        self.btn_to_root.setIcon(QIcon('res/ico_home.png'))
 
     def make_layout(self):
         layout_main = QVBoxLayout()
@@ -287,9 +292,9 @@ class OverviewScreen(QWidget):
         hsplitter.addWidget(self.edit_region)
         layout_table_edit.addWidget(hsplitter)
 
-        layout_top_bar.addWidget(self.btn_add_album)
         layout_top_bar.addWidget(self.btn_to_root)
         layout_top_bar.addItem(QSpacerItem(1, 1, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
+        layout_top_bar.addWidget(self.btn_add_album)
         layout_top_bar.addWidget(self.btn_upload)
 
         self.setLayout(layout_main)
