@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import *
 from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 import requests
+from src.gui.dashboard.upload_screen import UploadScreen
 
 import src.service.session as session
 from src.gui.common import show_success, show_error
@@ -21,7 +22,7 @@ class AddAlbumPopup(QDialog):
     parent_album_uuid: str
 
     def __init__(self, parent_album_uuid: str):
-        QWidget.__init__(self, )
+        QDialog.__init__(self, )
         self.parent_album_uuid = parent_album_uuid
 
         self.setModal(True)
@@ -70,9 +71,12 @@ class FileEdit(QGroupBox):
     new_fname: str
     tags: List[str]
 
-    def __init__(self, owner: "OverviewScreen"):
+    current_album_uuid: str
+
+    def __init__(self, owner: "OverviewScreen", current_album_uuid: str):
         QGroupBox.__init__(self)
         self.owner = owner
+        self.current_album_uuid = current_album_uuid
 
         self.init_gui()
         self.init_layout()
@@ -216,7 +220,7 @@ class FileEdit(QGroupBox):
         uuid = self.file_uuid
         
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-        result: requests.Response = delete_file(uuid)
+        result: requests.Response = delete_file(uuid, self.current_album_uuid)
         QApplication.restoreOverrideCursor()
 
         if result.status_code in [401, 403, 404]:
@@ -234,6 +238,7 @@ class OverviewScreen(QWidget):
     btn_add_album: QPushButton
     btn_add_dialog: AddAlbumPopup
     btn_to_root: QPushButton
+    btn_upload: QPushButton
 
     current_album_uuid: str
 
@@ -259,13 +264,15 @@ class OverviewScreen(QWidget):
         self.table.clicked.connect(self.on_click_item)
         self.table.itemDoubleClicked.connect(self.on_doubleclick_item)
 
-        self.edit_region = FileEdit(self)
+        self.edit_region = FileEdit(self, self.current_album_uuid)
         self.edit_region.setVisible(False)
 
         self.btn_add_album = QPushButton("New Album")
         self.btn_add_album.clicked.connect(self.on_click_add_album)
         self.btn_to_root = QPushButton("Jump to home")
         self.btn_to_root.clicked.connect(self.on_click_to_root)
+        self.btn_upload = QPushButton("Upload file")
+        self.btn_upload.clicked.connect(self.on_click_upload)
 
     def make_layout(self):
         layout_main = QVBoxLayout()
@@ -283,6 +290,7 @@ class OverviewScreen(QWidget):
         layout_top_bar.addWidget(self.btn_add_album)
         layout_top_bar.addWidget(self.btn_to_root)
         layout_top_bar.addItem(QSpacerItem(1, 1, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
+        layout_top_bar.addWidget(self.btn_upload)
 
         self.setLayout(layout_main)
 
@@ -344,3 +352,7 @@ class OverviewScreen(QWidget):
 
     def on_click_to_root(self):
         self.open_folder(f"{session.get_username()}_root")
+
+    def on_click_upload(self):
+        self.btn_add_dialog = UploadScreen(self.current_album_uuid)
+        self.btn_add_dialog.show()

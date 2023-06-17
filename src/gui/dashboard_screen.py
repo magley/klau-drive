@@ -9,14 +9,14 @@ from src.gui.dashboard.upload_screen import UploadScreen
 class DashboardScreen(QTabWidget):
     owner: QStackedWidget
     TAB_OVERVIEW = 0
-    TAB_UPLOAD = 1
+    #TAB_UPLOAD = 1
 
     def __init__(self, owner: QStackedWidget):
         QTabWidget.__init__(self)
         self.owner = owner
 
         DashboardScreen.TAB_OVERVIEW = self.addTab(OverviewScreen(self), 'Overview')
-        DashboardScreen.TAB_UPLOAD = self.addTab(UploadScreen(self), 'Upload')
+        #DashboardScreen.TAB_UPLOAD = self.addTab(UploadScreen(self), 'Upload')
 
         self.tabBarClicked.connect(self.handle_tabbar_clicked)
 

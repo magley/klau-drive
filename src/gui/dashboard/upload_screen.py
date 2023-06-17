@@ -6,7 +6,7 @@ from src.service.upload_file import upload_file
 
 
 @dataclass
-class UploadScreen(QWidget):
+class UploadScreen(QDialog):
     btn_pick: QPushButton
     lbl_fname: QLabel
     txt_desc: QTextEdit
@@ -18,12 +18,12 @@ class UploadScreen(QWidget):
 
     tags: List[str]
     fname: str
-    owner: QTabWidget
+    parent_album_uuid: str
 
-    def __init__(self, owner: QTabWidget):
-        QWidget.__init__(self)
-        
-        self.owner = owner
+    def __init__(self, parent_album_uuid: str):
+        QDialog.__init__(self, )
+        self.parent_album_uuid = parent_album_uuid
+
         self.tags = []
         self.fname = ""
         
@@ -139,7 +139,9 @@ class UploadScreen(QWidget):
 
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         
-        upload_file(fname, desc, tags)
+        upload_file(fname, desc, tags, self.parent_album_uuid)
 
         self.clear_form()
         QApplication.restoreOverrideCursor()
+
+        self.close()

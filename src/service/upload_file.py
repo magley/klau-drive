@@ -64,13 +64,13 @@ def make_data_base64(fname: str) -> bytes:
     return file_data_base64
 
 
-def upload_file(fname: str, desc: str, tags: List[str]):
+def upload_file(fname: str, desc: str, tags: List[str], album_uuid: str):
     metadata: dict = make_metadata(fname, desc, tags)
     data_b64: bytes = make_data_base64(fname)
 
     payload = {
         "metadata": metadata,
-        "album_uuid": f"{session.get_username()}_root",
+        "album_uuid": album_uuid,
         "data": data_b64,
     }
     payload_json = json.dumps(payload, default=str)

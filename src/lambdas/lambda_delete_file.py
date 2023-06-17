@@ -1,6 +1,4 @@
 from .common import *
-import base64
-
 
 def lambda_delete_file(event: dict, context):
     body: dict = json.loads(event['body'])
@@ -12,6 +10,8 @@ def lambda_delete_file(event: dict, context):
     
     album_uuid: dict = body['album_uuid']
     file_uuid: str = body[CONTENT_METADATA_TB_SK]
+
+    # TODO: Check if file is album and if so then you delete its children.
 
     key = {
         CONTENT_METADATA_TB_PK: username,
