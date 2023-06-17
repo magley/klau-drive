@@ -27,7 +27,7 @@ def list_files():
                 res_items.append(
                     FileData(
                         username=i['username'],
-                        uuid=i['uuid'],
+                        uuid=item['uuid'],
                         name=i['name'],
                         type=i.get('type', ''),
                         desc=i.get('desc', ''),
@@ -42,15 +42,15 @@ def list_files():
                 i = item['content']
                 res_items.append(FileData(
                         username=i['username'],
-                        uuid=i['uuid'],
+                        uuid=item['uuid'],
                         name=i['name'],
                         type='Album',
                         desc=i.get('desc', ''),
                         tags=i.get('tags', []),
                         size=i.get('size', 0),
-                        upload_date=datetime.fromisoformat(i.get('uploadDate', "")),
-                        last_modified=datetime.fromisoformat(i.get('modificationDate', "")),
-                        creation_date=datetime.fromisoformat(i.get('creationDate', "")),
+                        upload_date=datetime.fromisoformat(i.get('uploadDate', datetime.now().isoformat())),
+                        last_modified=datetime.fromisoformat(i.get('modificationDate', datetime.now().isoformat())),
+                        creation_date=datetime.fromisoformat(i.get('creationDate', datetime.now().isoformat())),
                     )
                 )
 

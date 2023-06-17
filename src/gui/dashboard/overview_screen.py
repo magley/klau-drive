@@ -11,6 +11,7 @@ from src.service.update_file import update_file
 from src.service.upload_file import FileData
 from src.service.list_files import list_files
 from src.service.delete_file import delete_file
+from src.service.create_album import create_album
 
 
 @dataclass
@@ -43,7 +44,7 @@ class AddAlbumPopup(QDialog):
         album_name = self.txt_name.text()
 
         print(f"Add album: {album_name}, as child of album with uuid: {self.parent_album_uuid}")
-        # Do the thing.
+        create_album(self.parent_album_uuid, album_name)
         self.close()
 
 
@@ -239,7 +240,7 @@ class OverviewScreen(QWidget):
         self.current_album_uuid = f"{session.get_username()}_root"
 
         self.files = []
-        self.columns = ['Icon', 'Name', 'Type', 'Date Modified']
+        self.columns = ['Name', 'Type', 'Date Modified']
 
         self.init_gui()
         self.make_layout()
@@ -297,14 +298,20 @@ class OverviewScreen(QWidget):
         
     def put_file_in_table(self, file: FileData, row: int):
         pixmapi = QStyle.StandardPixmap.SP_FileIcon
+        fullname = f"{file.name} {file.type}"
+
+        if file.type == 'Album':
+            pixmapi = QStyle.StandardPixmap.SP_DirIcon
+            fullname = f"{file.name}"
+
         icon = self.style().standardIcon(pixmapi)
         icon_item = QTableWidgetItem()
         icon_item.setIcon(icon)
+        icon_item.setText(fullname)
 
         self.table.setItem(row, 0, QTableWidgetItem(icon_item))
-        self.table.setItem(row, 1, QTableWidgetItem(file.name + file.type))
-        self.table.setItem(row, 2, QTableWidgetItem(file.type))
-        self.table.setItem(row, 3, QTableWidgetItem(file.last_modified.strftime('%a %d %b %Y, %I:%M%p')))
+        self.table.setItem(row, 1, QTableWidgetItem(file.type))
+        self.table.setItem(row, 2, QTableWidgetItem(file.last_modified.strftime('%a %d %b %Y, %I:%M%p')))
 
     def on_click_item(self, item: QModelIndex):
         self.edit_region.on_selected_file(self.files[item.row()])

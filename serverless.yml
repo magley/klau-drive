@@ -104,7 +104,16 @@ functions:
     events:
       - http:
           path: file
-          method: delete   
+          method: delete  
+  albumAdd:
+    handler: src/lambdas/lambda_album_add.lambda_album_add
+    package:
+      patterns:
+        - 'src/lambdas/lambda_album_add.py'
+    events:
+      - http:
+          path: album
+          method: post 
 
 resources:
   Resources:
