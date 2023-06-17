@@ -74,7 +74,7 @@ def lambda_delete_file(event: dict, context):
     album_uuid: dict = body['album_uuid']
     file_uuid: str = body['uuid']
 
-    if file_uuid.contains('_root'): # Root folder
+    if '_root' in file_uuid: # If it's a root folder
         return http_response("Cannot delete root album!", 400)
 
     delete(username, album_uuid, file_uuid)
