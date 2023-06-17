@@ -5,11 +5,47 @@ from PyQt6.QtGui import *
 from PyQt6.QtCore import *
 import requests
 
+import src.service.session as session
 from src.gui.common import show_success, show_error
 from src.service.update_file import update_file
 from src.service.upload_file import FileData
 from src.service.list_files import list_files
 from src.service.delete_file import delete_file
+
+
+@dataclass
+class AddAlbumPopup(QDialog):
+    txt_name: QLineEdit
+    btn_ok: QPushButton
+    parent_album_uuid: str
+
+    def __init__(self, parent_album_uuid: str):
+        QWidget.__init__(self, )
+        self.parent_album_uuid = parent_album_uuid
+
+        self.setModal(True)
+        self.setWindowTitle("Add new album")
+        self.init_gui()
+        self.make_layout()
+
+    def init_gui(self):
+        self.txt_name = QLineEdit()
+        self.btn_ok = QPushButton("Add")
+        self.btn_ok.clicked.connect(self.on_ok)
+
+    def make_layout(self):
+        main_layout = QVBoxLayout(self)
+
+        main_layout.addWidget(self.txt_name)
+        main_layout.addWidget(self.btn_ok)
+
+    def on_ok(self):
+        album_name = self.txt_name.text()
+
+        print(f"Add album: {album_name}, as child of album with uuid: {self.parent_album_uuid}")
+        # Do the thing.
+        self.close()
+
 
 @dataclass
 class FileEdit(QGroupBox):
@@ -183,7 +219,6 @@ class FileEdit(QGroupBox):
             show_error(result.json())
 
 
-
 @dataclass
 class OverviewScreen(QWidget):
     owner: QTabWidget
@@ -192,9 +227,16 @@ class OverviewScreen(QWidget):
     files: List[FileData]
     columns: List[str]
 
+    btn_add_album: QPushButton
+    btn_add_dialog: AddAlbumPopup
+
+    current_album_uuid: str
+
     def __init__(self, owner: QTabWidget):
         QWidget.__init__(self)
         self.owner = owner
+
+        self.current_album_uuid = f"{session.get_username()}_root"
 
         self.files = []
         self.columns = ['Icon', 'Name', 'Type', 'Date Modified']
@@ -214,14 +256,24 @@ class OverviewScreen(QWidget):
         self.edit_region = FileEdit(self)
         self.edit_region.setVisible(False)
 
+        self.btn_add_album = QPushButton("New Album")
+        self.btn_add_album.clicked.connect(self.on_click_add_album)
+
     def make_layout(self):
-        layout_main = QHBoxLayout()
+        layout_main = QVBoxLayout()
+        layout_top_bar = QHBoxLayout()
+        layout_table_edit = QHBoxLayout()
+
+        layout_main.addLayout(layout_top_bar)
+        layout_main.addLayout(layout_table_edit)
         
         hsplitter = QSplitter(Qt.Orientation.Horizontal)
         hsplitter.addWidget(self.table)
         hsplitter.addWidget(self.edit_region)
+        layout_table_edit.addWidget(hsplitter)
 
-        layout_main.addWidget(hsplitter)
+        layout_top_bar.addWidget(self.btn_add_album)
+        layout_top_bar.addItem(QSpacerItem(1, 1, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
 
         self.setLayout(layout_main)
 
@@ -257,3 +309,7 @@ class OverviewScreen(QWidget):
     def on_click_item(self, item: QModelIndex):
         self.edit_region.on_selected_file(self.files[item.row()])
         self.edit_region.setVisible(True)
+
+    def on_click_add_album(self):
+        self.btn_add_dialog = AddAlbumPopup(self.current_album_uuid)
+        self.btn_add_dialog.show()
