@@ -14,13 +14,17 @@ from src.service.list_files import list_files
 from src.service.delete_file import delete_file
 from src.service.create_album import create_album
 from src.service.move_file import move_file
+from src.service.get_albums import get_albums
 
 
 @dataclass
 class MoveFilePopup(QDialog):
-    txt_new_album: QLineEdit
     btn_ok: QPushButton
     owner: "FileEdit"
+    lst_albums: QListView
+    lst_albums_model: QStandardItemModel()
+    available_albums: List
+    selected_row: int
 
     def __init__(self, owner: "FileEdit"):
         QDialog.__init__(self)
@@ -28,6 +32,9 @@ class MoveFilePopup(QDialog):
 
         self.setModal(True)
         self.setWindowTitle("Move to different album")
+        self.available_albums = get_albums()
+        self.selected_row = 0
+
         self.init_gui()
         self.make_layout()
 
@@ -35,18 +42,32 @@ class MoveFilePopup(QDialog):
         self.txt_new_album = QLineEdit()
         self.btn_ok = QPushButton("Add")
         self.btn_ok.clicked.connect(self.on_ok)
+        self.lst_albums = QListView()
+        self.lst_albums_model = QStandardItemModel()
+        self.lst_albums.setModel(self.lst_albums_model)
+        self.lst_albums.clicked.connect(self.on_click_row)
+        self.lst_albums.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+
+        for album in self.available_albums:
+            self.lst_albums_model.appendRow(QStandardItem(album['name']))
 
     def make_layout(self):
         main_layout = QVBoxLayout(self)
 
-        main_layout.addWidget(self.txt_new_album)
+        main_layout.addWidget(self.lst_albums)
         main_layout.addWidget(self.btn_ok)
 
+    def on_click_row(self, index: QModelIndex):
+        self.selected_row = index.row()
+
     def on_ok(self):
-        album_uuid = self.txt_new_album.text()
+        album_uuid = self.available_albums[self.selected_row]['album_uuid']
+
+        if self.owner.file_uuid == album_uuid:
+            show_error('Cannot move album inside itself.')
+            return
 
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-        print(self.owner.file_uuid, self.owner.owner.current_album_uuid, album_uuid)
         move_file(self.owner.owner.current_album_uuid, album_uuid, self.owner.file_uuid)
         QApplication.restoreOverrideCursor()
 

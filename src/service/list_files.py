@@ -21,7 +21,6 @@ def list_files(album_uuid: str):
         res_items = []
 
         for item in body:
-            print(item)
             if item['type'] == 'file':
                 i = item['content']
                 res_items.append(

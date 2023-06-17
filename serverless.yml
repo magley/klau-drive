@@ -123,6 +123,16 @@ functions:
       - http:
           path: move
           method: put
+  getAlbums:
+    handler: src/lambdas/lambda_get_albums.lambda_get_albums
+    package:
+      patterns:
+        - 'src/lambdas/lambda_get_albums.py'
+    events:
+      - http:
+          path: album
+          method: get
+
 
 resources:
   Resources:
