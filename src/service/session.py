@@ -15,7 +15,7 @@ def get_username() -> str:
     try:
         token = get_jwt()
     except FileNotFoundError:
-        pass
+        return "" # Todo: bad.
 
     decoded = jwt.decode(token, options={"verify_signature": False})
     return decoded['username']

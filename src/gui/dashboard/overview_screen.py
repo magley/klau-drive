@@ -19,11 +19,11 @@ from src.service.create_album import create_album
 class AddAlbumPopup(QDialog):
     txt_name: QLineEdit
     btn_ok: QPushButton
-    parent_album_uuid: str
+    owner: "OverviewScreen"
 
-    def __init__(self, parent_album_uuid: str):
-        QDialog.__init__(self, )
-        self.parent_album_uuid = parent_album_uuid
+    def __init__(self, owner: "OverviewScreen"):
+        QDialog.__init__(self)
+        self.owner = owner
 
         self.setModal(True)
         self.setWindowTitle("Add new album")
@@ -45,8 +45,7 @@ class AddAlbumPopup(QDialog):
         album_name = self.txt_name.text()
 
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-        print(self.parent_album_uuid)
-        create_album(self.parent_album_uuid, album_name)
+        create_album(self.owner.current_album_uuid, album_name)
         QApplication.restoreOverrideCursor()
 
         self.close()
@@ -71,12 +70,10 @@ class FileEdit(QGroupBox):
     new_fname: str
     tags: List[str]
 
-    current_album_uuid: str
 
-    def __init__(self, owner: "OverviewScreen", current_album_uuid: str):
+    def __init__(self, owner: "OverviewScreen"):
         QGroupBox.__init__(self)
         self.owner = owner
-        self.current_album_uuid = current_album_uuid
 
         self.init_gui()
         self.init_layout()
@@ -218,9 +215,9 @@ class FileEdit(QGroupBox):
 
     def delete_file(self):
         uuid = self.file_uuid
-        
+   
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-        result: requests.Response = delete_file(uuid, self.current_album_uuid)
+        result: requests.Response = delete_file(uuid, self.owner.current_album_uuid)
         QApplication.restoreOverrideCursor()
 
         if result.status_code in [401, 403, 404]:
@@ -240,13 +237,20 @@ class OverviewScreen(QWidget):
     btn_to_root: QPushButton
     btn_upload: QPushButton
 
-    current_album_uuid: str
+    _current_album_uuid: str
+
+    @property
+    def current_album_uuid(self) -> str:
+        if self._current_album_uuid is None:
+            return f"{session.get_username()}_root"
+        return self._current_album_uuid
 
     def __init__(self, owner: QTabWidget):
         QWidget.__init__(self)
         self.owner = owner
 
-        self.current_album_uuid = f"{session.get_username()}_root"
+        self._current_album_uuid = None
+        print(self.current_album_uuid)
 
         self.files = []
         self.columns = ['Name', 'Type', 'Date Modified']
@@ -264,7 +268,7 @@ class OverviewScreen(QWidget):
         self.table.clicked.connect(self.on_click_item)
         self.table.itemDoubleClicked.connect(self.on_doubleclick_item)
 
-        self.edit_region = FileEdit(self, self.current_album_uuid)
+        self.edit_region = FileEdit(self)
         self.edit_region.setVisible(False)
 
         self.btn_add_album = QPushButton("New Album")
@@ -303,7 +307,6 @@ class OverviewScreen(QWidget):
         self.load_files_from_cloud()
 
     def load_files_from_cloud(self):
-        print(self.current_album_uuid)
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         self.clear_list()
 
@@ -345,14 +348,13 @@ class OverviewScreen(QWidget):
         file: FileData = self.files[item.row()]
         if file.type == 'Album':
             self.open_folder(file.uuid)
-            print(f"Open folder {file.uuid}")    
 
     def on_click_add_album(self):
-        self.btn_add_dialog = AddAlbumPopup(self.current_album_uuid)
+        self.btn_add_dialog = AddAlbumPopup(self)
         self.btn_add_dialog.show()
 
     def open_folder(self, uuid):
-        self.current_album_uuid = uuid
+        self._current_album_uuid = uuid
         self.refresh()
 
     def on_click_to_root(self):

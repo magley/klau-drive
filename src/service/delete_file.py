@@ -6,8 +6,8 @@ import src.service.session as session
 
 def delete_file(file_uuid: str, album_uuid: str) -> requests.Response:
     payload = {
-        "album_uuid": album_uuid,
         "uuid": file_uuid,
+        "album_uuid": album_uuid,
     }
     payload_json = json.dumps(payload, default=str)
 
