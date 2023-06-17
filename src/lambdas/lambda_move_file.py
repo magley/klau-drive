@@ -33,6 +33,8 @@ def lambda_move_file(event: dict, context):
     album_old_uuid: str = body['album_old_uuid']
     album_new_uuid: str = body['album_new_uuid']
 
+    # TODO: Check if album_new_uuid is a valid album...
+
     key_old = {
         TB_ALBUM_FILES_PK: album_old_uuid,
         TB_ALBUM_FILES_SK: uuid

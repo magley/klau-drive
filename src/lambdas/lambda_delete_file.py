@@ -69,9 +69,13 @@ def lambda_delete_file(event: dict, context):
     username: str = jwt_decode(headers)
     if not user_exists(username):
         return http_response("Forbidden", 401)
+
     
     album_uuid: dict = body['album_uuid']
     file_uuid: str = body['uuid']
+
+    if file_uuid.contains('_root'): # Root folder
+        return http_response("Cannot delete root album!", 400)
 
     delete(username, album_uuid, file_uuid)
 
