@@ -7,7 +7,7 @@ import uuid
 
 def create_album(parent_uuid: str, name: str) -> requests.Response:
     payload = {
-        "parent_uuid": f"{session.get_username()}_root",
+        "parent_uuid": parent_uuid,
         "uuid": str(uuid.uuid4()),
         "name": name
     }

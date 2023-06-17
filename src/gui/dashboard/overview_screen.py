@@ -43,8 +43,11 @@ class AddAlbumPopup(QDialog):
     def on_ok(self):
         album_name = self.txt_name.text()
 
-        print(f"Add album: {album_name}, as child of album with uuid: {self.parent_album_uuid}")
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        print(self.parent_album_uuid)
         create_album(self.parent_album_uuid, album_name)
+        QApplication.restoreOverrideCursor()
+
         self.close()
 
 
@@ -230,6 +233,7 @@ class OverviewScreen(QWidget):
 
     btn_add_album: QPushButton
     btn_add_dialog: AddAlbumPopup
+    btn_to_root: QPushButton
 
     current_album_uuid: str
 
@@ -253,12 +257,15 @@ class OverviewScreen(QWidget):
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.setShowGrid(False)
         self.table.clicked.connect(self.on_click_item)
+        self.table.itemDoubleClicked.connect(self.on_doubleclick_item)
 
         self.edit_region = FileEdit(self)
         self.edit_region.setVisible(False)
 
         self.btn_add_album = QPushButton("New Album")
         self.btn_add_album.clicked.connect(self.on_click_add_album)
+        self.btn_to_root = QPushButton("Jump to home")
+        self.btn_to_root.clicked.connect(self.on_click_to_root)
 
     def make_layout(self):
         layout_main = QVBoxLayout()
@@ -274,6 +281,7 @@ class OverviewScreen(QWidget):
         layout_table_edit.addWidget(hsplitter)
 
         layout_top_bar.addWidget(self.btn_add_album)
+        layout_top_bar.addWidget(self.btn_to_root)
         layout_top_bar.addItem(QSpacerItem(1, 1, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
 
         self.setLayout(layout_main)
@@ -282,15 +290,18 @@ class OverviewScreen(QWidget):
         self.load_files_from_cloud()
 
     def load_files_from_cloud(self):
+        print(self.current_album_uuid)
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         self.clear_list()
 
-        self.files = list_files()
+        self.files = list_files(self.current_album_uuid)
         self.table.setRowCount(len(self.files))
 
         for row, file in enumerate(self.files):
             file: FileData = file
             self.put_file_in_table(file, row)
             self.table.setRowHeight(row, 8)
+        QApplication.restoreOverrideCursor()
 
     def clear_list(self):
         self.files.clear()
@@ -317,6 +328,19 @@ class OverviewScreen(QWidget):
         self.edit_region.on_selected_file(self.files[item.row()])
         self.edit_region.setVisible(True)
 
+    def on_doubleclick_item(self, item: QModelIndex):
+        file: FileData = self.files[item.row()]
+        if file.type == 'Album':
+            self.open_folder(file.uuid)
+            print(f"Open folder {file.uuid}")    
+
     def on_click_add_album(self):
         self.btn_add_dialog = AddAlbumPopup(self.current_album_uuid)
         self.btn_add_dialog.show()
+
+    def open_folder(self, uuid):
+        self.current_album_uuid = uuid
+        self.refresh()
+
+    def on_click_to_root(self):
+        self.open_folder(f"{session.get_username()}_root")

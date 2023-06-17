@@ -6,9 +6,9 @@ import src.service.session as session
 from src.service.upload_file import FileData
 
 
-def list_files():
+def list_files(album_uuid: str):
     payload = {
-        "album_uuid": f"{session.get_username()}_root",
+        "album_uuid": album_uuid
     }
     payload_json = json.dumps(payload, default=str)
 
