@@ -15,10 +15,22 @@ def lambda_upload_file(event: dict, context):
     metadata: dict = body['metadata']
     metadata_dynamojson: str = python_obj_to_dynamo_obj(metadata)
     data: bytes = base64.b64decode(body['data'])
+    album_uuid: str = body['album_uuid']
+
+    tb_album_files_record: dict = python_obj_to_dynamo_obj({
+        TB_ALBUM_FILES_PK: album_uuid,
+        TB_ALBUM_FILES_SK: metadata['uuid'],
+        TB_ALBUM_FILES_FIELD_TYPE: TB_ALBUM_FILES_FIELD_TYPE__FILE,
+    })
 
     dynamo_cli.put_item(
         TableName=CONTENT_METADATA_TB_NAME,
         Item=metadata_dynamojson
+    )
+
+    dynamo_cli.put_item(
+        TableName=TB_ALBUM_FILES_NAME,
+        Item=tb_album_files_record
     )
 
     s3_cli.upload_fileobj(

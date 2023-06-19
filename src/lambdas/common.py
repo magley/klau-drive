@@ -12,6 +12,19 @@ CONTENT_METADATA_TB_SK = "uuid"
 USER_TB_NAME = environ["USER_TB_NAME"]
 USER_TB_PK = "username"
 
+TB_USER_ALBUMS_NAME = "user_albums" # TODO: Use environ[...] like USER_TB_NAME.
+TB_USER_ALBUMS_PK = "username"
+TB_USER_ALBUMS_SK = "album_uuid"
+TB_USER_ALBUMS_FIELD_NAME = "name"
+
+TB_ALBUM_FILES_NAME = "album_files"
+TB_ALBUM_FILES_PK = "album_uuid"
+TB_ALBUM_FILES_SK = "uuid"
+
+TB_ALBUM_FILES_FIELD_TYPE__FILE = "file"
+TB_ALBUM_FILES_FIELD_TYPE__ALBUM = "album"
+TB_ALBUM_FILES_FIELD_TYPE = "type" # TB_ALBUM_FILES_FIELD_TYPE__*
+
 ACCESS_KEY = 'test'
 SECRET_KEY = 'test'
 REGION = 'us-east-1'
@@ -25,15 +38,23 @@ s3_cli = session.client('s3', endpoint_url=ENDPOINT)
 dynamo_cli = session.client('dynamodb', endpoint_url=ENDPOINT)
 
 
-def python_obj_to_dynamo_obj(python_obj: dict) -> dict:
+def python_obj_to_dynamo_obj(python_obj):
     serializer = TypeSerializer()
-    return {
-        k: serializer.serialize(v)
-        for k, v in python_obj.items()
-    }
+
+    if type(python_obj) is dict:
+        return {
+            k: serializer.serialize(v)
+            for k, v in python_obj.items()
+        }
+    elif type(python_obj) is list:
+        return [
+            serializer.serialize(o) for o in python_obj
+        ]
+    else:
+        return serializer.serialize(python_obj)
 
 
-def dynamo_obj_to_python_obj(dynamo_obj: dict) -> dict:
+def dynamo_obj_to_python_obj(dynamo_obj):
     deserializer = TypeDeserializer()
     return {
         k: deserializer.deserialize(v)
@@ -106,3 +127,19 @@ def user_exists(username: str) -> bool:
     if 'Item' not in response:
         return False
     return True
+
+
+def get_album_files(album_uuid: str) -> list:
+    statement = f"""
+        SELECT * FROM {TB_ALBUM_FILES_NAME}
+        WHERE
+            {TB_ALBUM_FILES_PK}=?
+    """
+    parameters = python_obj_to_dynamo_obj([album_uuid])
+
+    response = dynamo_cli.execute_statement(    
+        Statement=statement,
+        Parameters=parameters
+    )
+
+    return response['Items']

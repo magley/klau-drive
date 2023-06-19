@@ -50,7 +50,7 @@ def update_file(uuid: str, new_name: str, new_desc: str, new_tags: List[str], ne
 
     payload_json = json.dumps(payload, default=str)
 
-    print(f"Upading http://localhost:4566/content/{metadata['uuid']}")
+    print(f"Updating http://localhost:4566/content/{metadata['uuid']}")
 
     header = {'Authorization': f'Bearer {session.get_jwt()}'}
     requests.put(f'{BASE_URL}/file', data=payload_json, headers=header)

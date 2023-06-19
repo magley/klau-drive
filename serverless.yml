@@ -104,7 +104,35 @@ functions:
     events:
       - http:
           path: file
-          method: delete   
+          method: delete  
+  albumAdd:
+    handler: src/lambdas/lambda_album_add.lambda_album_add
+    package:
+      patterns:
+        - 'src/lambdas/lambda_album_add.py'
+    events:
+      - http:
+          path: album
+          method: post
+  fileMove:
+    handler: src/lambdas/lambda_move_file.lambda_move_file
+    package:
+      patterns:
+        - 'src/lambdas/lambda_move_file.py'
+    events:
+      - http:
+          path: move
+          method: put
+  getAlbums:
+    handler: src/lambdas/lambda_get_albums.lambda_get_albums
+    package:
+      patterns:
+        - 'src/lambdas/lambda_get_albums.py'
+    events:
+      - http:
+          path: album
+          method: get
+
 
 resources:
   Resources:
@@ -132,6 +160,40 @@ resources:
             AttributeType: S
         KeySchema:
           - AttributeName: username
+            KeyType: HASH
+          - AttributeName: uuid
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    userAlbums:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: user_albums
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: album_uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
+            KeyType: HASH
+          - AttributeName: album_uuid
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    albumFiles:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: album_files
+        AttributeDefinitions:
+          - AttributeName: album_uuid
+            AttributeType: S
+          - AttributeName: uuid # can be album_uuid or file_uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: album_uuid
             KeyType: HASH
           - AttributeName: uuid
             KeyType: RANGE
