@@ -132,6 +132,15 @@ functions:
       - http:
           path: album
           method: get
+  downloadFile:
+    handler: src/lambdas/lambda_download_file.lambda_download_file
+    package:
+      patterns:
+        - 'src/lambdas/lambda_download_file.py'
+    events:
+      - http:
+          path: file-download
+          method: get
 
 
 resources:
