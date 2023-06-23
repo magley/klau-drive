@@ -47,8 +47,6 @@ def lambda_download_file(event: dict, context):
         return http_response("Forbidden", 401)
  
     file_uuid = body['file_uuid']
-    bucket_uri = f'{CONTENT_BUCKET_NAME}/{file_uuid}'
-    bucket_key = file_uuid
     file = get_file(username, file_uuid)
 
     if file is None:
