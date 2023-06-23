@@ -302,7 +302,7 @@ class FileEdit(QGroupBox):
         self.btn_move_dialog.show()
 
     def on_click_download(self):
-        fname, _ = QFileDialog.getSaveFileName(self, 'Download File')
+        fname, _ = QFileDialog.getSaveFileName(self, 'Download File', directory = f'{self.selected_file.name}{self.selected_file.type}')
         if fname == "":
             fname = None
 
