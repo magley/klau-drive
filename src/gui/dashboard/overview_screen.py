@@ -17,6 +17,8 @@ from src.service.move_file import move_file
 from src.service.get_albums import get_albums
 from src.service.download_file import download_file
 
+FILE_TYPE_ALBUM = 'Album'
+
 
 @dataclass
 class MoveFilePopup(QDialog):
@@ -235,6 +237,8 @@ class FileEdit(QGroupBox):
 
         self.selected_file = file
 
+        self.btn_download.setEnabled(file.type != FILE_TYPE_ALBUM)
+
     def on_click_update(self):
         new_name: str = self.txt_name.text()
         new_desc: str = self.txt_desc.toPlainText()
@@ -422,7 +426,7 @@ class OverviewScreen(QWidget):
         pixmapi = QStyle.StandardPixmap.SP_FileIcon
         fullname = f"{file.name} {file.type}"
 
-        if file.type == 'Album':
+        if file.type == FILE_TYPE_ALBUM:
             pixmapi = QStyle.StandardPixmap.SP_DirIcon
             fullname = f"{file.name}"
 
@@ -441,7 +445,7 @@ class OverviewScreen(QWidget):
 
     def on_doubleclick_item(self, item: QModelIndex):
         file: FileData = self.files[item.row()]
-        if file.type == 'Album':
+        if file.type == FILE_TYPE_ALBUM:
             self.open_folder(file.uuid)
 
     def on_click_add_album(self):
