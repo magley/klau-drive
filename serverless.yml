@@ -250,11 +250,32 @@ resources:
       Properties:
         TableName: share
         AttributeDefinitions:
+          - AttributeName: owner
+            AttributeType: S
+          - AttributeName: uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: owner
+            KeyType: HASH
+          - AttributeName: uuid
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    sharedWithMe:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: sharedWithMe
+        AttributeDefinitions:
           - AttributeName: username
+            AttributeType: S
+          - AttributeName: uuid
             AttributeType: S
         KeySchema:
           - AttributeName: username
             KeyType: HASH
+          - AttributeName: uuid
+            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5

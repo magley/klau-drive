@@ -16,6 +16,8 @@ from src.service.create_album import create_album
 from src.service.move_file import move_file
 from src.service.get_albums import get_albums
 from src.service.download_file import download_file
+from src.service.share import share
+
 
 FILE_TYPE_ALBUM = 'Album'
 
@@ -114,6 +116,42 @@ class AddAlbumPopup(QDialog):
 
 
 @dataclass
+class SharePopup(QDialog):
+    txt_name: QLineEdit
+    btn_ok: QPushButton
+    owner: "FileEdit"
+
+    def __init__(self, owner: "FileEdit"):
+        QDialog.__init__(self)
+        self.owner = owner
+
+        self.setModal(True)
+        self.setWindowTitle("Share with user:")
+        self.init_gui()
+        self.make_layout()
+
+    def init_gui(self):
+        self.txt_name = QLineEdit()
+        self.btn_ok = QPushButton("Add")
+        self.btn_ok.clicked.connect(self.on_ok)
+
+    def make_layout(self):
+        main_layout = QVBoxLayout(self)
+
+        main_layout.addWidget(self.txt_name)
+        main_layout.addWidget(self.btn_ok)
+
+    def on_ok(self):
+        username = self.txt_name.text()
+
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        share(username, self.owner.file_uuid, self.owner.selected_file.type == FILE_TYPE_ALBUM)
+        QApplication.restoreOverrideCursor()
+
+        self.close()
+
+
+@dataclass
 class FileEdit(QGroupBox):
     file_uuid: str
     txt_name: QLineEdit
@@ -130,6 +168,8 @@ class FileEdit(QGroupBox):
     btn_delete: QPushButton
     btn_move: QPushButton
     btn_move_dialog: MoveFilePopup
+    btn_share: QPushButton
+    btn_share_dialog: SharePopup
     lbl_size: QLabel
     owner: "OverviewScreen"
     new_fname: str
@@ -163,6 +203,7 @@ class FileEdit(QGroupBox):
         self.btn_delete = QPushButton("Delete")
         self.btn_move = QPushButton("Move")
         self.btn_download = QPushButton("Download")
+        self.btn_share = QPushButton("Share")
 
         self.txt_tag.setPlaceholderText("Enter tag name")
         self.txt_tag.textEdited.connect(self.set_btn_tag_add_enabled)
@@ -175,6 +216,7 @@ class FileEdit(QGroupBox):
         self.btn_update.clicked.connect(self.on_click_update)
         self.btn_move.clicked.connect(self.on_click_move)
         self.btn_download.clicked.connect(self.on_click_download)
+        self.btn_share.clicked.connect(self.on_click_share)
 
     def init_layout(self):
         layout_main = QVBoxLayout()
@@ -217,6 +259,7 @@ class FileEdit(QGroupBox):
         layout_main.addWidget(self.btn_update)
         layout_main.addWidget(self.btn_delete)
         layout_main.addWidget(self.btn_download)
+        layout_main.addWidget(self.btn_share)
 
 
         self.setLayout(layout_main)
@@ -304,6 +347,11 @@ class FileEdit(QGroupBox):
     def on_click_move(self):
         self.btn_move_dialog = MoveFilePopup(self)
         self.btn_move_dialog.show()
+
+    def on_click_share(self):
+        self.btn_share_dialog = SharePopup(self)
+        self.btn_share_dialog.show()
+        
 
     def on_click_download(self):
         fname, _ = QFileDialog.getSaveFileName(self, 'Download File', directory = f'{self.selected_file.name}{self.selected_file.type}')
