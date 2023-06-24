@@ -6,6 +6,7 @@ def lambda_list_files(event: dict, context):
     body: dict = json.loads(event['body'])
     headers: dict = event['headers']
     album_uuid: str = body['album_uuid']
+    album_owner: str = body['album_owner']
 
     username: str = jwt_decode(headers)
     if not user_exists(username):
@@ -27,8 +28,8 @@ def lambda_list_files(event: dict, context):
         item = {
             "uuid": item_uuid,
             "type": item_type,
-            "shared": False,
-            "owner": username,
+            "shared": username != album_owner,
+            "owner": album_owner,
             "content": {}
         }
         result.append(item)

@@ -401,6 +401,7 @@ class OverviewScreen(QWidget):
     btn_upload: QPushButton
 
     _current_album_uuid: str
+    _current_album_owner: str
 
     @property
     def current_album_uuid(self) -> str:
@@ -413,6 +414,7 @@ class OverviewScreen(QWidget):
         self.owner = owner
 
         self._current_album_uuid = None
+        self._current_album_owner = None
 
         self.files = []
         self.columns = ['Name', 'Type', 'Date Modified']
@@ -472,7 +474,7 @@ class OverviewScreen(QWidget):
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         self.clear_list()
 
-        self.files = list_files(self.current_album_uuid)
+        self.files = list_files(self.current_album_uuid, self._current_album_owner)
         self.table.setRowCount(len(self.files))
 
         for row, file in enumerate(self.files):
@@ -509,18 +511,19 @@ class OverviewScreen(QWidget):
     def on_doubleclick_item(self, item: QModelIndex):
         file: FileData = self.files[item.row()]
         if file.type == FILE_TYPE_ALBUM:
-            self.open_folder(file.uuid)
+            self.open_folder(file.uuid, file.owner)
 
     def on_click_add_album(self):
         self.btn_add_dialog = AddAlbumPopup(self)
         self.btn_add_dialog.show()
 
-    def open_folder(self, uuid):
+    def open_folder(self, uuid, owner):
         self._current_album_uuid = uuid
+        self._current_album_owner = owner
         self.refresh()
 
     def on_click_to_root(self):
-        self.open_folder(f"{session.get_username()}_root")
+        self.open_folder(f"{session.get_username()}_root", None)
 
     def on_click_upload(self):
         self.btn_add_dialog = UploadScreen(self.current_album_uuid)

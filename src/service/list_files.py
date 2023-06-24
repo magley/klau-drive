@@ -6,9 +6,13 @@ import src.service.session as session
 from src.service.upload_file import FileData
 
 
-def list_files(album_uuid: str):
+def list_files(album_uuid: str, album_owner: str):
+    if album_owner == None:
+        album_owner = session.get_username()
+
     payload = {
-        "album_uuid": album_uuid
+        "album_uuid": album_uuid,
+        "album_owner": album_owner
     }
     payload_json = json.dumps(payload, default=str)
     header = {'Authorization': f'Bearer {session.get_jwt()}'}
