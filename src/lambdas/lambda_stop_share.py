@@ -3,32 +3,20 @@ from .common import *
 
 def remove_share_obj(owner: str, uuid: str, username: str):
     statement1 = f"""
-        DELETE FROM {TB_SHARE_NAME}
-        WHERE
-            {TB_SHARE_PK} = ?
-                AND
-            {TB_SHARE_SK} = ?
-                AND
-            {TB_SHARE_FIELD_USER} = ?
-    """
-    statement2 = f"""
         DELETE FROM {TB_SHARED_WITH_ME_NAME}
         WHERE
             {TB_SHARED_WITH_ME_PK} = ?
                 AND
             {TB_SHARED_WITH_ME_SK} = ?
+                AND
+            {TB_SHARED_WITH_ME_FIELD_OWNER} = ?
     """
 
-    parameters1 = python_obj_to_dynamo_obj([owner, uuid, username])
-    parameters2 = python_obj_to_dynamo_obj([username, uuid])
+    parameters1 = python_obj_to_dynamo_obj([username, uuid, owner])
 
     dynamo_cli.execute_statement(  
         Statement=statement1,
         Parameters=parameters1
-    )
-    dynamo_cli.execute_statement(  
-        Statement=statement2,
-        Parameters=parameters2
     )
 
 

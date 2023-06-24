@@ -58,15 +58,20 @@ def get_shared_with_me():
     return result.json()
 
 
-def get_my_sharing():
+def get_my_sharing(with_whom_its_shared: str):
     """
         `owner` - self
         `username` - with whom it's shared
         `uuid` - UUID.
         `type` - 'folder' or 'file'
     """
+    payload = {
+        "username": with_whom_its_shared
+    }
+    payload_json = json.dumps(payload, default=str)
+
     header = {'Authorization': f'Bearer {session.get_jwt()}'}
-    result: requests.Response = requests.get(f'{session.BASE_URL}/get-sharing', headers=header)
+    result: requests.Response = requests.get(f'{session.BASE_URL}/get-sharing', data=payload_json, headers=header)
 
     if not result.ok:
         print(result)

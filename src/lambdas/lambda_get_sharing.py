@@ -1,13 +1,15 @@
 from .common import *
 
 
-def get_sharing(username: str):
+def get_sharing(owner: str, sharing_with: str):
     statement = f"""
-        SELECT * FROM {TB_SHARE_NAME}
+        SELECT * FROM {TB_SHARED_WITH_ME_NAME}
         WHERE
-            {TB_SHARE_PK}=?
+            {TB_SHARED_WITH_ME_PK}=?
+                AND
+            {TB_SHARED_WITH_ME_FIELD_OWNER}=?
     """
-    parameters = python_obj_to_dynamo_obj([username])
+    parameters = python_obj_to_dynamo_obj([sharing_with, owner])
 
     response = dynamo_cli.execute_statement(  
         Statement=statement,
@@ -22,12 +24,15 @@ def get_sharing(username: str):
 
 
 def lambda_get_sharing(event: dict, context):
+    body: dict = json.loads(event['body'])
     headers: dict = event['headers']
 
     username: str = jwt_decode(headers)
     if not user_exists(username):
         return http_response("Forbidden", 401)
+    
+    sharing_with = body['username']
  
-    result = get_sharing(username)
+    result = get_sharing(owner=username, sharing_with=sharing_with)
 
     return http_response(result, 200)

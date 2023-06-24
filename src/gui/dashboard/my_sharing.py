@@ -11,6 +11,7 @@ class MySharingScreen(QWidget):
     owner: QTabWidget
     btn_refresh_share: QPushButton
     btn_stop_share: QPushButton
+    txt_username: QLineEdit
     table: QTableWidget
     items: List
     columns: List[str]
@@ -34,6 +35,8 @@ class MySharingScreen(QWidget):
         self.btn_stop_share = QPushButton("Stop sharing")
         self.btn_stop_share.clicked.connect(self.on_click_stop_share)
 
+        self.txt_username = QLineEdit()
+
         self.table = QTableWidget()
         self.table.setColumnCount(len(self.columns))
         self.table.setHorizontalHeaderLabels(self.columns)
@@ -54,6 +57,7 @@ class MySharingScreen(QWidget):
 
         layout_table_edit.addWidget(self.table)
         
+        layout_top_bar.addWidget(self.txt_username)
         layout_top_bar.addWidget(self.btn_refresh_share)
         layout_top_bar.addWidget(self.btn_stop_share)
         self.setLayout(layout_main)
@@ -67,7 +71,7 @@ class MySharingScreen(QWidget):
         self.items.clear()
         self.table.clearContents()
 
-        self.items = get_my_sharing()
+        self.items = get_my_sharing(self.txt_username.text())
         self.table.setRowCount(len(self.items))
 
         for row, item in enumerate(self.items):       
@@ -77,8 +81,6 @@ class MySharingScreen(QWidget):
 
             self.table.setRowHeight(row, 8)
         QApplication.restoreOverrideCursor()
-
-        get_my_sharing()
 
     def on_click_item(self, item: QModelIndex):
         self.selected_item = self.items[item.row()]
