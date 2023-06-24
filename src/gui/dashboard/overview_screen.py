@@ -15,6 +15,9 @@ from src.service.delete_file import delete_file
 from src.service.create_album import create_album
 from src.service.move_file import move_file
 from src.service.get_albums import get_albums
+from src.service.download_file import download_file
+
+FILE_TYPE_ALBUM = 'Album'
 
 
 @dataclass
@@ -121,6 +124,7 @@ class FileEdit(QGroupBox):
     txt_tag: QLineEdit
     btn_tag_add: QPushButton
     btn_tag_rem: QPushButton
+    btn_download: QPushButton
     lst_tags: QListWidget
     btn_switch_file: QPushButton
     btn_delete: QPushButton
@@ -129,6 +133,7 @@ class FileEdit(QGroupBox):
     lbl_size: QLabel
     owner: "OverviewScreen"
     new_fname: str
+    selected_file: FileData
     tags: List[str]
 
 
@@ -142,6 +147,7 @@ class FileEdit(QGroupBox):
     def init_gui(self):
         self.file_uuid = ""
         self.new_fname = None
+        self.selected_file = None
         self.tags = []
         self.txt_name = QLineEdit()
         self.txt_desc = QTextEdit()
@@ -156,6 +162,7 @@ class FileEdit(QGroupBox):
         self.btn_switch_file = QPushButton("Pick Different File")
         self.btn_delete = QPushButton("Delete")
         self.btn_move = QPushButton("Move")
+        self.btn_download = QPushButton("Download")
 
         self.txt_tag.setPlaceholderText("Enter tag name")
         self.txt_tag.textEdited.connect(self.set_btn_tag_add_enabled)
@@ -167,6 +174,7 @@ class FileEdit(QGroupBox):
         self.btn_delete.clicked.connect(self.delete_file)
         self.btn_update.clicked.connect(self.on_click_update)
         self.btn_move.clicked.connect(self.on_click_move)
+        self.btn_download.clicked.connect(self.on_click_download)
 
     def init_layout(self):
         layout_main = QVBoxLayout()
@@ -208,6 +216,8 @@ class FileEdit(QGroupBox):
         layout_main.addWidget(self.btn_switch_file)
         layout_main.addWidget(self.btn_update)
         layout_main.addWidget(self.btn_delete)
+        layout_main.addWidget(self.btn_download)
+
 
         self.setLayout(layout_main)
 
@@ -224,6 +234,10 @@ class FileEdit(QGroupBox):
         for tag in file.tags:
             self.lst_tags.addItem(QListWidgetItem(tag))
             self.tags.append(tag)
+
+        self.selected_file = file
+
+        self.btn_download.setEnabled(file.type != FILE_TYPE_ALBUM)
 
     def on_click_update(self):
         new_name: str = self.txt_name.text()
@@ -290,6 +304,23 @@ class FileEdit(QGroupBox):
     def on_click_move(self):
         self.btn_move_dialog = MoveFilePopup(self)
         self.btn_move_dialog.show()
+
+    def on_click_download(self):
+        fname, _ = QFileDialog.getSaveFileName(self, 'Download File', directory = f'{self.selected_file.name}{self.selected_file.type}')
+        if fname == "":
+            fname = None
+
+        if fname is None:
+            return
+        
+        fname += self.selected_file.type
+
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        result: requests.Response = download_file(self.file_uuid)
+        QApplication.restoreOverrideCursor()
+
+        with open(fname, 'wb') as f:
+            f.write(result)
 
 
 @dataclass
@@ -395,7 +426,7 @@ class OverviewScreen(QWidget):
         pixmapi = QStyle.StandardPixmap.SP_FileIcon
         fullname = f"{file.name} {file.type}"
 
-        if file.type == 'Album':
+        if file.type == FILE_TYPE_ALBUM:
             pixmapi = QStyle.StandardPixmap.SP_DirIcon
             fullname = f"{file.name}"
 
@@ -414,7 +445,7 @@ class OverviewScreen(QWidget):
 
     def on_doubleclick_item(self, item: QModelIndex):
         file: FileData = self.files[item.row()]
-        if file.type == 'Album':
+        if file.type == FILE_TYPE_ALBUM:
             self.open_folder(file.uuid)
 
     def on_click_add_album(self):

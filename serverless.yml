@@ -132,6 +132,15 @@ functions:
       - http:
           path: album
           method: get
+  downloadFile:
+    handler: src/lambdas/lambda_download_file.lambda_download_file
+    package:
+      patterns:
+        - 'src/lambdas/lambda_download_file.py'
+    events:
+      - http:
+          path: file-download
+          method: get
 
 
 resources:
@@ -204,3 +213,9 @@ resources:
       Type: AWS::S3::Bucket
       Properties:
         BucketName: content
+        AccessControl: Private # This doesn't work?
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
