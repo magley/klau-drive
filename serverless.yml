@@ -141,6 +141,42 @@ functions:
       - http:
           path: file-download
           method: get
+  share:
+    handler: src/lambdas/lambda_share.lambda_share
+    package:
+      patterns:
+        - 'src/lambdas/lambda_share.py'
+    events:
+      - http:
+          path: share
+          method: put
+  stopShare:
+    handler: src/lambdas/lambda_stop_share.lambda_stop_share
+    package:
+      patterns:
+        - 'src/lambdas/lambda_stop_share.py'
+    events:
+      - http:
+          path: share-stop
+          method: put
+  getSharing:
+    handler: src/lambdas/lambda_get_sharing.lambda_get_sharing
+    package:
+      patterns:
+        - 'src/lambdas/lambda_get_sharing.py'
+    events:
+      - http:
+          path: get-sharing
+          method: get
+  getShared:
+    handler: src/lambdas/lambda_get_shared.lambda_get_shared
+    package:
+      patterns:
+        - 'src/lambdas/lambda_get_shared.py'
+    events:
+      - http:
+          path: get-sharing
+          method: get
 
 
 resources:
@@ -206,6 +242,19 @@ resources:
             KeyType: HASH
           - AttributeName: uuid
             KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    share:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: share
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
+            KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5

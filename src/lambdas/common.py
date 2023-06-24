@@ -25,6 +25,9 @@ TB_ALBUM_FILES_FIELD_TYPE__FILE = "file"
 TB_ALBUM_FILES_FIELD_TYPE__ALBUM = "album"
 TB_ALBUM_FILES_FIELD_TYPE = "type" # TB_ALBUM_FILES_FIELD_TYPE__*
 
+TB_SHARE_NAME = "share"
+TB_SHARE_PK = "username"
+
 ACCESS_KEY = 'test'
 SECRET_KEY = 'test'
 REGION = 'us-east-1'
