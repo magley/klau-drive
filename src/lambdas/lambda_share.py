@@ -8,11 +8,21 @@ def add_share_obj(owner: str, username: str, uuid: str, is_album: bool):
         TB_SHARED_WITH_ME_FIELD_TYPE: TB_ALBUM_FILES_FIELD_TYPE__FILE if not is_album else TB_ALBUM_FILES_FIELD_TYPE__ALBUM,
         TB_SHARED_WITH_ME_FIELD_OWNER: owner
     }
+    item2 = {
+        TB_FILE_IS_SHARED_PK: uuid,
+        TB_FILE_IS_SHARED_SK: username
+    }
 
     dynamo_cli.put_item(    
         TableName=TB_SHARED_WITH_ME_NAME,
         Item=python_obj_to_dynamo_obj(item1)
     )
+
+    dynamo_cli.put_item(    
+        TableName=TB_FILE_IS_SHARED_NAME,
+        Item=python_obj_to_dynamo_obj(item2)
+    )
+
 
 
 def lambda_share(event: dict, context):

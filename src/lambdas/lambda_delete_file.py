@@ -1,6 +1,47 @@
 from .common import *
 
 
+def get_sharing_instances(uuid: str):
+    statement = f"""
+        SELECT * FROM {TB_FILE_IS_SHARED_NAME}
+        WHERE
+            {TB_FILE_IS_SHARED_PK}=?
+    """
+    parameters = python_obj_to_dynamo_obj([uuid])
+
+    response = dynamo_cli.execute_statement(  
+        Statement=statement,
+        Parameters=parameters
+    )
+
+    shares = []
+    for o in response['Items']:
+        obj = dynamo_obj_to_python_obj(o)
+        shares.append(obj)
+    return shares
+
+def remove_sharing_instances(owner: str, uuid: str):
+
+    # Remove all sharing
+
+    sharing_instances = get_sharing_instances(uuid)
+
+    for o in sharing_instances:
+        shared_with: str = o[TB_FILE_IS_SHARED_SK]
+
+        statement1 = f"""
+            DELETE FROM {TB_SHARED_WITH_ME_NAME}
+            WHERE
+                {TB_SHARED_WITH_ME_PK} = ?
+                    AND
+                {TB_SHARED_WITH_ME_SK} = ?
+        """
+        parameters1 = python_obj_to_dynamo_obj([shared_with, uuid])
+        dynamo_cli.execute_statement(  
+            Statement=statement1,
+            Parameters=parameters1
+        )
+
 
 def delete(username: str, album_uuid: str, file_uuid: str):
     # Instead of checking if it's a file or album, we do it the lazy way and
@@ -15,6 +56,7 @@ def remove_single_file(username: str, album_uuid: str, file_uuid: str):
         CONTENT_METADATA_TB_PK: username,
         CONTENT_METADATA_TB_SK: file_uuid
     }
+    remove_sharing_instances(username, file_uuid)
 
     # Remove metadata.
 
@@ -41,8 +83,9 @@ def remove_single_file(username: str, album_uuid: str, file_uuid: str):
     )
 
 
-
 def remove_album(username: str, album_uuid: str):
+    remove_sharing_instances(username, album_uuid)
+    
     # Remove from user's list of albums.
 
     dynamo_cli.delete_item(

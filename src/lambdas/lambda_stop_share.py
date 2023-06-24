@@ -11,12 +11,22 @@ def remove_share_obj(owner: str, uuid: str, username: str):
                 AND
             {TB_SHARED_WITH_ME_FIELD_OWNER} = ?
     """
-
     parameters1 = python_obj_to_dynamo_obj([username, uuid, owner])
+
+    statement2 = f"""
+        DELETE FROM {TB_FILE_IS_SHARED_NAME}
+        WHERE {TB_FILE_IS_SHARED_PK} = ? 
+        AND {TB_FILE_IS_SHARED_SK} = ?
+    """
+    parameters2 = python_obj_to_dynamo_obj([uuid, username])
 
     dynamo_cli.execute_statement(  
         Statement=statement1,
         Parameters=parameters1
+    )
+    dynamo_cli.execute_statement(
+        Statement=statement2,
+        Parameters=parameters2
     )
 
 
