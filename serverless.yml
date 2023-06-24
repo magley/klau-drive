@@ -245,23 +245,23 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
-    share:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: share
-        AttributeDefinitions:
-          - AttributeName: owner
-            AttributeType: S
-          - AttributeName: uuid
-            AttributeType: S
-        KeySchema:
-          - AttributeName: owner
-            KeyType: HASH
-          - AttributeName: uuid
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 5
-          WriteCapacityUnits: 5
+    # share:
+    #   Type: AWS::DynamoDB::Table
+    #   Properties:
+    #     TableName: share
+    #     AttributeDefinitions:
+    #       - AttributeName: owner
+    #         AttributeType: S
+    #       - AttributeName: uuid
+    #         AttributeType: S
+    #     KeySchema:
+    #       - AttributeName: owner
+    #         KeyType: HASH
+    #       - AttributeName: uuid
+    #         KeyType: RANGE
+    #     ProvisionedThroughput:
+    #       ReadCapacityUnits: 5
+    #       WriteCapacityUnits: 5
     sharedWithMe:
       Type: AWS::DynamoDB::Table
       Properties:
