@@ -21,6 +21,7 @@ def list_files(album_uuid: str):
         res_items = []
 
         for item in body:
+            print(item)
             if item['type'] == 'file':
                 i = item['content']
                 res_items.append(
@@ -35,6 +36,8 @@ def list_files(album_uuid: str):
                         upload_date=datetime.fromisoformat(i.get('uploadDate', "")),
                         last_modified=datetime.fromisoformat(i.get('modificationDate', "")),
                         creation_date=datetime.fromisoformat(i.get('creationDate', "")),
+                        shared=item.get('shared', True), # True because principle of least priveleges
+                        owner=item.get('owner', '')
                     )
                 )
             else:
@@ -50,6 +53,8 @@ def list_files(album_uuid: str):
                         upload_date=datetime.fromisoformat(i.get('uploadDate', datetime.now().isoformat())),
                         last_modified=datetime.fromisoformat(i.get('modificationDate', datetime.now().isoformat())),
                         creation_date=datetime.fromisoformat(i.get('creationDate', datetime.now().isoformat())),
+                        shared=item.get('shared', True), # True because principle of least priveleges
+                        owner=item.get('owner', '')
                     )
                 )
 

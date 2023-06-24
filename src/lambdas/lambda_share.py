@@ -23,12 +23,17 @@ def lambda_share(event: dict, context):
     if not user_exists(username):
         return http_response("Forbidden", 401)
     
-    # Is username_with_whom_to_share not exists, 404.
-    # If uuid not exists, 404.
+    # TODO: If uuid not exists, 404.
  
     uuid: str = body['uuid']
     username_with_whom_to_share: str = body['username']
     is_album: bool = body['is_album']
+
+    if not user_exists(username_with_whom_to_share):
+        return http_response("No user with such username", 404)
+    
+    if username_with_whom_to_share == username:
+        return http_response("Cannot share with yourself!", 400)
 
     add_share_obj(username, username_with_whom_to_share, uuid, is_album)
 

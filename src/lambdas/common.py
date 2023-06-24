@@ -126,6 +126,7 @@ def owns_that_file(username: str, file_uuid: str) -> bool:
         return False
     return True
 
+
 def user_exists(username: str) -> bool:
     key = {
         USER_TB_PK: username,
@@ -155,3 +156,59 @@ def get_album_files(album_uuid: str) -> list:
     )
 
     return response['Items']
+
+
+def get_everything_shared(username: str) -> list:
+    statement = f"""
+        SELECT * FROM {TB_SHARED_WITH_ME_NAME}
+        WHERE
+            {TB_SHARED_WITH_ME_PK}=?
+    """
+    parameters = python_obj_to_dynamo_obj([username])
+
+    response = dynamo_cli.execute_statement(  
+        Statement=statement,
+        Parameters=parameters
+    )
+
+    return response['Items']
+
+
+def album_uuid_to_album_metadata(username: str, album_uuid: str) -> dict:
+    statement = f"""
+        SELECT * FROM {TB_USER_ALBUMS_NAME}
+        WHERE
+            {TB_USER_ALBUMS_PK}=? AND
+            {TB_USER_ALBUMS_SK}=?
+    """
+    parameters = python_obj_to_dynamo_obj([username, album_uuid])
+
+    response = dynamo_cli.execute_statement(    
+        Statement=statement,
+        Parameters=parameters
+    )
+
+    for o in response['Items']:
+        obj = dynamo_obj_to_python_obj(o)
+        return obj # There should be only 1.
+    return {}
+
+
+def file_uuid_to_file_metadata(username: str, file_uuid: str) -> dict:
+    statement = f"""
+        SELECT * FROM {CONTENT_METADATA_TB_NAME}
+        WHERE
+            {CONTENT_METADATA_TB_PK}=? AND
+            {CONTENT_METADATA_TB_SK}=?
+    """
+    parameters = python_obj_to_dynamo_obj([username, file_uuid])
+
+    response = dynamo_cli.execute_statement(    
+        Statement=statement,
+        Parameters=parameters
+    )
+
+    for o in response['Items']:
+        obj = dynamo_obj_to_python_obj(o)
+        return obj # There should be only 1.
+    return {}   

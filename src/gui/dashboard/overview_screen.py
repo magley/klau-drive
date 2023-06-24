@@ -261,7 +261,6 @@ class FileEdit(QGroupBox):
         layout_main.addWidget(self.btn_download)
         layout_main.addWidget(self.btn_share)
 
-
         self.setLayout(layout_main)
 
     def on_selected_file(self, file: FileData):
@@ -280,7 +279,24 @@ class FileEdit(QGroupBox):
 
         self.selected_file = file
 
-        self.btn_download.setEnabled(file.type != FILE_TYPE_ALBUM)
+        self.btn_update.setEnabled(True)
+        self.btn_share.setEnabled(True)
+        self.btn_delete.setEnabled(True)
+        self.btn_move.setEnabled(True)
+        self.btn_download.setEnabled(True)
+        self.btn_switch_file.setEnabled(True)
+        
+        if file.shared == True:
+            self.btn_update.setEnabled(False)
+            self.btn_share.setEnabled(False)
+            self.btn_delete.setEnabled(False)
+            self.btn_move.setEnabled(False)
+            self.btn_switch_file.setEnabled(False)
+        if file.type == FILE_TYPE_ALBUM:
+            self.btn_update.setEnabled(False)
+            self.btn_download.setEnabled(False)
+            self.btn_switch_file.setEnabled(False)
+
 
     def on_click_update(self):
         new_name: str = self.txt_name.text()

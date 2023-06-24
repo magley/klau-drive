@@ -23,6 +23,8 @@ class FileData:
     upload_date: datetime
     last_modified: datetime
     creation_date: datetime
+    shared: bool
+    owner: str
 
 
 LAMBDA_NAME = "upload_file"
