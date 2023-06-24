@@ -6,7 +6,8 @@ def add_share_obj(owner: str, username: str, uuid: str, is_album: bool):
     item1 = {
         TB_SHARE_PK: owner,
         TB_SHARE_SK: uuid,
-        TB_SHARE_FIELD_TYPE: TB_ALBUM_FILES_FIELD_TYPE__FILE if not is_album else TB_ALBUM_FILES_FIELD_TYPE__ALBUM
+        TB_SHARE_FIELD_TYPE: TB_ALBUM_FILES_FIELD_TYPE__FILE if not is_album else TB_ALBUM_FILES_FIELD_TYPE__ALBUM,
+        TB_SHARE_FIELD_USER: username
     }
     item2 = {
         TB_SHARED_WITH_ME_PK: username,

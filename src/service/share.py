@@ -21,3 +21,56 @@ def share(username: str, uuid: str, is_album: bool):
         print(r.json())
     
     return None
+
+
+def stop_share(owner: str, uuid: str, username: str):
+    payload = {
+        "owner": owner,
+        "uuid": uuid,
+        "username": username
+    }
+    payload_json = json.dumps(payload, default=str)
+
+    header = {'Authorization': f'Bearer {session.get_jwt()}'}
+    r = requests.put(f'{session.BASE_URL}/share-stop', data=payload_json, headers=header)
+ 
+    if not r.ok:
+        print(r.json())
+    
+    return None
+
+
+def get_shared_with_me():
+    """
+        `username` - Self
+        `owner` - Owner of the actual item
+        `uuid` - UUID.
+        `is_album` - 'folder' or 'file'
+    """
+    header = {'Authorization': f'Bearer {session.get_jwt()}'}
+    result: requests.Response = requests.get(f'{session.BASE_URL}/get-shared', headers=header)
+
+    if not result.ok:
+        print(result)
+
+    print(result.json())
+
+    return result.json()
+
+
+def get_my_sharing():
+    """
+        `owner` - self
+        `username` - with whom it's shared
+        `uuid` - UUID.
+        `type` - 'folder' or 'file'
+    """
+    header = {'Authorization': f'Bearer {session.get_jwt()}'}
+    result: requests.Response = requests.get(f'{session.BASE_URL}/get-sharing', headers=header)
+
+    if not result.ok:
+        print(result)
+
+    print(result.json())
+
+    return result.json()

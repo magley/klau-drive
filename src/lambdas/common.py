@@ -29,6 +29,7 @@ TB_SHARE_NAME = "share"
 TB_SHARE_PK = "owner"
 TB_SHARE_SK = "uuid"
 TB_SHARE_FIELD_TYPE = "type" # TB_ALBUM_FILES_FIELD_TYPE__*
+TB_SHARE_FIELD_USER = "username"
 
 TB_SHARED_WITH_ME_NAME = "sharedWithMe"
 TB_SHARED_WITH_ME_PK = "username"

@@ -397,7 +397,6 @@ class OverviewScreen(QWidget):
         self.owner = owner
 
         self._current_album_uuid = None
-        print(self.current_album_uuid)
 
         self.files = []
         self.columns = ['Name', 'Type', 'Date Modified']

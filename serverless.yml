@@ -175,7 +175,7 @@ functions:
         - 'src/lambdas/lambda_get_shared.py'
     events:
       - http:
-          path: get-sharing
+          path: get-shared
           method: get
 
 
