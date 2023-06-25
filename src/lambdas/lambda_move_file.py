@@ -32,6 +32,7 @@ def lambda_move_file(event: dict, context):
     uuid: str = body['uuid']
     album_old_uuid: str = body['album_old_uuid']
     album_new_uuid: str = body['album_new_uuid']
+    cut: bool = body['cut']
 
     if not has_write_accesss(username, uuid):
         return http_response("You don't own this.", 404)
@@ -44,10 +45,11 @@ def lambda_move_file(event: dict, context):
     item = get_album_entry(album_old_uuid, uuid)
     item[TB_ALBUM_FILES_PK] = album_new_uuid
 
-    # dynamo_cli.delete_item(
-    #     TableName=TB_ALBUM_FILES_NAME,
-    #     Key=python_obj_to_dynamo_obj(key_old),
-    # )
+    if cut:
+        dynamo_cli.delete_item(
+            TableName=TB_ALBUM_FILES_NAME,
+            Key=python_obj_to_dynamo_obj(key_old),
+        )
 
     dynamo_cli.put_item(
         TableName=TB_ALBUM_FILES_NAME,

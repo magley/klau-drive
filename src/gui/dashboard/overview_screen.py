@@ -28,6 +28,7 @@ class MoveFilePopup(QDialog):
     owner: "FileEdit"
     lst_albums: QListView
     lst_albums_model: QStandardItemModel()
+    cb_cut: QCheckBox
     available_albums: List
     selected_row: int
 
@@ -52,6 +53,7 @@ class MoveFilePopup(QDialog):
         self.lst_albums.setModel(self.lst_albums_model)
         self.lst_albums.clicked.connect(self.on_click_row)
         self.lst_albums.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.cb_cut = QCheckBox("Cut:")
 
         for album in self.available_albums:
             self.lst_albums_model.appendRow(QStandardItem(album['name']))
@@ -60,6 +62,7 @@ class MoveFilePopup(QDialog):
         main_layout = QVBoxLayout(self)
 
         main_layout.addWidget(self.lst_albums)
+        main_layout.addWidget(self.cb_cut)
         main_layout.addWidget(self.btn_ok)
 
     def on_click_row(self, index: QModelIndex):
@@ -73,7 +76,7 @@ class MoveFilePopup(QDialog):
             return
 
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-        move_file(self.owner.owner.current_album_uuid, album_uuid, self.owner.file_uuid)
+        move_file(self.owner.owner.current_album_uuid, album_uuid, self.owner.file_uuid, self.cb_cut.isChecked())
         QApplication.restoreOverrideCursor()
 
         self.close()

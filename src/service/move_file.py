@@ -4,11 +4,12 @@ import requests
 import src.service.session as session
 
 
-def move_file(album_old_uuid: str, album_new_uuid: str, uuid: str) -> requests.Response:
+def move_file(album_old_uuid: str, album_new_uuid: str, uuid: str, should_cut: bool) -> requests.Response:
     payload = {
         "album_old_uuid": album_old_uuid,
         "album_new_uuid": album_new_uuid,
-        "uuid": uuid
+        "uuid": uuid,
+        "cut": should_cut
     }
     payload_json = json.dumps(payload, default=str)
 

@@ -67,11 +67,10 @@ def remove_sharing_instances(owner: str, uuid: str):
 
 
 def delete(username: str, album_uuid: str, file_uuid: str):
-    # Instead of checking if it's a file or album, we do it the lazy way and
-    # delete both. If the key does not exist, aws won't crash.
-
-    remove_single_file(username, album_uuid, file_uuid)
-    remove_album(username, file_uuid) # Recursive
+    if file_uuid in [o[TB_USER_ALBUMS_SK] for o in get_albums(username)]:
+        remove_album(username, file_uuid) # Recursive
+    else:
+        remove_single_file(username, album_uuid, file_uuid)
 
 
 def remove_single_file(username: str, album_uuid: str, file_uuid: str):
@@ -115,8 +114,22 @@ def remove_single_file(username: str, album_uuid: str, file_uuid: str):
 def remove_album(username: str, album_uuid: str):
     remove_sharing_instances(username, album_uuid)
     
-    # Remove from user's list of albums.
+    # Remove each subfile: THIS HAS TO GO BEFORE BECAUSE:
+    # if you remove [user-album], then when you delete a single file:
+    # it checks for all abums that have that file. The way it checks needs the
+    # [user-album] relationship because it'll return one less item. If the file
+    # has only 1 owner, it gets deleted for real. So the S3 item and metadata are
+    # gone, but it may have one more owner. When you do list files on THAT other
+    # owner, it won't be able to fetch metadata and your app will crash.
 
+    items = get_album_files(album_uuid)
+    for o in items:
+        album_item = dynamo_obj_to_python_obj(o)
+        item_uuid = album_item[TB_ALBUM_FILES_SK]
+        delete(username, album_uuid, item_uuid)
+
+    # Remove from user's list of albums.
+        
     dynamo_cli.delete_item(
         TableName=TB_USER_ALBUMS_NAME,
         Key=python_obj_to_dynamo_obj({
@@ -125,13 +138,6 @@ def remove_album(username: str, album_uuid: str):
         })
     )
 
-    # Remove each subfile 
-
-    items = get_album_files(album_uuid)
-    for o in items:
-        album_item = dynamo_obj_to_python_obj(o)
-        item_uuid = album_item[TB_ALBUM_FILES_SK]
-        delete(username, album_uuid, item_uuid)
 
 
 def lambda_delete_file(event: dict, context):
