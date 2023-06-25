@@ -53,8 +53,6 @@ def get_shared_with_me():
     if not result.ok:
         print(result)
 
-    print(result.json())
-
     return result.json()
 
 
@@ -75,7 +73,5 @@ def get_my_sharing(with_whom_its_shared: str):
 
     if not result.ok:
         print(result)
-
-    print(result.json())
 
     return result.json()

@@ -2,27 +2,11 @@ from .common import *
 import io
 
 
-def get_file(username: str, file_uuid: str):
-    # TODO: Sharing: check if file is part of shared album hierarchy or if
-    # the file is directly shared.
-
-    statement = f"""
-        SELECT * FROM {CONTENT_METADATA_TB_NAME}
-        WHERE
-            {CONTENT_METADATA_TB_PK}=? AND
-            {CONTENT_METADATA_TB_SK}=?
-    """
-    parameters = python_obj_to_dynamo_obj([username, file_uuid])
-
-    response = dynamo_cli.execute_statement(    
-        Statement=statement,
-        Parameters=parameters
-    )
-
-    for o in response['Items']:
-        obj = dynamo_obj_to_python_obj(o)
-        return obj # There should be only 1.
-    return None
+def can_download_file(username: str, file_uuid: str, owner: str):
+    if is_file_owned_by_me(username, file_uuid):
+        return True
+    
+    return is_shared_with_me(file_uuid, username, owner)
 
 
 def download_file(file_uuid: str) -> str:
@@ -47,10 +31,10 @@ def lambda_download_file(event: dict, context):
         return http_response("Forbidden", 401)
  
     file_uuid = body['file_uuid']
-    file = get_file(username, file_uuid)
+    owner_name = body['owner']
 
-    if file is None:
-        return http_response("File not found", 404)
+    if not has_read_access(username, file_uuid, owner_name):
+        return http_response("File not found.", 404)
 
     bytes_str = download_file(file_uuid)
     return http_response(bytes_str, 200)

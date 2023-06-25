@@ -5,9 +5,10 @@ import src.service.session as session
 import base64
 
 
-def download_file(file_uuid: str) -> bytes:
+def download_file(file_uuid: str, owner: str) -> bytes:
     payload = {
-        "file_uuid": file_uuid
+        "file_uuid": file_uuid,
+        "owner": owner
     }
     payload_json = json.dumps(payload, default=str)
     header = {'Authorization': f'Bearer {session.get_jwt()}'}
