@@ -28,6 +28,9 @@ def lambda_update_file(event: dict, context):
     
     metadata: dict = body['metadata']
 
+    if not has_write_accesss(username, metadata[CONTENT_METADATA_TB_SK]):
+        return http_response("You don't own this.", 404)
+
     primary_key = {
         CONTENT_METADATA_TB_PK: metadata[CONTENT_METADATA_TB_PK],
         CONTENT_METADATA_TB_SK: metadata[CONTENT_METADATA_TB_SK]

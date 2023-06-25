@@ -16,6 +16,6 @@ def move_file(album_old_uuid: str, album_new_uuid: str, uuid: str) -> requests.R
     result: requests.Response = requests.put(f'{BASE_URL}/move', data=payload_json, headers=header)
 
     if not result.ok:
-        print(result)
+        print(result, result.json())
 
     return result

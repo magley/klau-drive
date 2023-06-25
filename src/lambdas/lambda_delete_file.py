@@ -120,6 +120,9 @@ def lambda_delete_file(event: dict, context):
     if '_root' in file_uuid: # If it's a root folder
         return http_response("Cannot delete root album!", 400)
 
+    if not has_write_accesss(username, file_uuid):
+        return http_response("You don't own this.", 404)
+
     delete(username, album_uuid, file_uuid)
 
     return http_response(None, 204)

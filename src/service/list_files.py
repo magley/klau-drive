@@ -62,6 +62,6 @@ def list_files(album_uuid: str, album_owner: str):
                 )
 
         return res_items
-    else:
-        return []
-        # print("TODO Error case", body)
+    if not r.ok:
+        print(r, r.json())
+    return []

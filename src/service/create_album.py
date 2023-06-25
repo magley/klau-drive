@@ -17,6 +17,6 @@ def create_album(parent_uuid: str, name: str) -> requests.Response:
     result: requests.Response = requests.post(f'{BASE_URL}/album', data=payload_json, headers=header)
 
     if not result.ok:
-        print(result)
+        print(result, result.json())
 
     return result

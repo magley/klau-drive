@@ -39,6 +39,9 @@ def lambda_share(event: dict, context):
     username_with_whom_to_share: str = body['username']
     is_album: bool = body['is_album']
 
+    if not has_write_accesss(username, uuid):
+        return http_response("You don't own this.", 404)
+
     if not user_exists(username_with_whom_to_share):
         return http_response("No user with such username", 404)
     

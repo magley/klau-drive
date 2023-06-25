@@ -42,6 +42,8 @@ def lambda_stop_share(event: dict, context):
     username_to_share_with: str = body['username']
     owner: str = body['owner']
 
+    # No need to check for write premissions, the partiql query will return 404.
+
     if owner != username:
         return http_response("Unauthorized", 403)
 

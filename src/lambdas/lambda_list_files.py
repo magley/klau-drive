@@ -11,6 +11,9 @@ def lambda_list_files(event: dict, context):
     username: str = jwt_decode(headers)
     if not user_exists(username):
         return http_response("Forbidden", 401)
+
+    if not has_read_access(username, album_uuid, album_owner):
+        return http_response("You can't open this.", 404)
     
     items = get_album_files(album_uuid)
 

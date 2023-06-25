@@ -17,8 +17,8 @@ def share(username: str, uuid: str, is_album: bool):
     r = requests.put(f'{session.BASE_URL}/share', data=payload_json, headers=header)
     status = r.status_code
 
-    if status == 400:
-        print(r.json())
+    if not r.ok:
+        print(r, r.json())
     
     return None
 
@@ -35,7 +35,7 @@ def stop_share(owner: str, uuid: str, username: str):
     r = requests.put(f'{session.BASE_URL}/share-stop', data=payload_json, headers=header)
  
     if not r.ok:
-        print(r.json())
+        print(r, r.json())
     
     return None
 
@@ -51,7 +51,7 @@ def get_shared_with_me():
     result: requests.Response = requests.get(f'{session.BASE_URL}/get-shared', headers=header)
 
     if not result.ok:
-        print(result)
+        print(result, result.json())
 
     return result.json()
 
@@ -72,6 +72,6 @@ def get_my_sharing(with_whom_its_shared: str):
     result: requests.Response = requests.get(f'{session.BASE_URL}/get-sharing', data=payload_json, headers=header)
 
     if not result.ok:
-        print(result)
+        print(result, result.json())
 
     return result.json()
