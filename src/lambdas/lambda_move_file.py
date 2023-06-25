@@ -44,10 +44,10 @@ def lambda_move_file(event: dict, context):
     item = get_album_entry(album_old_uuid, uuid)
     item[TB_ALBUM_FILES_PK] = album_new_uuid
 
-    dynamo_cli.delete_item(
-        TableName=TB_ALBUM_FILES_NAME,
-        Key=python_obj_to_dynamo_obj(key_old),
-    )
+    # dynamo_cli.delete_item(
+    #     TableName=TB_ALBUM_FILES_NAME,
+    #     Key=python_obj_to_dynamo_obj(key_old),
+    # )
 
     dynamo_cli.put_item(
         TableName=TB_ALBUM_FILES_NAME,

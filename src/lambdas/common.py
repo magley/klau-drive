@@ -309,7 +309,10 @@ def is_shared_with_me(target_uuid: str, username: str, owner: str):
     reverse_lookup = {}
     for album in all_albums:
         for item in album['content']:
-            reverse_lookup[item['uuid']] = item['album_uuid']
+            if item['uuid'] not in item:
+                reverse_lookup[item['uuid']] = []
+
+            reverse_lookup[item['uuid']].append(item['album_uuid'])
     """
         all_albums = [
             {
@@ -328,14 +331,20 @@ def is_shared_with_me(target_uuid: str, username: str, owner: str):
         }
     """
 
-    current_uuid = target_uuid
-    while True:
+    queue = [target_uuid]
+    while len(queue) > 0:
+        current_uuid = queue[0]
+        queue = queue[1:]
+
         if is_shared_directly(username, current_uuid):
             return True
         
         if current_uuid not in reverse_lookup:
-            break
-        current_uuid = reverse_lookup[current_uuid]
+            continue
+
+        owners_uuid = reverse_lookup[current_uuid]
+        for o in owners_uuid:
+            queue.append(o)
 
     return False
 

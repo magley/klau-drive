@@ -1,6 +1,30 @@
 from .common import *
 
 
+def get_all_owners(username: str, uuid: str):
+    album_uuids = []
+    for album in get_albums(username):
+        statement = f"""
+            SELECT * FROM {TB_ALBUM_FILES_NAME}
+            WHERE
+                {TB_ALBUM_FILES_PK}=?
+                    AND
+                {TB_ALBUM_FILES_SK}=?
+        """
+        parameters = python_obj_to_dynamo_obj([album[TB_USER_ALBUMS_SK], uuid])
+
+        response = dynamo_cli.execute_statement(  
+            Statement=statement,
+            Parameters=parameters
+        )
+
+        for o in response['Items']:
+            obj = dynamo_obj_to_python_obj(o)
+            album_uuids.append(obj[TB_ALBUM_FILES_PK])
+
+    return list(set(album_uuids))
+
+
 def get_sharing_instances(uuid: str):
     statement = f"""
         SELECT * FROM {TB_FILE_IS_SHARED_NAME}
@@ -21,7 +45,6 @@ def get_sharing_instances(uuid: str):
     return shares
 
 def remove_sharing_instances(owner: str, uuid: str):
-
     # Remove all sharing
 
     sharing_instances = get_sharing_instances(uuid)
@@ -56,16 +79,29 @@ def remove_single_file(username: str, album_uuid: str, file_uuid: str):
         CONTENT_METADATA_TB_PK: username,
         CONTENT_METADATA_TB_SK: file_uuid
     }
-    remove_sharing_instances(username, file_uuid)
 
-    # Remove metadata.
+    all_owners = get_all_owners(username, file_uuid)
 
-    dynamo_cli.delete_item(
-        Key=python_obj_to_dynamo_obj(key),
-        TableName=CONTENT_METADATA_TB_NAME,
-    )
+    if len(all_owners) == 1: # If this file is only in 1 album.
+        # Removing all sharing instances
 
-    # Remove from album.
+        remove_sharing_instances(username, file_uuid)
+        
+        # Remove metadata.
+
+        dynamo_cli.delete_item(
+            Key=python_obj_to_dynamo_obj(key),
+            TableName=CONTENT_METADATA_TB_NAME,
+        )
+
+        # Remove content.
+
+        s3_cli.delete_object(
+            Bucket=CONTENT_BUCKET_NAME,
+            Key=key[CONTENT_METADATA_TB_SK]
+        )
+
+    # Remove from this album.
 
     dynamo_cli.delete_item(
         TableName=TB_ALBUM_FILES_NAME,
@@ -73,13 +109,6 @@ def remove_single_file(username: str, album_uuid: str, file_uuid: str):
             TB_ALBUM_FILES_PK: album_uuid,
             TB_ALBUM_FILES_SK: file_uuid
         })
-    )
-
-    # Remove content.
-
-    s3_cli.delete_object(
-        Bucket=CONTENT_BUCKET_NAME,
-        Key=key[CONTENT_METADATA_TB_SK]
     )
 
 
