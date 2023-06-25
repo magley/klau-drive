@@ -489,7 +489,7 @@ class OverviewScreen(QWidget):
         
     def put_file_in_table(self, file: FileData, row: int):
         pixmapi = QStyle.StandardPixmap.SP_FileIcon
-        fullname = f"{file.name} {file.type}"
+        fullname = f"{file.name}{file.type}"
 
         if file.type == FILE_TYPE_ALBUM:
             pixmapi = QStyle.StandardPixmap.SP_DirIcon

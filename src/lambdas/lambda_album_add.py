@@ -13,6 +13,9 @@ def lambda_album_add(event: dict, context):
     uuid: str = body['uuid']
     name: str = body['name']
 
+    if not has_write_accesss(username, parent_uuid):
+        return http_response("You don't own this.", 404)
+
     tb_user_albums_entry = {
         TB_USER_ALBUMS_PK: username,
         TB_USER_ALBUMS_SK: uuid,
