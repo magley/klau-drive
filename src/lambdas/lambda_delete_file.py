@@ -44,6 +44,7 @@ def get_sharing_instances(uuid: str):
         shares.append(obj)
     return shares
 
+
 def remove_sharing_instances(owner: str, uuid: str):
     # Remove all sharing
 
@@ -68,7 +69,7 @@ def remove_sharing_instances(owner: str, uuid: str):
 
 def delete(username: str, album_uuid: str, file_uuid: str):
     if file_uuid in [o[TB_USER_ALBUMS_SK] for o in get_albums(username)]:
-        remove_album(username, file_uuid) # Recursive
+        remove_album(username, album_uuid, file_uuid) # Recursive
     else:
         remove_single_file(username, album_uuid, file_uuid)
 
@@ -93,11 +94,14 @@ def remove_single_file(username: str, album_uuid: str, file_uuid: str):
             TableName=CONTENT_METADATA_TB_NAME,
         )
 
-        # Remove content.
+        # Mark content for removal.
 
-        s3_cli.delete_object(
-            Bucket=CONTENT_BUCKET_NAME,
-            Key=key[CONTENT_METADATA_TB_SK]
+        dynamo_cli.put_item(
+            TableName=TB_GARBAGE_COLLECTOR_NAME,
+            Item=python_obj_to_dynamo_obj({
+                TB_GARBAGE_COLLECTOR_PK: username,
+                TB_GARBAGE_COLLECTOR_SK: file_uuid,
+            })
         )
 
     # Remove from this album.
@@ -111,7 +115,7 @@ def remove_single_file(username: str, album_uuid: str, file_uuid: str):
     )
 
 
-def remove_album(username: str, album_uuid: str):
+def remove_album(username: str, owner_album_uuid: str, album_uuid: str):
     remove_sharing_instances(username, album_uuid)
     
     # Remove each subfile: THIS HAS TO GO BEFORE BECAUSE:
@@ -129,12 +133,19 @@ def remove_album(username: str, album_uuid: str):
         delete(username, album_uuid, item_uuid)
 
     # Remove from user's list of albums.
-        
+  
     dynamo_cli.delete_item(
         TableName=TB_USER_ALBUMS_NAME,
         Key=python_obj_to_dynamo_obj({
             TB_USER_ALBUMS_PK: username,
             TB_USER_ALBUMS_SK: album_uuid,
+        })
+    )
+    dynamo_cli.delete_item(
+        TableName=TB_ALBUM_FILES_NAME,
+        Key=python_obj_to_dynamo_obj({
+            TB_ALBUM_FILES_PK: owner_album_uuid,
+            TB_ALBUM_FILES_SK: album_uuid,
         })
     )
 

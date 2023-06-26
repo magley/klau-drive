@@ -38,6 +38,10 @@ TB_SHARED_WITH_ME_FIELD_OWNER = "owner"
 TB_LAST_VALID_CONTENT_NAME = "lastValidContent"
 TB_LAST_VALID_CONTENT_PK = "uuid"
 
+TB_GARBAGE_COLLECTOR_NAME = "garbageCollector"
+TB_GARBAGE_COLLECTOR_PK = "username"
+TB_GARBAGE_COLLECTOR_SK = "uuid"
+
 ACCESS_KEY = 'test'
 SECRET_KEY = 'test'
 REGION = 'us-east-1'

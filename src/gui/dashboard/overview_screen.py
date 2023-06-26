@@ -17,6 +17,7 @@ from src.service.move_file import move_file
 from src.service.get_albums import get_albums
 from src.service.download_file import download_file
 from src.service.share import share
+from src.service.empty_trash import empty_trash
 
 
 FILE_TYPE_ALBUM = 'Album'
@@ -221,6 +222,7 @@ class FileEdit(QGroupBox):
         self.btn_download.clicked.connect(self.on_click_download)
         self.btn_share.clicked.connect(self.on_click_share)
 
+
     def init_layout(self):
         layout_main = QVBoxLayout()
 
@@ -388,6 +390,8 @@ class FileEdit(QGroupBox):
             f.write(result)
 
 
+
+
 @dataclass
 class OverviewScreen(QWidget):
     owner: QTabWidget
@@ -398,6 +402,7 @@ class OverviewScreen(QWidget):
 
     btn_add_album: QPushButton
     btn_add_dialog: AddAlbumPopup
+    btn_empty_trash: QPushButton
     btn_to_root: QPushButton
     btn_upload: QPushButton
 
@@ -448,6 +453,9 @@ class OverviewScreen(QWidget):
         self.btn_to_root.clicked.connect(self.on_click_to_root)
         self.btn_to_root.setIcon(QIcon('res/ico_home.png'))
 
+        self.btn_empty_trash = QPushButton("Empty Trash")
+        self.btn_empty_trash.clicked.connect(self.on_click_empty_trash)
+
     def make_layout(self):
         layout_main = QVBoxLayout()
         layout_top_bar = QHBoxLayout()
@@ -465,6 +473,7 @@ class OverviewScreen(QWidget):
         layout_top_bar.addItem(QSpacerItem(1, 1, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
         layout_top_bar.addWidget(self.btn_add_album)
         layout_top_bar.addWidget(self.btn_upload)
+        layout_top_bar.addWidget(self.btn_empty_trash)
 
         self.setLayout(layout_main)
 
@@ -529,3 +538,8 @@ class OverviewScreen(QWidget):
     def on_click_upload(self):
         self.btn_add_dialog = UploadScreen(self.current_album_uuid)
         self.btn_add_dialog.show()
+
+    def on_click_empty_trash(self):
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        result: requests.Response = empty_trash()
+        QApplication.restoreOverrideCursor()

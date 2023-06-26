@@ -306,11 +306,15 @@ resources:
       Properties:
         TableName: garbageCollector
         AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
           - AttributeName: uuid
             AttributeType: S
         KeySchema:
-          - AttributeName: uuid
+          - AttributeName: username
             KeyType: HASH
+          - AttributeName: uuid
+            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
