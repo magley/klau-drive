@@ -177,6 +177,15 @@ functions:
       - http:
           path: get-shared
           method: get
+  collectGarbage:
+    handler: src/lambdas/lambda_collect_garbage.lambda_collect_garbage
+    package:
+      patterns:
+        - 'src/lambdas/lambda_collect_garbage.py'
+    events:
+      - http:
+          path: gc
+          method: put
 
 
 resources:
@@ -276,6 +285,32 @@ resources:
             KeyType: HASH
           - AttributeName: uuid
             KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    lastValidContent:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: lastValidContent
+        AttributeDefinitions:
+          - AttributeName: uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: uuid
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    garbageCollector:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: garbageCollector
+        AttributeDefinitions:
+          - AttributeName: uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: uuid
+            KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
