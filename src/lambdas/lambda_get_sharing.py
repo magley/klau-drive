@@ -31,7 +31,11 @@ def lambda_get_sharing(event: dict, context):
     if not user_exists(username):
         return http_response("Forbidden", 401)
     
-    sharing_with = body['username']
+    if "username" not in body:
+        return http_response("No username", 400)
+    sharing_with: str = body['username']
+    if len(sharing_with.strip()) == 0:
+        return http_response("Username cannot be empty", 400)
  
     result = get_sharing(owner=username, sharing_with=sharing_with)
 

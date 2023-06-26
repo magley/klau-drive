@@ -380,8 +380,6 @@ class FileEdit(QGroupBox):
         if fname is None:
             return
         
-        fname += self.selected_file.type
-
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         result: requests.Response = download_file(self.file_uuid, self.selected_file.owner)
         QApplication.restoreOverrideCursor()

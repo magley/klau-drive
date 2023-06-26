@@ -73,5 +73,6 @@ def get_my_sharing(with_whom_its_shared: str):
 
     if not result.ok:
         print(result, result.json())
+        return []
 
     return result.json()

@@ -36,6 +36,7 @@ class MySharingScreen(QWidget):
         self.btn_stop_share.clicked.connect(self.on_click_stop_share)
 
         self.txt_username = QLineEdit()
+        self.txt_username.setPlaceholderText("Enter username of user")
 
         self.table = QTableWidget()
         self.table.setColumnCount(len(self.columns))
