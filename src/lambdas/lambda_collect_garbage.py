@@ -41,6 +41,5 @@ def lambda_collect_garbage(event: dict, context):
         except Exception as e:
             # this will probably never fail
             fail += 1
-            raise e
 
     return http_response({"success": success, "fail": fail}, 200)
