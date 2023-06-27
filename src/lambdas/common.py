@@ -55,7 +55,7 @@ if "ENDPOINT" not in environ:
 session = boto3.Session(aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
 s3_cli = session.client('s3', endpoint_url=ENDPOINT)
 dynamo_cli = session.client('dynamodb', endpoint_url=ENDPOINT)
-ses_cli = session.client('ses')
+ses_cli = session.client('ses', endpoint_url=ENDPOINT)
 
 
 def python_obj_to_dynamo_obj(python_obj):
