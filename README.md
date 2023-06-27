@@ -16,7 +16,7 @@ Example: `ENDPOINT='http://host.docker.internal:4566' npm run sls deploy`
 
 You can use `serverless deploy` instead of `npm run sls deploy` if you have it global
 
-Run this command so email sending works: `aws --endpoint-url=http://localhost:4566 ses verify-email-identity --email-address "test@example.com`
+Run this command so email sending works: `aws --endpoint-url=http://localhost:4566 ses verify-email-identity --email-address "test@example.com"`
 
 Or use awslocal instead of endpoint-url if you have it setup
 
