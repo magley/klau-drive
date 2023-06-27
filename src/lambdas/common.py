@@ -25,6 +25,23 @@ TB_ALBUM_FILES_FIELD_TYPE__FILE = "file"
 TB_ALBUM_FILES_FIELD_TYPE__ALBUM = "album"
 TB_ALBUM_FILES_FIELD_TYPE = "type" # TB_ALBUM_FILES_FIELD_TYPE__*
 
+TB_FILE_IS_SHARED_NAME = "fileIsShared"
+TB_FILE_IS_SHARED_PK = "uuid"
+TB_FILE_IS_SHARED_SK = "username"
+
+TB_SHARED_WITH_ME_NAME = "sharedWithMe"
+TB_SHARED_WITH_ME_PK = "username"
+TB_SHARED_WITH_ME_SK = "uuid"
+TB_SHARED_WITH_ME_FIELD_TYPE = "type" # TB_ALBUM_FILES_FIELD_TYPE__*
+TB_SHARED_WITH_ME_FIELD_OWNER = "owner"
+
+TB_LAST_VALID_CONTENT_NAME = "lastValidContent"
+TB_LAST_VALID_CONTENT_PK = "uuid"
+
+TB_GARBAGE_COLLECTOR_NAME = "garbageCollector"
+TB_GARBAGE_COLLECTOR_PK = "username"
+TB_GARBAGE_COLLECTOR_SK = "uuid"
+
 ACCESS_KEY = 'test'
 SECRET_KEY = 'test'
 REGION = 'us-east-1'
@@ -114,6 +131,7 @@ def owns_that_file(username: str, file_uuid: str) -> bool:
         return False
     return True
 
+
 def user_exists(username: str) -> bool:
     key = {
         USER_TB_PK: username,
@@ -129,7 +147,30 @@ def user_exists(username: str) -> bool:
     return True
 
 
+def get_albums(username: str):
+    statement = f"""
+        SELECT * FROM {TB_USER_ALBUMS_NAME}
+        WHERE
+            {TB_USER_ALBUMS_PK}=?
+    """
+    parameters = python_obj_to_dynamo_obj([username])
+
+    response = dynamo_cli.execute_statement(  
+        Statement=statement,
+        Parameters=parameters
+    )
+
+    albums = []
+    for o in response['Items']:
+        obj = dynamo_obj_to_python_obj(o)
+        albums.append(obj)
+    return albums
+
+
 def get_album_files(album_uuid: str) -> list:
+    """
+        RETURNS A DYNAMO OBJECT
+    """
     statement = f"""
         SELECT * FROM {TB_ALBUM_FILES_NAME}
         WHERE
@@ -143,3 +184,185 @@ def get_album_files(album_uuid: str) -> list:
     )
 
     return response['Items']
+
+
+def get_everything_shared(username: str) -> list:
+    statement = f"""
+        SELECT * FROM {TB_SHARED_WITH_ME_NAME}
+        WHERE
+            {TB_SHARED_WITH_ME_PK}=?
+    """
+    parameters = python_obj_to_dynamo_obj([username])
+
+    response = dynamo_cli.execute_statement(  
+        Statement=statement,
+        Parameters=parameters
+    )
+
+    return response['Items']
+
+
+def album_uuid_to_album_metadata(username: str, album_uuid: str) -> dict:
+    statement = f"""
+        SELECT * FROM {TB_USER_ALBUMS_NAME}
+        WHERE
+            {TB_USER_ALBUMS_PK}=? AND
+            {TB_USER_ALBUMS_SK}=?
+    """
+    parameters = python_obj_to_dynamo_obj([username, album_uuid])
+
+    response = dynamo_cli.execute_statement(    
+        Statement=statement,
+        Parameters=parameters
+    )
+
+    for o in response['Items']:
+        obj = dynamo_obj_to_python_obj(o)
+        return obj # There should be only 1.
+    return {}
+
+
+def file_uuid_to_file_metadata(username: str, file_uuid: str) -> dict:
+    statement = f"""
+        SELECT * FROM {CONTENT_METADATA_TB_NAME}
+        WHERE
+            {CONTENT_METADATA_TB_PK}=? AND
+            {CONTENT_METADATA_TB_SK}=?
+    """
+    parameters = python_obj_to_dynamo_obj([username, file_uuid])
+
+    response = dynamo_cli.execute_statement(    
+        Statement=statement,
+        Parameters=parameters
+    )
+
+    for o in response['Items']:
+        obj = dynamo_obj_to_python_obj(o)
+        return obj # There should be only 1.
+    return {}   
+
+
+def is_shared_directly(username: str, uuid: str):
+    """
+        FILES OR ALBUMS
+    """
+    statement = f"""
+        SELECT * FROM {TB_SHARED_WITH_ME_NAME}
+        WHERE
+            {TB_SHARED_WITH_ME_PK}=?
+                AND
+            {TB_SHARED_WITH_ME_SK}=?
+    """
+    parameters = python_obj_to_dynamo_obj([username, uuid])
+
+    response = dynamo_cli.execute_statement(  
+        Statement=statement,
+        Parameters=parameters
+    )
+
+    for o in response['Items']:
+        return True
+    return False
+
+
+def is_file_owned_by_me(username: str, file_uuid: str):
+    statement = f"""
+        SELECT * FROM {CONTENT_METADATA_TB_NAME}
+        WHERE
+            {CONTENT_METADATA_TB_PK}=? AND
+            {CONTENT_METADATA_TB_SK}=?
+    """
+    parameters = python_obj_to_dynamo_obj([username, file_uuid])
+
+    response = dynamo_cli.execute_statement(    
+        Statement=statement,
+        Parameters=parameters
+    )
+
+    for o in response['Items']:
+        return True
+    return False
+
+
+def is_album_owned_by_me(username: str, album_uuid: str):
+    statement = f"""
+        SELECT * FROM {TB_USER_ALBUMS_NAME}
+        WHERE
+            {TB_USER_ALBUMS_PK}=? AND
+            {TB_USER_ALBUMS_SK}=?
+    """
+    parameters = python_obj_to_dynamo_obj([username, album_uuid])
+
+    response = dynamo_cli.execute_statement(    
+        Statement=statement,
+        Parameters=parameters
+    )
+
+    for o in response['Items']:
+        return True
+    return False
+    
+
+def is_shared_with_me(target_uuid: str, username: str, owner: str):
+    """
+        Recursive. For direct sharing, see: `is_shared_directly`.
+    """
+    
+    all_albums = get_albums(owner)
+    for album in all_albums:
+        album_content = [dynamo_obj_to_python_obj(o) for o in get_album_files(album[TB_USER_ALBUMS_SK])]
+        album['content'] = album_content
+
+    reverse_lookup = {}
+    for album in all_albums:
+        for item in album['content']:
+            if item['uuid'] not in item:
+                reverse_lookup[item['uuid']] = []
+
+            reverse_lookup[item['uuid']].append(item['album_uuid'])
+    """
+        all_albums = [
+            {
+                "uuid": album_uuid,
+                "content": [
+                    "uuid": uuid,
+                    "album_uuid": album_uuid,
+                    "type": file/folder
+                ]
+            }
+        ]
+
+        reverse_lookup = {
+            uuid1: uuid_of_owner_of_uuid1,
+            uuid2: ...
+        }
+    """
+
+    queue = [target_uuid]
+    while len(queue) > 0:
+        current_uuid = queue[0]
+        queue = queue[1:]
+
+        if is_shared_directly(username, current_uuid):
+            return True
+        
+        if current_uuid not in reverse_lookup:
+            continue
+
+        owners_uuid = reverse_lookup[current_uuid]
+        for o in owners_uuid:
+            queue.append(o)
+
+    return False
+
+
+def has_write_accesss(username: str, uuid: str):
+    if is_file_owned_by_me(username, uuid):
+        return True
+    return is_album_owned_by_me(username, uuid)
+
+
+def has_read_access(username: str, uuid: str, owner: str):
+    if has_write_accesss(username, uuid):
+        return True
+    return is_shared_with_me(uuid, username, owner)

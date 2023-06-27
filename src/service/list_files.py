@@ -6,9 +6,13 @@ import src.service.session as session
 from src.service.upload_file import FileData
 
 
-def list_files(album_uuid: str):
+def list_files(album_uuid: str, album_owner: str):
+    if album_owner == None:
+        album_owner = session.get_username()
+
     payload = {
-        "album_uuid": album_uuid
+        "album_uuid": album_uuid,
+        "album_owner": album_owner
     }
     payload_json = json.dumps(payload, default=str)
     header = {'Authorization': f'Bearer {session.get_jwt()}'}
@@ -35,6 +39,8 @@ def list_files(album_uuid: str):
                         upload_date=datetime.fromisoformat(i.get('uploadDate', "")),
                         last_modified=datetime.fromisoformat(i.get('modificationDate', "")),
                         creation_date=datetime.fromisoformat(i.get('creationDate', "")),
+                        shared=item.get('shared', True), # True because principle of least priveleges
+                        owner=item.get('owner', '')
                     )
                 )
             else:
@@ -50,10 +56,12 @@ def list_files(album_uuid: str):
                         upload_date=datetime.fromisoformat(i.get('uploadDate', datetime.now().isoformat())),
                         last_modified=datetime.fromisoformat(i.get('modificationDate', datetime.now().isoformat())),
                         creation_date=datetime.fromisoformat(i.get('creationDate', datetime.now().isoformat())),
+                        shared=item.get('shared', True), # True because principle of least priveleges
+                        owner=item.get('owner', '')
                     )
                 )
 
         return res_items
-    else:
-        return []
-        # print("TODO Error case", body)
+    if not r.ok:
+        print(r, r.json())
+    return []

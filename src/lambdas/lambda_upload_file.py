@@ -17,6 +17,9 @@ def lambda_upload_file(event: dict, context):
     data: bytes = base64.b64decode(body['data'])
     album_uuid: str = body['album_uuid']
 
+    if not has_write_accesss(username, album_uuid):
+        return http_response("You don't own this.", 404)
+
     tb_album_files_record: dict = python_obj_to_dynamo_obj({
         TB_ALBUM_FILES_PK: album_uuid,
         TB_ALBUM_FILES_SK: metadata['uuid'],
@@ -33,10 +36,34 @@ def lambda_upload_file(event: dict, context):
         Item=tb_album_files_record
     )
 
-    s3_cli.upload_fileobj(
-        Fileobj=io.BytesIO(data),
-        Bucket=CONTENT_BUCKET_NAME,
-        Key=metadata[CONTENT_METADATA_TB_SK]
-    )
+    success = False
 
-    return http_response(None, 204)
+    try:
+        #raise Exception()
+        s3_cli.upload_fileobj(
+            Fileobj=io.BytesIO(data),
+            Bucket=CONTENT_BUCKET_NAME,
+            Key=metadata[CONTENT_METADATA_TB_SK]
+        )
+        success = True
+    except Exception as e:
+        dynamo_cli.delete_item(
+            TableName=CONTENT_METADATA_TB_NAME,
+            Key=python_obj_to_dynamo_obj({
+                CONTENT_METADATA_TB_PK: username,
+                CONTENT_METADATA_TB_SK: metadata['uuid']
+            })
+        )
+        dynamo_cli.delete_item(
+            TableName=TB_ALBUM_FILES_NAME,
+            Key=python_obj_to_dynamo_obj({
+                TB_ALBUM_FILES_PK: album_uuid,
+                TB_ALBUM_FILES_SK: metadata['uuid']
+            })
+        )
+        success = False
+
+    if not success:
+        return http_response("Failed to upload, fixing consistency.", 500)
+    else:
+        return http_response("", 204)

@@ -16,6 +16,6 @@ def get_albums() -> requests.Response:
     result: requests.Response = requests.get(f'{BASE_URL}/album', headers=header)
 
     if not result.ok:
-        print(result)
+        print(result, result.json())
 
     return result.json()

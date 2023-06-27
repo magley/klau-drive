@@ -141,6 +141,51 @@ functions:
       - http:
           path: file-download
           method: get
+  share:
+    handler: src/lambdas/lambda_share.lambda_share
+    package:
+      patterns:
+        - 'src/lambdas/lambda_share.py'
+    events:
+      - http:
+          path: share
+          method: put
+  stopShare:
+    handler: src/lambdas/lambda_stop_share.lambda_stop_share
+    package:
+      patterns:
+        - 'src/lambdas/lambda_stop_share.py'
+    events:
+      - http:
+          path: share-stop
+          method: put
+  getSharing:
+    handler: src/lambdas/lambda_get_sharing.lambda_get_sharing
+    package:
+      patterns:
+        - 'src/lambdas/lambda_get_sharing.py'
+    events:
+      - http:
+          path: get-sharing
+          method: get
+  getShared:
+    handler: src/lambdas/lambda_get_shared.lambda_get_shared
+    package:
+      patterns:
+        - 'src/lambdas/lambda_get_shared.py'
+    events:
+      - http:
+          path: get-shared
+          method: get
+  collectGarbage:
+    handler: src/lambdas/lambda_collect_garbage.lambda_collect_garbage
+    package:
+      patterns:
+        - 'src/lambdas/lambda_collect_garbage.py'
+    events:
+      - http:
+          path: gc
+          method: put
 
 
 resources:
@@ -203,6 +248,70 @@ resources:
             AttributeType: S
         KeySchema:
           - AttributeName: album_uuid
+            KeyType: HASH
+          - AttributeName: uuid
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    fileIsShared: # Redundancy, used for when removing by uuid to remove all sharing
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: fileIsShared
+        AttributeDefinitions:
+          - AttributeName: uuid
+            AttributeType: S
+          - AttributeName: username
+            AttributeType: S
+        KeySchema:
+          - AttributeName: uuid
+            KeyType: HASH
+          - AttributeName: username
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    sharedWithMe:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: sharedWithMe
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
+            KeyType: HASH
+          - AttributeName: uuid
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    lastValidContent:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: lastValidContent
+        AttributeDefinitions:
+          - AttributeName: uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: uuid
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    garbageCollector:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: garbageCollector
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
             KeyType: HASH
           - AttributeName: uuid
             KeyType: RANGE

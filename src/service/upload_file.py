@@ -23,6 +23,8 @@ class FileData:
     upload_date: datetime
     last_modified: datetime
     creation_date: datetime
+    shared: bool
+    owner: str
 
 
 LAMBDA_NAME = "upload_file"
@@ -78,4 +80,7 @@ def upload_file(fname: str, desc: str, tags: List[str], album_uuid: str):
     print(f"Uploading http://localhost:4566/content/{metadata['uuid']}")
 
     header = {'Authorization': f'Bearer {session.get_jwt()}'}
-    requests.post(f'{BASE_URL}/file', data=payload_json, headers=header)
+    result = requests.post(f'{BASE_URL}/file', data=payload_json, headers=header)
+
+    if not result.ok:
+        print(result, result.json())

@@ -14,4 +14,6 @@ def delete_file(file_uuid: str, album_uuid: str) -> requests.Response:
     header = {'Authorization': f'Bearer {session.get_jwt()}'}
     result: requests.Response = requests.delete(f'{BASE_URL}/file', data=payload_json, headers=header)
 
+    if not result.ok:
+        print(result, result.json())
     return result
