@@ -21,6 +21,11 @@ provider:
     ENDPOINT: ${env:ENDPOINT}
   iamRoleStatements:
     - Effect: Allow
+      Resource: "*"
+      Action:
+        - ses:SendEmail
+        - ses:SendRawEmail
+    - Effect: Allow
       Action:
         - dynamodb:DescribeTable
         - dynamodb:Query

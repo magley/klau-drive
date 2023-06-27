@@ -171,4 +171,5 @@ def lambda_delete_file(event: dict, context):
 
     delete(username, album_uuid, file_uuid)
 
+    send_email(username, f"You have just deleted a file: {file_uuid}", "File deleted")
     return http_response(None, 204)
