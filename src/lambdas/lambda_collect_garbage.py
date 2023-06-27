@@ -1,19 +1,6 @@
+import json
+
 from .common import *
-
-
-def delete_single_file(username: str, uuid: str):
-    s3_cli.delete_object(
-        Bucket=CONTENT_BUCKET_NAME,
-        Key=uuid
-    )
-
-    dynamo_cli.delete_item(
-        TableName=TB_GARBAGE_COLLECTOR_NAME,
-        Key=python_obj_to_dynamo_obj({
-            TB_GARBAGE_COLLECTOR_PK: username,
-            TB_GARBAGE_COLLECTOR_SK: uuid
-        })
-    )
 
 
 def get_all_garbage(username: str):
@@ -48,9 +35,12 @@ def lambda_collect_garbage(event: dict, context):
     for item in get_all_garbage(username):
         uuid = item[TB_GARBAGE_COLLECTOR_SK]
         try:
-            delete_single_file(username, uuid)
+            sqs_cli.send_message(QueueUrl=GARBAGE_QUEUE_URL,
+                                 MessageBody=json.dumps({"username": username, "uuid": uuid}))
             success += 1
-        except Exception:
+        except Exception as e:
+            # this will probably never fail
             fail += 1
+            raise e
 
     return http_response({"success": success, "fail": fail}, 200)

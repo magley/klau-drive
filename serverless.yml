@@ -18,6 +18,8 @@ provider:
       Ref: fileMetaTable
     USER_TB_NAME:
       Ref: userTable
+    GARBAGE_QUEUE_URL:
+      Ref: garbageQueue
     ENDPOINT: ${env:ENDPOINT}
   iamRoleStatements:
     - Effect: Allow
@@ -191,6 +193,17 @@ functions:
       - http:
           path: gc
           method: put
+  collectPieceOfGarbage:
+    handler: src/lambdas/lambda_collect_piece_of_garbage.lambda_collect_piece_of_garbage
+    package:
+      patterns:
+        - 'src/lambdas/lambda_collect_piece_of_garbage.py'
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - garbageQueue
+              - Arn
 
 
 resources:
@@ -333,3 +346,7 @@ resources:
           BlockPublicPolicy: true
           IgnorePublicAcls: true
           RestrictPublicBuckets: true
+    garbageQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: "garbageQueue"

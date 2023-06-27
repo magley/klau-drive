@@ -6,6 +6,8 @@ from boto3.dynamodb.types import TypeSerializer, TypeDeserializer
 
 NOTIFICATIONS_SENDER_EMAIL = "test@example.com"
 
+GARBAGE_QUEUE_URL = environ["GARBAGE_QUEUE_URL"]
+
 CONTENT_BUCKET_NAME = environ["CONTENT_BUCKET_NAME"]
 CONTENT_METADATA_TB_NAME = environ["CONTENT_METADATA_TB_NAME"]
 CONTENT_METADATA_TB_PK = "username"
@@ -56,6 +58,7 @@ session = boto3.Session(aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECR
 s3_cli = session.client('s3', endpoint_url=ENDPOINT)
 dynamo_cli = session.client('dynamodb', endpoint_url=ENDPOINT)
 ses_cli = session.client('ses', endpoint_url=ENDPOINT)
+sqs_cli = session.client('sqs', endpoint_url=ENDPOINT)
 
 
 def python_obj_to_dynamo_obj(python_obj):
