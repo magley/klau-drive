@@ -27,4 +27,16 @@ def lambda_family_approve(event: dict, context):
                                  "is_album": True,
                                  "username_who_shares": username
                              }))
+    statement = f"""
+        DELETE FROM {FAMILY_VERIFICATION_TB_NAME}
+        WHERE
+            {FAMILY_VERIFICATION_TB_PK} = ?
+                    AND
+            {FAMILY_VERIFICATION_TB_SK} = ?
+    """
+    dynamo_cli.execute_statement(
+        Statement=statement,
+        Parameters=python_obj_to_dynamo_obj([username, sharing_to_username])
+    )
+
     return http_response(None, 204)
