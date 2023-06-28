@@ -52,4 +52,4 @@ def share_single_obj(username: str, body: dict):
 
     add_share_obj(username, username_with_whom_to_share, uuid, is_album)
 
-    http_response("No conent", 204)
+    return http_response("No conent", 204)
