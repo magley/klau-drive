@@ -31,6 +31,7 @@ class LoginScreen(QWidget):
         self.btn_register.clicked.connect(self.on_register_clicked)
         self.txt_username = QLineEdit()
         self.txt_password = QLineEdit()
+        self.txt_password.setEchoMode(QLineEdit.EchoMode.Password)
 
     def make_layout(self):
         layout_main = QVBoxLayout()

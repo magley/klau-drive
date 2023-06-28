@@ -36,6 +36,15 @@ def lambda_move_file(event: dict, context):
 
     if not has_write_accesss(username, uuid):
         return http_response("You don't own this.", 404)
+    
+    if filename_used(uuid, get_file_name(username, uuid), username, album_new_uuid):
+        return http_response("Can't update, filename in use!", 400)
+
+    if album_old_uuid == album_new_uuid:
+        return http_response(None, 204)
+    
+    if album_new_uuid == uuid:
+        return http_response("Can't move album into itself!", 400)
 
     key_old = {
         TB_ALBUM_FILES_PK: album_old_uuid,

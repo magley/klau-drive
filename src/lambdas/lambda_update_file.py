@@ -104,7 +104,10 @@ def lambda_update_file(event: dict, context):
     )
 
     if 'Item' not in response:
-        return http_response(f"No element under key {metadata['old_name']} exists!", 404)
+        return http_response(f"No element under key {metadata['name']} exists!", 404)
+    
+    if filename_used(metadata['uuid'], metadata['name'], username, body['album_uuid']):
+        return http_response("Can't update, filename in use!", 400)
     
     # Update metadata
 

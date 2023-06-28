@@ -29,6 +29,7 @@ def lambda_share(event: dict, context):
     headers: dict = event['headers']
     username: str = jwt_decode(headers)
     share_single_obj(username, body)
+    return http_response("No conent", 204)
 
 
 def share_single_obj(username: str, body: dict):
@@ -51,5 +52,3 @@ def share_single_obj(username: str, body: dict):
         return http_response("Cannot share with yourself!", 400)
 
     add_share_obj(username, username_with_whom_to_share, uuid, is_album)
-
-    return http_response("No conent", 204)
