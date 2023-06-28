@@ -34,7 +34,7 @@ def make_data_base64(fname: str) -> bytes:
 
 
 
-def update_file(uuid: str, new_name: str, new_desc: str, new_tags: List[str], new_fname: str | None):   
+def update_file(uuid: str, new_name: str, new_desc: str, new_tags: List[str], new_fname: str | None, album_uuid: str):   
     metadata: dict = make_metadata(session.get_username(), uuid, new_name, new_desc, new_tags)
     payload = {}
 
@@ -47,6 +47,7 @@ def update_file(uuid: str, new_name: str, new_desc: str, new_tags: List[str], ne
         metadata['type'] = metadata_2['type']
 
     payload['metadata'] = metadata
+    payload['album_uuid'] = album_uuid
 
     payload_json = json.dumps(payload, default=str)
 

@@ -409,3 +409,29 @@ def send_email(username: str, message: str, subject: str):
     except Exception as e:
         return False
     return True
+
+
+def filename_used(file_uuid: str, filename: str, username: str, album_uuid: str):
+    for f in get_album_files(album_uuid):
+        ff = dynamo_obj_to_python_obj(f)
+        uuid = ff['uuid']
+        if file_uuid == uuid:
+            continue
+
+        file_meta = file_uuid_to_file_metadata(username, uuid)
+
+        if file_meta == {} or 'name' not in file_meta: # E.g. album
+            continue
+
+        if file_meta['name'] == filename:
+            return True
+    return False
+
+
+def get_file_name(username: str, file_uuid: str):
+    file_meta = file_uuid_to_file_metadata(username, file_uuid)
+    if file_meta == None:
+        return None
+    if 'name' not in file_meta:
+        return None
+    return file_meta['name']

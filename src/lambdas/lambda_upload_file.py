@@ -19,6 +19,9 @@ def lambda_upload_file(event: dict, context):
 
     if not has_write_accesss(username, album_uuid):
         return http_response("You don't own this.", 404)
+    
+    if filename_used(metadata['uuid'], metadata['name'], username, album_uuid):
+        return http_response("Can't upload, filename in use!", 400)
 
     tb_album_files_record: dict = python_obj_to_dynamo_obj({
         TB_ALBUM_FILES_PK: album_uuid,

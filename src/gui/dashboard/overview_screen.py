@@ -158,6 +158,7 @@ class SharePopup(QDialog):
 @dataclass
 class FileEdit(QGroupBox):
     file_uuid: str
+    album_uuid: str
     txt_name: QLineEdit
     txt_desc: QTextEdit
     btn_update: QPushButton
@@ -283,6 +284,7 @@ class FileEdit(QGroupBox):
             self.tags.append(tag)
 
         self.selected_file = file
+        self.album_uuid = self.owner.current_album_uuid
 
         self.btn_update.setEnabled(True)
         self.btn_share.setEnabled(True)
@@ -318,7 +320,8 @@ class FileEdit(QGroupBox):
             new_name,
             new_desc,
             new_tags,
-            self.new_fname
+            self.new_fname,
+            self.album_uuid
         )
         QApplication.restoreOverrideCursor()
         
