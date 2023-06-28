@@ -37,4 +37,5 @@ def lambda_album_add(event: dict, context):
         Item=python_obj_to_dynamo_obj(tb_album_files_entry)
     )
 
+    send_email(username, f"You have just created an album: {uuid}", "Album created")
     return http_response(None, 204)

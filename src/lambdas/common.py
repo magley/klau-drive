@@ -4,6 +4,17 @@ import boto3
 from os import environ
 from boto3.dynamodb.types import TypeSerializer, TypeDeserializer
 
+NOTIFICATIONS_SENDER_EMAIL = "test@example.com"
+
+FAMILY_VERIFICATION_TB_NAME = environ["FAMILY_VERIFICATION_TB_NAME"]
+FAMILY_VERIFICATION_TB_PK = "username"
+FAMILY_VERIFICATION_TB_SK = "sharing_to_username"
+REGISTER_STEP = environ["REGISTER_STEP"]
+
+FAMILY_SHARE_QUEUE_URL = environ["FAMILY_SHARE_QUEUE_URL"]
+
+GARBAGE_QUEUE_URL = environ["GARBAGE_QUEUE_URL"]
+
 CONTENT_BUCKET_NAME = environ["CONTENT_BUCKET_NAME"]
 CONTENT_METADATA_TB_NAME = environ["CONTENT_METADATA_TB_NAME"]
 CONTENT_METADATA_TB_PK = "username"
@@ -53,6 +64,9 @@ if "ENDPOINT" not in environ:
 session = boto3.Session(aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
 s3_cli = session.client('s3', endpoint_url=ENDPOINT)
 dynamo_cli = session.client('dynamodb', endpoint_url=ENDPOINT)
+ses_cli = session.client('ses', endpoint_url=ENDPOINT)
+sqs_cli = session.client('sqs', endpoint_url=ENDPOINT)
+stepfunctions_cli = session.client('stepfunctions', endpoint_url=ENDPOINT)
 
 
 def python_obj_to_dynamo_obj(python_obj):
@@ -145,6 +159,20 @@ def user_exists(username: str) -> bool:
     if 'Item' not in response:
         return False
     return True
+
+
+def get_email(username: str) -> str:
+    key = {
+        USER_TB_PK: username,
+    }
+    response = dynamo_cli.get_item(
+        TableName=USER_TB_NAME,
+        Key=python_obj_to_dynamo_obj(key)
+    )
+    if "Item" not in response:
+        return ""
+    print(response["Item"])
+    return response["Item"]["email"]["S"]
 
 
 def get_albums(username: str):
@@ -366,3 +394,18 @@ def has_read_access(username: str, uuid: str, owner: str):
     if has_write_accesss(username, uuid):
         return True
     return is_shared_with_me(uuid, username, owner)
+
+
+def send_email(username: str, message: str, subject: str):
+    try:
+        email = get_email(username)
+        if not email:
+            return False
+        ses_cli.send_email(Source=NOTIFICATIONS_SENDER_EMAIL, Destination={"ToAddresses": [email]},
+                           Message={
+                               "Subject": {"Data": subject, "Charset": "utf-8"},
+                               "Body": {"Text": {"Data": message, "Charset": "utf-8"}}
+                           })
+    except Exception as e:
+        return False
+    return True

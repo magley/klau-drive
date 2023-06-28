@@ -13,28 +13,30 @@ def add_share_obj(owner: str, username: str, uuid: str, is_album: bool):
         TB_FILE_IS_SHARED_SK: username
     }
 
-    dynamo_cli.put_item(    
+    dynamo_cli.put_item(
         TableName=TB_SHARED_WITH_ME_NAME,
         Item=python_obj_to_dynamo_obj(item1)
     )
 
-    dynamo_cli.put_item(    
+    dynamo_cli.put_item(
         TableName=TB_FILE_IS_SHARED_NAME,
         Item=python_obj_to_dynamo_obj(item2)
     )
 
 
-
 def lambda_share(event: dict, context):
     body: dict = json.loads(event['body'])
     headers: dict = event['headers']
-
     username: str = jwt_decode(headers)
+    share_single_obj(username, body)
+
+
+def share_single_obj(username: str, body: dict):
     if not user_exists(username):
         return http_response("Forbidden", 401)
-    
+
     # TODO: If uuid not exists, 404.
- 
+
     uuid: str = body['uuid']
     username_with_whom_to_share: str = body['username']
     is_album: bool = body['is_album']
@@ -44,7 +46,7 @@ def lambda_share(event: dict, context):
 
     if not user_exists(username_with_whom_to_share):
         return http_response("No user with such username", 404)
-    
+
     if username_with_whom_to_share == username:
         return http_response("Cannot share with yourself!", 400)
 

@@ -17,9 +17,9 @@ class User:
     username: str
     email: str | None
     password: str
+    family: str | None
 
 
-TB_USER_NAME = 'user'
 TB_USER_PK = 'username'
 LAMBDA_NAME = "register"
 

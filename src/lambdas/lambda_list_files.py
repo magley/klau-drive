@@ -18,7 +18,8 @@ def lambda_list_files(event: dict, context):
     items = get_album_files(album_uuid)
 
     items_shared = []
-    if 'root' in album_uuid:
+    # this way with _root is kinda hardcoded, if we change can cause bad bug
+    if album_uuid == username + "_root":
         items_shared = get_everything_shared(username)
 
     result = []

@@ -154,4 +154,5 @@ def lambda_update_file(event: dict, context):
     if not success:
         return http_response("Failed to upload, fixing consistency.", 500)
     else:
+        send_email(username, f"You have just updated a file: {metadata['uuid']}", "File updated")
         return http_response(None, 204)

@@ -56,4 +56,5 @@ def lambda_move_file(event: dict, context):
         Item=python_obj_to_dynamo_obj(item)
     )
 
+    send_email(username, f"You have just moved a file: {uuid}", "File moved")
     return http_response(None, 204)

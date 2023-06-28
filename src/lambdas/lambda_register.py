@@ -1,34 +1,14 @@
-
-from botocore.exceptions import ClientError
 from .common import *
 
 
 def lambda_register(event: dict, context):
-    body: dict = json.loads(event['body'])
-    user_data: dict = body
-    user_data_ddb: dict = python_obj_to_dynamo_obj(user_data)
-
-    default_album_data: dict = {
-        TB_USER_ALBUMS_PK: user_data['username'],
-        TB_USER_ALBUMS_SK: f'{user_data["username"]}_root',
-        TB_USER_ALBUMS_FIELD_NAME: 'root'
-    }
-    default_album_data_ddb: dict = python_obj_to_dynamo_obj(default_album_data)
-
-    try:
-        dynamo_cli.put_item(
-            TableName=USER_TB_NAME,
-            Item=user_data_ddb,
-            ConditionExpression='attribute_not_exists(username)'
-        )
-        dynamo_cli.put_item(
-            TableName=TB_USER_ALBUMS_NAME,
-            Item=default_album_data_ddb
-        )
-
-        return http_response(None, 204)
-    except ClientError as e:
-        if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
-            return http_response({"message": "Username already taken"}, 400)
-        else:
-            return http_response({"message": e.response['Error']['Code']}, 400)
+    user_data: dict = json.loads(event['body'])
+    if "username" not in user_data or not user_data["username"]:
+        return http_response({"message": "Need username to register"}, 400)
+    if "password" not in user_data or not user_data["password"]:
+        return http_response({"message": "Need password to register"}, 400)
+    if "family" not in user_data or not user_data["family"]:
+        user_data["family"] = ""  # just in case
+    # TODO: does this need some stuff for error handling?
+    stepfunctions_cli.start_execution(stateMachineArn=REGISTER_STEP, input=json.dumps(user_data, default=str))
+    return http_response(None, 204)
