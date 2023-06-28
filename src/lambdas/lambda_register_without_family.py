@@ -10,7 +10,7 @@ def lambda_register_without_family(event: dict, context):
     default_album_data: dict = {
         TB_USER_ALBUMS_PK: user_data['username'],
         TB_USER_ALBUMS_SK: f'{user_data["username"]}_root',
-        TB_USER_ALBUMS_FIELD_NAME: 'root'
+        TB_USER_ALBUMS_FIELD_NAME: f"{user_data['username']}'s drive",
     }
     default_album_data_ddb: dict = python_obj_to_dynamo_obj(default_album_data)
 
