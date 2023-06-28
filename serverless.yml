@@ -314,7 +314,7 @@ resources:
     userTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: user
+        TableName: userTable
         AttributeDefinitions:
           - AttributeName: username
             AttributeType: S
