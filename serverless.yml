@@ -241,6 +241,15 @@ functions:
       - http:
           path: family/approve
           method: put
+  familyReject:
+    handler: src/lambdas/lambda_family_reject.lambda_family_reject
+    package:
+      patterns:
+        - 'src/lambdas/lambda_family_reject.py'
+    events:
+      - http:
+          path: family/reject
+          method: put
   getFamilyVerifications:
     handler: src/lambdas/lambda_get_family_verifications.lambda_get_family_verifications
     package:

@@ -3,7 +3,7 @@ from typing import List
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 
-from src.service.family import approve, get_family_verifications
+from src.service.family import approve, get_family_verifications, reject
 
 
 @dataclass
@@ -11,6 +11,7 @@ class FamilyScreen(QWidget):
     owner: QTabWidget
     btn_refresh: QPushButton
     btn_approve: QPushButton
+    btn_reject: QPushButton
     table: QTableWidget
     items: List
     columns: List[str]
@@ -34,10 +35,13 @@ class FamilyScreen(QWidget):
         self.btn_approve = QPushButton("Approve sharing")
         self.btn_approve.clicked.connect(self.on_click_approve_sharing)
 
+        self.btn_reject = QPushButton("Reject sharing")
+        self.btn_reject.clicked.connect(self.on_click_reject_sharing)
+
         self.table = QTableWidget()
         self.table.setColumnCount(len(self.columns))
         self.table.setHorizontalHeaderLabels(self.columns)
-        self.table.setColumnWidth(0, 400)
+        self.table.setColumnWidth(0, 450)
         self.table.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.setShowGrid(False)
@@ -57,6 +61,7 @@ class FamilyScreen(QWidget):
 
         layout_top_bar.addWidget(self.btn_refresh)
         layout_top_bar.addWidget(self.btn_approve)
+        layout_top_bar.addWidget(self.btn_reject)
         self.setLayout(layout_main)
 
     def on_click_refresh(self):
@@ -85,3 +90,9 @@ class FamilyScreen(QWidget):
         approve(self.selected_item["sharing_to_username"])
         QApplication.restoreOverrideCursor()
         self.btn_approve.setEnabled(False)
+
+    def on_click_reject_sharing(self):
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        reject(self.selected_item["sharing_to_username"])
+        QApplication.restoreOverrideCursor()
+        self.btn_reject.setEnabled(False)
