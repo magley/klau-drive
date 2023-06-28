@@ -92,9 +92,11 @@ class FamilyScreen(QWidget):
         approve(self.selected_item["sharing_to_username"])
         QApplication.restoreOverrideCursor()
         self.btn_approve.setEnabled(False)
+        self.reload_family()
 
     def on_click_reject_sharing(self):
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
         reject(self.selected_item["sharing_to_username"])
         QApplication.restoreOverrideCursor()
         self.btn_reject.setEnabled(False)
+        self.reload_family()

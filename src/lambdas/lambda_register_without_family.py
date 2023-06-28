@@ -4,6 +4,7 @@ from .common import *
 
 def lambda_register_without_family(event: dict, context):
     user_data: dict = event
+    user_data["activated"] = True
     user_data_ddb: dict = python_obj_to_dynamo_obj(user_data)
 
     default_album_data: dict = {

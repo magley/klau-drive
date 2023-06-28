@@ -32,7 +32,7 @@ def lambda_login(event: dict, context):
     )
 
     user = response.get("Item")
-    if user is None or user["password"]["S"] != password:
+    if user is None or not user["activated"]["BOOL"] or user["password"]["S"] != password:
         return http_response("Wrong username or password", 401)
 
     return http_response({"token": jwt_creator(username)}, 200)

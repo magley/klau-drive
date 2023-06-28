@@ -6,6 +6,7 @@ def lambda_register_with_family(event: dict, context):
     user_data: dict = event
     if "family" not in user_data:
         return http_response({"message": "Missing family for register"}, 400)
+    user_data["activated"] = False
     user_data_ddb: dict = python_obj_to_dynamo_obj(user_data)
     if not user_exists(user_data["family"]):
         return http_response("No user exists for family registration", 400)
