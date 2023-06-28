@@ -48,6 +48,7 @@ class FamilyScreen(QWidget):
         self.table.clicked.connect(self.on_click_item)
 
         self.btn_approve.setEnabled(False)
+        self.btn_reject.setEnabled(False)
 
     def make_layout(self):
         layout_main = QVBoxLayout()
@@ -84,6 +85,7 @@ class FamilyScreen(QWidget):
     def on_click_item(self, item: QModelIndex):
         self.selected_item = self.items[item.row()]
         self.btn_approve.setEnabled(True)
+        self.btn_reject.setEnabled(True)
 
     def on_click_approve_sharing(self):
         QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
