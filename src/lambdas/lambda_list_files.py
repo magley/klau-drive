@@ -1,50 +1,63 @@
-from typing import Dict
-from common import *
+
+from .common import * 
 
 
-"""
-awslocal lambda create-function --function-name list_files --zip-file fileb://list_files.zip --runtime python3.9 --handler lambda_list_files.lambda_list_files --role arn:aws:iam::000000000000:role/LambdaBasic
-awslocal lambda update-function-configuration --function-name list_files --timeout 180
-awslocal lambda update-function-code --function-name list_files --zip-file fileb://list_files.zip
-awslocal lambda invoke --function-name list_files ./out.json
-"""
+def lambda_list_files(event: dict, context):
+    body: dict = json.loads(event['body'])
+    headers: dict = event['headers']
+    album_uuid: str = body['album_uuid']
+    album_owner: str = body['album_owner']
 
-def lambda_list_files(event: Dict, context):
+    username: str = jwt_decode(headers)
+    if not user_exists(username):
+        return http_response("Forbidden", 401)
+
+    if not has_read_access(username, album_uuid, album_owner):
+        return http_response("You can't open this.", 404)
+    
+    items = get_album_files(album_uuid)
+
+    items_shared = []
+    # this way with _root is kinda hardcoded, if we change can cause bad bug
+    if album_uuid == username + "_root":
+        items_shared = get_everything_shared(username)
+
     result = []
 
-    try:
-        response = s3_cli.list_objects(Bucket=CONTENT_BUCKET_NAME)
-    except s3_cli.exceptions.NoSuchBucket:
-        return {
-            "body": result
-        }
-
-    contents = response.get('Contents')
-    if contents is None:
-        return {
-            "body": result
-        }
-
-    for s3_file in contents:
-        dynamo_key = {CONTENT_METADATA_TB_PK: s3_file['Key']}
-        dynamo_key = python_obj_to_dynamo_obj(dynamo_key)
-        dynamo_res = dynamo_cli.get_item(TableName=CONTENT_METADATA_TB_NAME, Key=dynamo_key)
-        dynamo_item = dynamo_obj_to_python_obj(dynamo_res.get('Item'))
+    for o in items:
+        album_item = dynamo_obj_to_python_obj(o)
+        item_uuid = album_item[TB_ALBUM_FILES_SK]
+        item_type = album_item[TB_ALBUM_FILES_FIELD_TYPE]
 
         item = {
-            "name":s3_file['Key'],
-            "type":dynamo_item.get('type', ''),
-            "desc":dynamo_item.get('desc', ''),
-            "tags":dynamo_item.get('tags', []),
-            "size":dynamo_item.get('size', 0),
-            "upload_date":dynamo_item.get('uploadDate', ""),
-            "last_modified":dynamo_item.get('modificationDate', ""),
-            "creation_date":dynamo_item.get('creationDate', ""),
+            "uuid": item_uuid,
+            "type": item_type,
+            "shared": username != album_owner,
+            "owner": album_owner,
+            "content": {}
         }
-
         result.append(item)
-    result = sorted(result, key=lambda item: item['upload_date'], reverse=True)
+
+    for o in items_shared:
+        item = dynamo_obj_to_python_obj(o)
+        item_uuid = item[TB_SHARED_WITH_ME_SK]
+        item_type = item[TB_SHARED_WITH_ME_FIELD_TYPE]
+        item_owner = item[TB_SHARED_WITH_ME_FIELD_OWNER]
+
+        item = {
+            "uuid": item_uuid,
+            "type": item_type,
+            "shared": True,
+            "owner": item_owner,
+            "content": {}
+        }
+        result.append(item)
+
+    for o in result:
+        if o['type'] == TB_ALBUM_FILES_FIELD_TYPE__ALBUM:
+            o['content'] = album_uuid_to_album_metadata(o['owner'], o['uuid'])
+        else:
+            o['content'] = file_uuid_to_file_metadata(o['owner'], o['uuid'])
     
-    return {
-        "body": result
-    }
+
+    return http_response(result, 200)

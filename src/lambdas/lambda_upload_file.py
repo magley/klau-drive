@@ -1,38 +1,73 @@
 import base64
 import io
-from typing import Dict
-from common import *
 
-"""
-awslocal lambda create-function --function-name upload_file --zip-file fileb://upload_file.zip --runtime python3.9 --handler lambda_upload_file.lambda_upload_file --role arn:aws:iam::000000000000:role/LambdaBasic
-awslocal lambda update-function-configuration --function-name upload_file --timeout 900
-awslocal lambda update-function-code --function-name upload_file --zip-file fileb://upload_file.zip
-awslocal lambda invoke --function-name upload_file --payload file://in.json ./out.json
-"""
-
-# TODO: Create a lambda that initializes the dynamodb table and s3 bucket.
-def create_bucket_if_not_exists(bucket_name):
-    s3_cli.create_bucket(Bucket=bucket_name)
+from .common import *
 
 
-def lambda_upload_file(event: Dict, context):
-    body: Dict = event['body']
-    metadata: Dict = body['metadata']
+def lambda_upload_file(event: dict, context):
+    body: dict = json.loads(event['body'])
+    headers: dict = event['headers']
+
+    username: str = jwt_decode(headers)
+    if not user_exists(username):
+        return http_response("Forbidden", 401)
+     
+    metadata: dict = body['metadata']
     metadata_dynamojson: str = python_obj_to_dynamo_obj(metadata)
     data: bytes = base64.b64decode(body['data'])
+    album_uuid: str = body['album_uuid']
 
-    create_bucket_if_not_exists(CONTENT_BUCKET_NAME)
-    create_table_if_not_exists(CONTENT_METADATA_TB_NAME, CONTENT_METADATA_TB_PK, CONTENT_METADATA_TB_SK)
+    if not has_write_accesss(username, album_uuid):
+        return http_response("You don't own this.", 404)
+    
+    if filename_used(metadata['uuid'], metadata['name'], username, album_uuid):
+        return http_response("Can't upload, filename in use!", 400)
+
+    tb_album_files_record: dict = python_obj_to_dynamo_obj({
+        TB_ALBUM_FILES_PK: album_uuid,
+        TB_ALBUM_FILES_SK: metadata['uuid'],
+        TB_ALBUM_FILES_FIELD_TYPE: TB_ALBUM_FILES_FIELD_TYPE__FILE,
+    })
 
     dynamo_cli.put_item(
         TableName=CONTENT_METADATA_TB_NAME,
         Item=metadata_dynamojson
     )
 
-    s3_cli.upload_fileobj(
-        Fileobj=io.BytesIO(data),
-        Bucket=CONTENT_BUCKET_NAME,
-        Key=metadata['name']
+    dynamo_cli.put_item(
+        TableName=TB_ALBUM_FILES_NAME,
+        Item=tb_album_files_record
     )
 
-    return { "metadata": metadata, "data": str(data) }
+    success = False
+
+    try:
+        #raise Exception()
+        s3_cli.upload_fileobj(
+            Fileobj=io.BytesIO(data),
+            Bucket=CONTENT_BUCKET_NAME,
+            Key=metadata[CONTENT_METADATA_TB_SK]
+        )
+        success = True
+    except Exception as e:
+        dynamo_cli.delete_item(
+            TableName=CONTENT_METADATA_TB_NAME,
+            Key=python_obj_to_dynamo_obj({
+                CONTENT_METADATA_TB_PK: username,
+                CONTENT_METADATA_TB_SK: metadata['uuid']
+            })
+        )
+        dynamo_cli.delete_item(
+            TableName=TB_ALBUM_FILES_NAME,
+            Key=python_obj_to_dynamo_obj({
+                TB_ALBUM_FILES_PK: album_uuid,
+                TB_ALBUM_FILES_SK: metadata['uuid']
+            })
+        )
+        success = False
+
+    if not success:
+        return http_response("Failed to upload, fixing consistency.", 500)
+    else:
+        send_email(username, f"You have just uploaded a file: {metadata['uuid']}", "File uploaded")
+        return http_response("", 204)

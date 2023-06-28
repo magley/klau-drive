@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 import json
-from typing import Dict
-from src.service.session import dynamo_cli
+
+
+import requests
+from src.service.session import BASE_URL
 from datetime import datetime
-from src.service.session import lambda_cli
 
 
 @dataclass
@@ -16,45 +17,28 @@ class User:
     username: str
     email: str | None
     password: str
+    family: str | None
 
 
-TB_USER_NAME = 'user'
 TB_USER_PK = 'username'
 LAMBDA_NAME = "register"
 
 
-def make_payload_from(user: User) -> Dict:
+def make_payload_from(user: User) -> dict:
     user_dict = vars(user) # Be careful if you ever add anything fancy to `User`
 
-    return {
-        "body": {
-            "user": {
-                **user_dict
-            }
-        }
-    }
+    return user_dict
    
 
 def register_user(user: User) -> str | None:
     payload = make_payload_from(user)
     payload_json = json.dumps(payload, default=str)
 
-    result = lambda_cli.invoke(
-        FunctionName=LAMBDA_NAME,
-        Payload=payload_json
-    )
-
-    p = json.loads(result['Payload'].read())
-    print(p)
-    body = p['body']
-    status = body['status']
+    r = requests.post(f'{BASE_URL}/user', data=payload_json)
+    status = r.status_code
 
     if status == 400:
-        return 'Username already taken'
+        body = r.json()
+        return body['message']
     
     return None
-
-
-def list_users():
-    for user in dynamo_cli.scan(TableName=TB_USER_NAME)['Items']:
-        print(user)

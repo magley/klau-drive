@@ -37,6 +37,8 @@ class MainWindow(QMainWindow):
 
     def logout_clicked(self):
         token_util.delete_token()
+        self.stack_widget.removeWidget(self.stack_widget.widget(MainWindow.SCREEN_DASHBOARD))
+        MainWindow.SCREEN_DASHBOARD = self.stack_widget.addWidget(DashboardScreen(self.stack_widget))
         self.stack_widget.setCurrentIndex(MainWindow.SCREEN_LOGIN)
 
     def page_change(self, new_index: int):

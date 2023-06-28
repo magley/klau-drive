@@ -4,12 +4,17 @@ from datetime import datetime
 import json
 import os
 from pathlib import Path
-from typing import Dict, List
-from src.service.session import lambda_cli
+from typing import List
+from src.service.session import BASE_URL
+import requests
+import uuid
+import src.service.session as session
 
 
 @dataclass
-class FileData():
+class FileData:
+    username: str
+    uuid: str
     name: str
     type: str
     desc: str
@@ -18,6 +23,8 @@ class FileData():
     upload_date: datetime
     last_modified: datetime
     creation_date: datetime
+    shared: bool
+    owner: str
 
 
 LAMBDA_NAME = "upload_file"
@@ -27,7 +34,8 @@ TB_META_NAME = 'file_meta'
 TB_META_PK = 'name'
 TB_META_SK = None
 
-def make_metadata(fname: str, desc: str, tags: List[str]) -> Dict:
+
+def make_metadata(fname: str, desc: str, tags: List[str]) -> dict:
     stat: os.stat_result = os.stat(fname)
     size_in_bytes = stat.st_size
     creation_time = datetime.fromtimestamp(stat.st_ctime)
@@ -36,6 +44,8 @@ def make_metadata(fname: str, desc: str, tags: List[str]) -> Dict:
     just_name = Path(fname).stem
 
     metadata = {
+        'username': session.get_username(),
+        'uuid': str(uuid.uuid4()),
         'name': just_name,
         'size': size_in_bytes,
         'creationDate': creation_time,
@@ -53,47 +63,24 @@ def make_data_base64(fname: str) -> bytes:
     file_data_base64: bytes = None
     with open(fname, 'rb') as f:
         file_data_base64 = base64.b64encode(f.read()).decode()
-    return file_data_base64 
+    return file_data_base64
 
 
-def upload_file(fname: str, desc: str, tags: List[str]):
-    metadata: Dict = make_metadata(fname, desc, tags)
+def upload_file(fname: str, desc: str, tags: List[str], album_uuid: str):
+    metadata: dict = make_metadata(fname, desc, tags)
     data_b64: bytes = make_data_base64(fname)
 
     payload = {
-        "body": {
-            "metadata": metadata,
-            "data": data_b64,
-        }
+        "metadata": metadata,
+        "album_uuid": album_uuid,
+        "data": data_b64,
     }
-
     payload_json = json.dumps(payload, default=str)
 
-    lambda_cli.invoke(
-        FunctionName=LAMBDA_NAME,
-        Payload=payload_json
-    )
+    print(f"Uploading http://localhost:4566/content/{metadata['uuid']}")
 
+    header = {'Authorization': f'Bearer {session.get_jwt()}'}
+    result = requests.post(f'{BASE_URL}/file', data=payload_json, headers=header)
 
-def list_files():
-    result = lambda_cli.invoke(
-        FunctionName=LAMBDA_NAME_LS
-    )
-
-    p = json.loads(result['Payload'].read())
-    body = p['body']
-
-    res_items = [
-        FileData(
-            name=i['name'],
-            type=i.get('type', ''),
-            desc=i.get('desc', ''),
-            tags=i.get('tags', []),
-            size=i.get('size', 0),
-            upload_date=datetime.fromisoformat(i.get('upload_date', "")),
-            last_modified=datetime.fromisoformat(i.get('last_modified', "")),
-            creation_date=datetime.fromisoformat(i.get('creation_date', "")),
-        ) for i in body
-    ]
-
-    return res_items
+    if not result.ok:
+        print(result, result.json())

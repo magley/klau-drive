@@ -1,0 +1,476 @@
+service: klau-drive
+frameworkVersion: '3'
+
+plugins:
+  - serverless-localstack
+  - serverless-step-functions
+
+provider:
+  name: aws
+  runtime: python3.9
+  stage: dev
+  region: us-east-1
+  memorySize: 128
+  timeout: 20
+  environment:
+    CONTENT_BUCKET_NAME:
+      Ref: contentBucket
+    CONTENT_METADATA_TB_NAME:
+      Ref: fileMetaTable
+    USER_TB_NAME:
+      Ref: userTable
+    FAMILY_VERIFICATION_TB_NAME:
+      Ref: familyVerificationTable
+    GARBAGE_QUEUE_URL:
+      Ref: garbageQueue
+    FAMILY_SHARE_QUEUE_URL:
+      Ref: familyShareQueue
+    REGISTER_STEP:
+      Ref: RegisterStep
+    ENDPOINT: ${env:ENDPOINT}
+  iamRoleStatements:
+    - Effect: Allow
+      Resource: "*"
+      Action:
+        - ses:SendEmail
+        - ses:SendRawEmail
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "Fn::GetAtt": [userTable, Arn]
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "Fn::GetAtt": [fileMetaTable, Arn]
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "Fn::GetAtt": [familyVerificationTable, Arn]
+
+package:
+  individually: True
+  patterns:
+    - '!**/**'
+    - 'src/lambdas/common.py'
+
+functions:
+  listFiles:
+    handler: src/lambdas/lambda_list_files.lambda_list_files
+    package:
+      patterns:
+        - 'src/lambdas/lambda_list_files.py'
+    events:
+      - http:
+          path: file
+          method: get
+          # TODO: enable cors later, better security
+  login:
+    handler: src/lambdas/lambda_login.lambda_login
+    package:
+      patterns:
+        - 'src/lambdas/lambda_login.py'
+    events:
+      - http:
+          path: login
+          method: post
+  register:
+    handler: src/lambdas/lambda_register.lambda_register
+    package:
+      patterns:
+        - 'src/lambdas/lambda_register.py'
+    events:
+      - http:
+          path: user
+          method: post
+  registerWithFamily:
+    handler: src/lambdas/lambda_register_with_family.lambda_register_with_family
+    package:
+      patterns:
+        - 'src/lambdas/lambda_register_with_family.py'
+  registerWithoutFamily:
+    handler: src/lambdas/lambda_register_without_family.lambda_register_without_family
+    package:
+      patterns:
+        - 'src/lambdas/lambda_register_without_family.py'
+  uploadFile:
+    handler: src/lambdas/lambda_upload_file.lambda_upload_file
+    package:
+      patterns:
+        - 'src/lambdas/lambda_upload_file.py'
+    events:
+      - http:
+          path: file
+          method: post
+  updateFile:
+    handler: src/lambdas/lambda_update_file.lambda_update_file
+    package:
+      patterns:
+        - 'src/lambdas/lambda_update_file.py'
+    events:
+      - http:
+          path: file
+          method: put
+  deleteFile:
+    handler: src/lambdas/lambda_delete_file.lambda_delete_file
+    package:
+      patterns:
+        - 'src/lambdas/lambda_delete_file.py'
+    events:
+      - http:
+          path: file
+          method: delete  
+  albumAdd:
+    handler: src/lambdas/lambda_album_add.lambda_album_add
+    package:
+      patterns:
+        - 'src/lambdas/lambda_album_add.py'
+    events:
+      - http:
+          path: album
+          method: post
+  fileMove:
+    handler: src/lambdas/lambda_move_file.lambda_move_file
+    package:
+      patterns:
+        - 'src/lambdas/lambda_move_file.py'
+    events:
+      - http:
+          path: move
+          method: put
+  getAlbums:
+    handler: src/lambdas/lambda_get_albums.lambda_get_albums
+    package:
+      patterns:
+        - 'src/lambdas/lambda_get_albums.py'
+    events:
+      - http:
+          path: album
+          method: get
+  downloadFile:
+    handler: src/lambdas/lambda_download_file.lambda_download_file
+    package:
+      patterns:
+        - 'src/lambdas/lambda_download_file.py'
+    events:
+      - http:
+          path: file-download
+          method: get
+  share:
+    handler: src/lambdas/lambda_share.lambda_share
+    package:
+      patterns:
+        - 'src/lambdas/lambda_share.py'
+    events:
+      - http:
+          path: share
+          method: put
+  stopShare:
+    handler: src/lambdas/lambda_stop_share.lambda_stop_share
+    package:
+      patterns:
+        - 'src/lambdas/lambda_stop_share.py'
+    events:
+      - http:
+          path: share-stop
+          method: put
+  getSharing:
+    handler: src/lambdas/lambda_get_sharing.lambda_get_sharing
+    package:
+      patterns:
+        - 'src/lambdas/lambda_get_sharing.py'
+    events:
+      - http:
+          path: get-sharing
+          method: get
+  getShared:
+    handler: src/lambdas/lambda_get_shared.lambda_get_shared
+    package:
+      patterns:
+        - 'src/lambdas/lambda_get_shared.py'
+    events:
+      - http:
+          path: get-shared
+          method: get
+  collectGarbage:
+    handler: src/lambdas/lambda_collect_garbage.lambda_collect_garbage
+    package:
+      patterns:
+        - 'src/lambdas/lambda_collect_garbage.py'
+    events:
+      - http:
+          path: gc
+          method: put
+  collectPieceOfGarbage:
+    handler: src/lambdas/lambda_collect_piece_of_garbage.lambda_collect_piece_of_garbage
+    package:
+      patterns:
+        - 'src/lambdas/lambda_collect_piece_of_garbage.py'
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - garbageQueue
+              - Arn
+  familyApprove:
+    handler: src/lambdas/lambda_family_approve.lambda_family_approve
+    package:
+      patterns:
+        - 'src/lambdas/lambda_family_approve.py'
+    events:
+      - http:
+          path: family/approve
+          method: put
+  familyReject:
+    handler: src/lambdas/lambda_family_reject.lambda_family_reject
+    package:
+      patterns:
+        - 'src/lambdas/lambda_family_reject.py'
+    events:
+      - http:
+          path: family/reject
+          method: put
+  getFamilyVerifications:
+    handler: src/lambdas/lambda_get_family_verifications.lambda_get_family_verifications
+    package:
+      patterns:
+        - 'src/lambdas/lambda_get_family_verifications.py'
+    events:
+      - http:
+          path: family
+          method: get
+  shareFamily:
+    handler: src/lambdas/lambda_share_family.lambda_share_family
+    package:
+      patterns:
+        - 'src/lambdas/lambda_share_family.py'
+        - 'src/lambdas/lambda_share.py'
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - familyShareQueue
+              - Arn
+
+
+stepFunctions:
+  stateMachines:
+    registerStep:
+      name: registerStep
+      definition:
+        StartAt: IsFamily
+        States:
+          IsFamily:
+            Type: Choice
+            Choices:
+              - Variable: "$.family"
+                StringEquals: ""
+                Next: RegisterWithoutFamily
+            Default: RegisterWithFamily
+          RegisterWithoutFamily:
+            Type: Task
+            Resource: "arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:service}-${self:provider.stage}-registerWithoutFamily"
+            Retry:
+              - ErrorEquals:
+                  - States.TaskFailed
+                IntervalSeconds: 1
+                MaxAttempts: 2
+                BackoffRate: 2
+            End: true
+          RegisterWithFamily:
+            Type: Task
+            Resource: "arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:service}-${self:provider.stage}-registerWithFamily"
+            Retry:
+              - ErrorEquals:
+                  - States.TaskFailed
+                IntervalSeconds: 1
+                MaxAttempts: 2
+                BackoffRate: 2
+            End: true
+
+
+resources:
+  Resources:
+    userTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: userTable
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    fileMetaTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: file_meta
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
+            KeyType: HASH
+          - AttributeName: uuid
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    userAlbums:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: user_albums
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: album_uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
+            KeyType: HASH
+          - AttributeName: album_uuid
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    albumFiles:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: album_files
+        AttributeDefinitions:
+          - AttributeName: album_uuid
+            AttributeType: S
+          - AttributeName: uuid # can be album_uuid or file_uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: album_uuid
+            KeyType: HASH
+          - AttributeName: uuid
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    fileIsShared: # Redundancy, used for when removing by uuid to remove all sharing
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: fileIsShared
+        AttributeDefinitions:
+          - AttributeName: uuid
+            AttributeType: S
+          - AttributeName: username
+            AttributeType: S
+        KeySchema:
+          - AttributeName: uuid
+            KeyType: HASH
+          - AttributeName: username
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    sharedWithMe:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: sharedWithMe
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
+            KeyType: HASH
+          - AttributeName: uuid
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    lastValidContent:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: lastValidContent
+        AttributeDefinitions:
+          - AttributeName: uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: uuid
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    garbageCollector:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: garbageCollector
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
+            KeyType: HASH
+          - AttributeName: uuid
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    familyVerificationTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: familyVerificationTable
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: sharing_to_username
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
+            KeyType: HASH
+          - AttributeName: sharing_to_username
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    contentBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: content
+        AccessControl: Private # This doesn't work?
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+    garbageQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: "garbageQueue"
+    familyShareQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: "familyShareQueue"

@@ -1,31 +1,27 @@
 import json
-from src.service.session import lambda_cli
+
+import requests
+from src.service.session import BASE_URL
 
 
 class NoSuchUserException(Exception):
     pass
 
-LAMBDA_NAME = "login"
-
 
 def login(username: str, password: str):
     payload = {
-        "body": {
-            "username": username,
-            "password": password,
-        },
+        "username": username,
+        "password": password,
     }
     payload_json = json.dumps(payload, default=str)
 
-    result = lambda_cli.invoke(
-        FunctionName=LAMBDA_NAME,
-        Payload=payload_json
-    )
+    r = requests.post(f'{BASE_URL}/login', data=payload_json)
+    status_code = r.status_code
+    body = r.json()
 
-    p = json.loads(result['Payload'].read())
-    body = p['body']
-
-    if body is None:
+    if status_code == 200:
+        return body["token"]
+    elif status_code == 401:
         raise NoSuchUserException("No such user with that password: " + username)
-
-    return body["token"]
+    else:
+        raise RuntimeError("Fatal error: " + str(body))
