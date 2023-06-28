@@ -159,6 +159,7 @@ class SharePopup(QDialog):
 class FileEdit(QGroupBox):
     file_uuid: str
     album_uuid: str
+    lbl_owner: QLabel
     txt_name: QLineEdit
     txt_desc: QTextEdit
     btn_update: QPushButton
@@ -194,6 +195,7 @@ class FileEdit(QGroupBox):
         self.new_fname = None
         self.selected_file = None
         self.tags = []
+        self.lbl_owner = QLabel()
         self.txt_name = QLineEdit()
         self.txt_desc = QTextEdit()
         self.txt_tag = QLineEdit()
@@ -227,6 +229,10 @@ class FileEdit(QGroupBox):
     def init_layout(self):
         layout_main = QVBoxLayout()
 
+        h0 = QHBoxLayout()
+        h0.addWidget(QLabel("Owner: "))
+        h0.addWidget(self.lbl_owner)
+
         h1 = QHBoxLayout()
         h1.addWidget(QLabel("Size: "))
         h1.addWidget(self.lbl_size)
@@ -254,6 +260,7 @@ class FileEdit(QGroupBox):
         layout_main.addLayout(h4)
         layout_main.addWidget(self.lst_tags)
 
+        layout_main.addLayout(h0)
         layout_main.addLayout(h1)
         layout_main.addLayout(h2)
         layout_main.addLayout(h3)
@@ -270,6 +277,7 @@ class FileEdit(QGroupBox):
         self.setLayout(layout_main)
 
     def on_selected_file(self, file: FileData):
+        self.lbl_owner.setText(file.owner)
         self.txt_name.setText(file.name)
         self.file_uuid = file.uuid
         self.txt_desc.setText(file.desc)
@@ -490,6 +498,8 @@ class OverviewScreen(QWidget):
         self.files = list_files(self.current_album_uuid, self._current_album_owner)
         self.table.setRowCount(len(self.files))
 
+        self.files.sort(key=lambda f: f.upload_date, reverse=True)
+
         for row, file in enumerate(self.files):
             file: FileData = file
             self.put_file_in_table(file, row)
@@ -503,6 +513,9 @@ class OverviewScreen(QWidget):
     def put_file_in_table(self, file: FileData, row: int):
         pixmapi = QStyle.StandardPixmap.SP_FileIcon
         fullname = f"{file.name}{file.type}"
+
+        if file.owner != session.get_username():
+            fullname = f'[SHARE] {fullname}'
 
         if file.type == FILE_TYPE_ALBUM:
             pixmapi = QStyle.StandardPixmap.SP_DirIcon
