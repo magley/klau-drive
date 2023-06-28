@@ -7,6 +7,8 @@ def lambda_register_with_family(event: dict, context):
     if "family" not in user_data:
         return http_response({"message": "Missing family for register"}, 400)
     user_data_ddb: dict = python_obj_to_dynamo_obj(user_data)
+    if not user_exists(user_data["family"]):
+        return http_response("No user exists for family registration", 400)
 
     default_album_data: dict = {
         TB_USER_ALBUMS_PK: user_data['username'],
@@ -36,6 +38,8 @@ def lambda_register_with_family(event: dict, context):
             Item=family_data_ddb
         )
 
+        send_email(user_data["family"], f"A family member is registering: {user_data['username']}",
+                   "Family member registering")
         return http_response(None, 204)
     except ClientError as e:
         if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
