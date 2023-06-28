@@ -3,6 +3,7 @@ frameworkVersion: '3'
 
 plugins:
   - serverless-localstack
+  - serverless-step-functions
 
 provider:
   name: aws
@@ -18,8 +19,14 @@ provider:
       Ref: fileMetaTable
     USER_TB_NAME:
       Ref: userTable
+    FAMILY_VERIFICATION_TB_NAME:
+      Ref: familyVerificationTable
     GARBAGE_QUEUE_URL:
       Ref: garbageQueue
+    FAMILY_SHARE_QUEUE_URL:
+      Ref: familyShareQueue
+    REGISTER_STEP:
+      Ref: RegisterStep
     ENDPOINT: ${env:ENDPOINT}
   iamRoleStatements:
     - Effect: Allow
@@ -49,6 +56,17 @@ provider:
         - dynamodb:DeleteItem
       Resource:
         - "Fn::GetAtt": [fileMetaTable, Arn]
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "Fn::GetAtt": [familyVerificationTable, Arn]
 
 package:
   individually: True
@@ -85,6 +103,16 @@ functions:
       - http:
           path: user
           method: post
+  registerWithFamily:
+    handler: src/lambdas/lambda_register_with_family.lambda_register_with_family
+    package:
+      patterns:
+        - 'src/lambdas/lambda_register_with_family.py'
+  registerWithoutFamily:
+    handler: src/lambdas/lambda_register_without_family.lambda_register_without_family
+    package:
+      patterns:
+        - 'src/lambdas/lambda_register_without_family.py'
   uploadFile:
     handler: src/lambdas/lambda_upload_file.lambda_upload_file
     package:
@@ -204,6 +232,72 @@ functions:
             Fn::GetAtt:
               - garbageQueue
               - Arn
+  familyApprove:
+    handler: src/lambdas/lambda_family_approve.lambda_family_approve
+    package:
+      patterns:
+        - 'src/lambdas/lambda_family_approve.py'
+    events:
+      - http:
+          path: family/approve
+          method: put
+  getFamilyVerifications:
+    handler: src/lambdas/lambda_get_family_verifications.lambda_get_family_verifications
+    package:
+      patterns:
+        - 'src/lambdas/lambda_get_family_verifications.py'
+    events:
+      - http:
+          path: family
+          method: get
+  shareFamily:
+    handler: src/lambdas/lambda_share_family.lambda_share_family
+    package:
+      patterns:
+        - 'src/lambdas/lambda_share_family.py'
+        - 'src/lambdas/lambda_share.py'
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - familyShareQueue
+              - Arn
+
+
+stepFunctions:
+  stateMachines:
+    registerStep:
+      name: registerStep
+      definition:
+        StartAt: IsFamily
+        States:
+          IsFamily:
+            Type: Choice
+            Choices:
+              - Variable: "$.family"
+                StringEquals: ""
+                Next: RegisterWithoutFamily
+            Default: RegisterWithFamily
+          RegisterWithoutFamily:
+            Type: Task
+            Resource: "arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:service}-${self:provider.stage}-registerWithoutFamily"
+            Retry:
+              - ErrorEquals:
+                  - States.TaskFailed
+                IntervalSeconds: 1
+                MaxAttempts: 2
+                BackoffRate: 2
+            End: true
+          RegisterWithFamily:
+            Type: Task
+            Resource: "arn:aws:lambda:${aws:region}:${aws:accountId}:function:${self:service}-${self:provider.stage}-registerWithFamily"
+            Retry:
+              - ErrorEquals:
+                  - States.TaskFailed
+                IntervalSeconds: 1
+                MaxAttempts: 2
+                BackoffRate: 2
+            End: true
 
 
 resources:
@@ -336,6 +430,23 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
+    familyVerificationTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: familyVerificationTable
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: sharing_to_username
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
+            KeyType: HASH
+          - AttributeName: sharing_to_username
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
     contentBucket:
       Type: AWS::S3::Bucket
       Properties:
@@ -350,3 +461,7 @@ resources:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: "garbageQueue"
+    familyShareQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: "familyShareQueue"

@@ -17,6 +17,7 @@ class User:
     username: str
     email: str | None
     password: str
+    family: str | None
 
 
 TB_USER_NAME = 'user'

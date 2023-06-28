@@ -16,6 +16,7 @@ class RegisterScreen(QWidget):
         self.txt_name = QLineEdit()
         self.txt_surname = QLineEdit()
         self.date_of_birth = QDateEdit(calendarPopup=True)
+        self.txt_family = QLineEdit()
         self.txt_username = QLineEdit()
         self.txt_email = QLineEdit()
         self.txt_password = QLineEdit()
@@ -30,6 +31,7 @@ class RegisterScreen(QWidget):
         layout.addRow(QLabel('Name'), self.txt_name)
         layout.addRow(QLabel('Surname'), self.txt_surname)
         layout.addRow(QLabel('Date of birth'), self.date_of_birth)
+        layout.addRow(QLabel('Family Username'), self.txt_family)
         layout.addRow(QLabel('Username'), self.txt_username)
         layout.addRow(QLabel('Email'), self.txt_email)
         layout.addRow(QLabel('Password'), self.txt_password)
@@ -62,7 +64,8 @@ class RegisterScreen(QWidget):
             date_of_birth=dob,
             username=username,
             email=self.txt_email.text(),
-            password=password
+            password=password,
+            family=self.txt_family.text()
         )
         err = register_user(user)
         if err:

@@ -6,6 +6,13 @@ from boto3.dynamodb.types import TypeSerializer, TypeDeserializer
 
 NOTIFICATIONS_SENDER_EMAIL = "test@example.com"
 
+FAMILY_VERIFICATION_TB_NAME = environ["FAMILY_VERIFICATION_TB_NAME"]
+FAMILY_VERIFICATION_TB_PK = "username"
+FAMILY_VERIFICATION_TB_SK = "sharing_to_username"
+REGISTER_STEP = environ["REGISTER_STEP"]
+
+FAMILY_SHARE_QUEUE_URL = environ["FAMILY_SHARE_QUEUE_URL"]
+
 GARBAGE_QUEUE_URL = environ["GARBAGE_QUEUE_URL"]
 
 CONTENT_BUCKET_NAME = environ["CONTENT_BUCKET_NAME"]
@@ -59,6 +66,7 @@ s3_cli = session.client('s3', endpoint_url=ENDPOINT)
 dynamo_cli = session.client('dynamodb', endpoint_url=ENDPOINT)
 ses_cli = session.client('ses', endpoint_url=ENDPOINT)
 sqs_cli = session.client('sqs', endpoint_url=ENDPOINT)
+stepfunctions_cli = session.client('stepfunctions', endpoint_url=ENDPOINT)
 
 
 def python_obj_to_dynamo_obj(python_obj):
